@@ -77,4 +77,13 @@ export class Ollama {
 			}
 		}
 	}
+
+	async copy (source: string, destination: string): Promise<void> {
+		const response = await utils.post(`${this.config.address}/api/copy`, {
+			source,
+			destination
+		});
+
+		console.log(await response.text());
+	}
 }
