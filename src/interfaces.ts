@@ -46,3 +46,27 @@ export interface GenerateResponseEnd {
 	eval_count: number
 	eval_duration: number
 }
+
+export interface CreateResponse {
+	status: "parsing modelfile" | "looking for model" | "creating model layer" | "creating model template layer" | "creating model system layer" | "creating parameter layer" | "creating config layer" | `using already created layer ${string}` | "writing manifest" | "removing any unused layers" | "success"
+}
+
+interface PullResponseStatus {
+	status: "pulling manifest" | "verifying sha256 digest" | "writing manifest" | "removing any unused layers" | "success"
+}
+
+interface PullResponseDownloadStart {
+	status: `downloading ${string}`
+	digest: string
+	total: number
+}
+
+interface PullResponseDownloadUpdate extends PullResponseDownloadStart {
+	completed: number
+}
+
+export type PullResponse = PullResponseStatus | PullResponseDownloadStart | PullResponseDownloadUpdate
+
+export interface EmbeddingsResponse {
+	embeddings: number[]
+}
