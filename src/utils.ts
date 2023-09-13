@@ -16,13 +16,11 @@ export const formatAddress = (address: string): string => {
 
 const checkOk = async (response: Response): Promise<void> => {
 	if (!response.ok) {
-		let message: string;
+		let message = await response.text();
 
 		try {
-			message = (await response.json() as ErrorResponse).error;
-		} catch(error) {
-			message = await response.text();
-		}
+			message = (JSON.parse(message) as ErrorResponse).error;
+		} catch(error) { }
 
 		throw new Error(message);
 	}
