@@ -1,52 +1,13 @@
-import fetch from "node-fetch";
+import * as utils from "./utils.js";
 
-export interface Config {
-	address: string
-}
-
-export interface TagsResponse {
-	models: {
-		name: string
-		modified_at: string
-		size: number
-	}[]
-}
-
-export interface GenerateResponse {
-	model: string
-	created_at: string
-	response: string
-	done: false
-}
-
-export interface GenerateResponseEnd {
-	model: string
-	created_at: string
-	done: true
-	context: number[]
-	total_duration: number
-	load_duration: number
-	prompt_eval_count: number
-	eval_count: number
-	eval_duration: number
-}
-
-export interface GenerateResult {
-	model: string
-	createdAt: Date
-	context: number[]
-	totalDuration: number
-	loadDuration: number
-	promptEvalCount: number
-	evalCount: number
-	evalDuration: number
-}
-
-export interface Tag {
-	name: string
-	modifiedAt: Date
-	size: number
-}
+import type {
+	Config,
+	TagsResponse,
+	Tag,
+	GenerateResponse,
+	GenerateResponseEnd,
+	GenerateResult
+} from "./interfaces.js";
 
 export class Ollama {
 	private readonly config: Config;
@@ -58,12 +19,7 @@ export class Ollama {
 	}
 
 	async tags (): Promise<Tag[]> {
-		const response = await fetch(`${this.config.address}/api/tags`);
-
-		if (!response.ok) {
-			throw new Error(await response.text());
-		}
-
+		const response = await utils.get(`${this.config.address}/api/tags`);
 		const json = await response.json() as TagsResponse;
 
 		return json.models.map(m => ({
@@ -74,14 +30,7 @@ export class Ollama {
 	}
 
 	async * generate (model: string, prompt: string): AsyncGenerator<string, GenerateResult> {
-		const response = await fetch(`${this.config.address}/api/generate`, {
-			method: "POST",
-			body: JSON.stringify({ model, prompt })
-		});
-
-		if (!response.ok) {
-			throw new Error(await response.text());
-		}
+		const response = await utils.post(`${this.config.address}/api/generate`, { model, prompt });
 
 		if (!response.body) {
 			throw new Error("Missing body");
