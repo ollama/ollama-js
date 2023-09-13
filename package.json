@@ -2,7 +2,7 @@
   "type": "module",
   "name": "ollama",
   "version": "0.1.0",
-  "description": "Iterface with an ollama instance over HTTP.",
+  "description": "Interface with an ollama instance over HTTP.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

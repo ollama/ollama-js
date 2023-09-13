@@ -1,2 +1,2 @@
 # node-ollama
-Iterface with an ollama instance over HTTP.
+Interface with an ollama instance over HTTP.
