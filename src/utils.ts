@@ -4,7 +4,7 @@ import type { ErrorResponse } from "./interfaces.js";
 
 export const formatAddress = (address: string): string => {
 	if (!address.startsWith("http://") && !address.startsWith("https://")) {
-		address = `http://${address}`
+		address = `http://${address}`;
 	}
 
 	while (address.endsWith("/")) {
@@ -20,11 +20,13 @@ const checkOk = async (response: Response): Promise<void> => {
 
 		try {
 			message = (JSON.parse(message) as ErrorResponse).error;
-		} catch(error) { }
+		} catch(error) {
+			// Do nothing.
+		}
 
 		throw new Error(message);
 	}
-}
+};
 
 export const get = async (address: string): Promise<Response> => {
 	const response = await fetch(formatAddress(address));
