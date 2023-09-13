@@ -19,6 +19,13 @@ export interface Tag {
 	size: number
 }
 
+export interface PullResult {
+	status: PullStatus
+	digest: string
+	total: number
+	completed: number
+}
+
 // Responses:
 export interface ErrorResponse {
 	error: string
@@ -57,7 +64,7 @@ export interface CreateResponse {
 	status: CreateStatus
 }
 
-export type PullStatus = "pulling manifest" | "verifying sha256 digest" | "writing manifest" | "removing any unused layers" | "success"
+export type PullStatus = "" | "pulling manifest" | "verifying sha256 digest" | "writing manifest" | "removing any unused layers" | "success" | `downloading ${string}`
 
 interface PullResponseStatus {
 	status: PullStatus

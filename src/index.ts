@@ -8,7 +8,9 @@ import type {
 	GenerateResponseEnd,
 	GenerateResult,
 	CreateResponse,
-	CreateStatus
+	CreateStatus,
+	PullResponse,
+	PullResult
 } from "./interfaces.js";
 
 export class Ollama {
@@ -87,5 +89,28 @@ export class Ollama {
 
 	async delete (name: string): Promise<void> {
 		await utils.del(`${this.config.address}/api/delete`, { name });
+	}
+
+	async * pull (name: string): AsyncGenerator<PullResult> {
+		const response = await utils.post(`${this.config.address}/api/pull`, { name });
+
+		if (!response.body) {
+			throw new Error("Missing body");
+		}
+
+		for await (const chunk of response.body) {
+			const messages = chunk.toString().split("\n").filter(s => s.length !== 0);
+
+			for (const message of messages) {
+				const res: PullResponse = JSON.parse(message);
+
+				yield {
+					status: res.status,
+					digest: res["digest"] ?? "",
+					total: res["total"] ?? 0,
+					completed: res["completed"] ?? 0
+				};
+			}
+		}
 	}
 }
