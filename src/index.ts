@@ -10,7 +10,8 @@ import type {
 	CreateResponse,
 	CreateStatus,
 	PullResponse,
-	PullResult
+	PullResult,
+	EmbeddingsResponse
 } from "./interfaces.js";
 
 export class Ollama {
@@ -112,5 +113,16 @@ export class Ollama {
 				};
 			}
 		}
+	}
+
+	async embeddings (model: string, prompt: string): Promise<number[]> {
+		const response = await utils.post(`${this.config.address}/api/embeddings`, {
+			model,
+			prompt
+		});
+
+		const json = await response.json() as EmbeddingsResponse;
+
+		return json.embedding;
 	}
 }

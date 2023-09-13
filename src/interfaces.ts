@@ -83,5 +83,5 @@ interface PullResponseDownloadUpdate extends PullResponseDownloadStart {
 export type PullResponse = PullResponseStatus | PullResponseDownloadStart | PullResponseDownloadUpdate
 
 export interface EmbeddingsResponse {
-	embeddings: number[]
+	embedding: number[]
 }
