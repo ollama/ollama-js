@@ -47,12 +47,16 @@ export interface GenerateResponseEnd {
 	eval_duration: number
 }
 
+export type CreateStatus = "parsing modelfile" | "looking for model" | "creating model layer" | "creating model template layer" | "creating model system layer" | "creating parameter layer" | "creating config layer" | `writing layer ${string}` | `using already created layer ${string}` | "writing manifest" | "removing any unused layers" | "success"
+
 export interface CreateResponse {
-	status: "parsing modelfile" | "looking for model" | "creating model layer" | "creating model template layer" | "creating model system layer" | "creating parameter layer" | "creating config layer" | `using already created layer ${string}` | "writing manifest" | "removing any unused layers" | "success"
+	status: CreateStatus
 }
 
+export type PullStatus = "pulling manifest" | "verifying sha256 digest" | "writing manifest" | "removing any unused layers" | "success"
+
 interface PullResponseStatus {
-	status: "pulling manifest" | "verifying sha256 digest" | "writing manifest" | "removing any unused layers" | "success"
+	status: PullStatus
 }
 
 interface PullResponseDownloadStart {

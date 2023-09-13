@@ -6,7 +6,9 @@ import type {
 	Tag,
 	GenerateResponse,
 	GenerateResponseEnd,
-	GenerateResult
+	GenerateResult,
+	CreateResponse,
+	CreateStatus
 } from "./interfaces.js";
 
 export class Ollama {
@@ -56,5 +58,23 @@ export class Ollama {
 		}
 
 		throw new Error("Did not recieve done response in stream.");
+	}
+
+	async * create (name: string, path: string): AsyncGenerator<CreateStatus> {
+		const response = await utils.post(`${this.config.address}/api/create`, { name, path });
+
+		if (!response.body) {
+			throw new Error("Missing body");
+		}
+
+		for await (const chunk of response.body) {
+			const messages = chunk.toString().split("\n").filter(s => s.length !== 0);
+
+			for (const message of messages) {
+				const res: CreateResponse = JSON.parse(message);
+
+				yield res.status;
+			}
+		}
 	}
 }
