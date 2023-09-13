@@ -11,9 +11,10 @@
     "lint": "eslint ./src/* ./test/*",
     "prepublishOnly": "npm run build"
   },
+  "homepage": "https://code.organicdesign.nz/organicdesign/node-ollama",
   "repository": {
     "type": "git",
-    "url": "ssh://git@github.com:saul-jb/node-ollama.git"
+    "url": "https://github.com/organicdesign/node-ollama.git"
   },
   "author": "Saul Boyd",
   "license": "GPL-3.0-or-later",
