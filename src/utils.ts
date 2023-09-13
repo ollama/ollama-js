@@ -44,3 +44,14 @@ export const post = async (address: string, data?: Record<string, unknown>): Pro
 
 	return response;
 };
+
+export const del = async (address: string, data?: Record<string, unknown>): Promise<Response> => {
+	const response = await fetch(formatAddress(address), {
+		method: "DELETE",
+		body: JSON.stringify(data)
+	});
+
+	await checkOk(response);
+
+	return response;
+};

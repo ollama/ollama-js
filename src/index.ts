@@ -79,11 +79,13 @@ export class Ollama {
 	}
 
 	async copy (source: string, destination: string): Promise<void> {
-		const response = await utils.post(`${this.config.address}/api/copy`, {
+		await utils.post(`${this.config.address}/api/copy`, {
 			source,
 			destination
 		});
+	}
 
-		console.log(await response.text());
+	async delete (name: string): Promise<void> {
+		await utils.del(`${this.config.address}/api/delete`, { name });
 	}
 }
