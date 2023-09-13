@@ -20,6 +20,10 @@ export interface Tag {
 }
 
 // Responses:
+export interface ErrorResponse {
+	error: string
+}
+
 export interface TagsResponse {
 	models: {
 		name: string

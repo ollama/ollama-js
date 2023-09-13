@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
 import type { Response } from "node-fetch";
+import type { ErrorResponse } from "./interfaces.js";
 
 export const formatAddress = (address: string): string => {
 	if (!address.startsWith("http://") && !address.startsWith("https://")) {
@@ -13,12 +14,24 @@ export const formatAddress = (address: string): string => {
 	return address;
 };
 
+const checkOk = async (response: Response): Promise<void> => {
+	if (!response.ok) {
+		let message: string;
+
+		try {
+			message = (await response.json() as ErrorResponse).error;
+		} catch(error) {
+			message = await response.text();
+		}
+
+		throw new Error(message);
+	}
+}
+
 export const get = async (address: string): Promise<Response> => {
 	const response = await fetch(formatAddress(address));
 
-	if (!response.ok) {
-		throw new Error(await response.text());
-	}
+	await checkOk(response);
 
 	return response;
 };
@@ -29,9 +42,7 @@ export const post = async (address: string, data?: Record<string, unknown>): Pro
 		body: JSON.stringify(data)
 	});
 
-	if (!response.ok) {
-		throw new Error(await response.text());
-	}
+	await checkOk(response);
 
 	return response;
 };
