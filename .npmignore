@@ -1,9 +1,14 @@
 node_modules
 build
-dist
 .docs
 .coverage
 node_modules
 package-lock.json
 yarn.lock
 .vscode
+.gitignore
+.eslintrc.cjs
+.eslintignore
+jest.config.cjs
+tsconfig.json
+test

@@ -1,0 +1,30 @@
+{
+	"compilerOptions": {
+		"noImplicitAny": false,
+		"noImplicitThis": true,
+		"strictNullChecks": true,
+		"esModuleInterop": true,
+		"declaration": true,
+		"declarationMap": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"forceConsistentCasingInFileNames": true,
+		"moduleResolution": "node",
+		"module": "ES2022",
+		"outDir": "./dist",
+		"target": "ES6"
+	},
+
+	"ts-node": {
+		"swc": true,
+		"esm": true
+	},
+
+	"include": [
+		"./src/**/*.ts"
+	],
+
+	"exclude": [
+		"node_modules"
+	]
+}
