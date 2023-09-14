@@ -13,7 +13,8 @@ import type {
 	PullResult,
 	EmbeddingsResponse,
 	GenerateOptions,
-	GenerateRequest
+	GenerateRequest,
+	ModelParameters
 } from "./interfaces.js";
 
 export class Ollama {
@@ -131,10 +132,11 @@ export class Ollama {
 		}
 	}
 
-	async embeddings (model: string, prompt: string): Promise<number[]> {
+	async embeddings (model: string, prompt: string, parameters?: Partial<ModelParameters>): Promise<number[]> {
 		const response = await utils.post(`${this.config.address}/api/embeddings`, {
 			model,
-			prompt
+			prompt,
+			options: parameters ?? {}
 		});
 
 		const json = await response.json() as EmbeddingsResponse;

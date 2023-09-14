@@ -126,11 +126,12 @@ Download a model from a the model registry. Cancelled pulls are resumed from whe
 ### embeddings
 
 ```javascript
-ollama.embeddings(model, prompt);
+ollama.embeddings(model, prompt, [parameters]);
 ```
 
 - `model` `<string>` The name of the model to generate embeddings for.
 - `prompt` `<string>` The prompt to generate embeddings with.
+- `parameters` `<ModelParameters>` Model Parameters.
 - Returns: `Promise<number[]>` The embeddings.
 
 Generate embeddings from a model.
