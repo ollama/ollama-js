@@ -11,7 +11,9 @@ import type {
 	CreateStatus,
 	PullResponse,
 	PullResult,
-	EmbeddingsResponse
+	EmbeddingsResponse,
+	GenerateOptions,
+	GenerateRequest
 } from "./interfaces.js";
 
 export class Ollama {
@@ -34,8 +36,18 @@ export class Ollama {
 		}));
 	}
 
-	async * generate (model: string, prompt: string): AsyncGenerator<string, GenerateResult> {
-		const response = await utils.post(`${this.config.address}/api/generate`, { model, prompt });
+	async * generate (model: string, prompt: string, options?: Partial<GenerateOptions>): AsyncGenerator<string, GenerateResult> {
+		const parameters = options?.parameters;
+
+		delete options?.parameters;
+
+		const request: GenerateRequest = { model, prompt, ...options };
+
+		if (parameters != null) {
+			request.options = parameters;
+		}
+
+		const response = await utils.post(`${this.config.address}/api/generate`, { ...request });
 
 		if (!response.body) {
 			throw new Error("Missing body");

@@ -2,6 +2,29 @@ export interface Config {
 	address: string
 }
 
+export interface ModelParameters {
+	mirostat: number
+	mirostat_eta: number
+	mirostat_tau: number
+	num_ctx: number
+	num_gqa: number
+	num_thread: number
+	repeat_last_n: number
+	repeat_penalty: number
+	temperature: number
+	stop: string
+	tfs_z: number
+	top_k: number
+	top_p: number
+}
+
+export interface GenerateOptions {
+	parameters: Partial<ModelParameters>
+	context: number[]
+	template: string
+	system: string
+}
+
 export interface GenerateResult {
 	model: string
 	createdAt: Date
@@ -37,6 +60,15 @@ export interface TagsResponse {
 		modified_at: string
 		size: number
 	}[]
+}
+
+export interface GenerateRequest {
+	model: string
+	prompt: string
+	options?: Partial<ModelParameters>
+	system?: string
+	template?: string
+	context?: number[]
 }
 
 export interface GenerateResponse {

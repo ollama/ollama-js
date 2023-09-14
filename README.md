@@ -53,11 +53,16 @@ Create a new API handler for ollama.
 ### generate
 
 ```javascript
-ollama.generate(model, prompt);
+ollama.generate(model, prompt, [options]);
 ```
 
 - `model` `<string>` The name of the model to use for the prompt.
 - `prompt` `<string>` The prompt to give the model.
+- `options` `<GenerateOptions>` Optional options to pass to the model.
+  - `parameters` `<ModelParameters>` Model Parameters.
+  - `context` `<number[]>` Context returned from previous calls.
+  - `template` `<string>` Override the default template.
+  - `system` `<string>` Override the default system string.
 - Returns: `<AsyncGenerator<string, GenerateResult>>` A generator that outputs the tokens as strings.
 
 Generate a response for a given prompt with a provided model. The final response object will include statistics and additional data from the request.
