@@ -6,6 +6,7 @@ Interface with an ollama instance over HTTP.
 - [Install](#install)
 - [Usage](#usage)
 - [API](#api)
+  - [Ollama](#Ollama)
   - [generate](#generate)
   - [create](#create)
   - [tags](#tags)
@@ -37,6 +38,17 @@ for await (const token of ollama.generate("llama2", "What is a llama?")) {
 ## API
 
 The API aims to mirror the [HTTP API for Ollama](https://github.com/jmorganca/ollama/blob/main/docs/api.md).
+
+### Ollama
+
+```javascript
+new Ollama(config);
+```
+
+- `config` `<Object>` The configuration object for Ollama.
+  - `address` `<string>` The Ollama API address. Default: `"http://localhost:11434"`.
+
+Create a new API handler for ollama.
 
 ### generate
 
