@@ -42,22 +42,26 @@ export class Ollama {
 		}
 
 		for await (const chunk of response.body) {
-			const res: GenerateResponse | GenerateResponseEnd = JSON.parse(chunk.toString());
+			const messages = chunk.toString().split("\n").filter(s => s.length !== 0);
 
-			if (res.done) {
-				return {
-					model: res.model,
-					createdAt: new Date(res.created_at),
-					context: res.context,
-					totalDuration: res.total_duration,
-					loadDuration: res.load_duration,
-					promptEvalCount: res.prompt_eval_count,
-					evalCount: res.eval_count,
-					evalDuration: res.eval_duration
-				};
+			for (const message of messages) {
+				const res: GenerateResponse | GenerateResponseEnd = JSON.parse(message);
+
+				if (res.done) {
+					return {
+						model: res.model,
+						createdAt: new Date(res.created_at),
+						context: res.context,
+						totalDuration: res.total_duration,
+						loadDuration: res.load_duration,
+						promptEvalCount: res.prompt_eval_count,
+						evalCount: res.eval_count,
+						evalDuration: res.eval_duration
+					};
+				}
+
+				yield res.response;
 			}
-
-			yield res.response;
 		}
 
 		throw new Error("Did not recieve done response in stream.");
