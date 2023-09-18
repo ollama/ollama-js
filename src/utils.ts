@@ -57,3 +57,31 @@ export const del = async (address: string, data?: Record<string, unknown>): Prom
 
 	return response;
 };
+
+export const parseJSON = async function * <T = unknown>(itr: Iterable<{ toString: () => string }> | AsyncIterable<{ toString: () => string }>): AsyncGenerator<T> {
+	let buffer = "";
+
+	for await (const chunk of itr) {
+		buffer += chunk;
+
+		const parts = buffer.split("\n");
+
+		buffer = parts.pop() ?? "";
+
+		for (const part of parts) {
+			try {
+				yield JSON.parse(part);
+			} catch (error) {
+				console.warn("invalid json: ", part);
+			}
+		}
+	}
+
+	for (const part of buffer.split("\n").filter(p => p !== "")) {
+		try {
+			yield JSON.parse(part);
+		} catch (error) {
+			console.warn("invalid json: ", part);
+		}
+	}
+};

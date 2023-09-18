@@ -54,27 +54,23 @@ export class Ollama {
 			throw new Error("Missing body");
 		}
 
-		for await (const chunk of response.body) {
-			const messages = chunk.toString().split("\n").filter(s => s.length !== 0);
+		const itr = utils.parseJSON<GenerateResponse | GenerateResponseEnd>(response.body);
 
-			for (const message of messages) {
-				const res: GenerateResponse | GenerateResponseEnd = JSON.parse(message);
-
-				if (res.done) {
-					return {
-						model: res.model,
-						createdAt: new Date(res.created_at),
-						context: res.context,
-						totalDuration: res.total_duration,
-						loadDuration: res.load_duration,
-						promptEvalCount: res.prompt_eval_count,
-						evalCount: res.eval_count,
-						evalDuration: res.eval_duration
-					};
-				}
-
-				yield res.response;
+		for await (const message of itr) {
+			if (message.done) {
+				return {
+					model: message.model,
+					createdAt: new Date(message.created_at),
+					context: message.context,
+					totalDuration: message.total_duration,
+					loadDuration: message.load_duration,
+					promptEvalCount: message.prompt_eval_count,
+					evalCount: message.eval_count,
+					evalDuration: message.eval_duration
+				};
 			}
+
+			yield message.response;
 		}
 
 		throw new Error("Did not recieve done response in stream.");
@@ -87,14 +83,10 @@ export class Ollama {
 			throw new Error("Missing body");
 		}
 
-		for await (const chunk of response.body) {
-			const messages = chunk.toString().split("\n").filter(s => s.length !== 0);
+		const itr = utils.parseJSON<CreateResponse>(response.body);
 
-			for (const message of messages) {
-				const res: CreateResponse = JSON.parse(message);
-
-				yield res.status;
-			}
+		for await (const message of itr) {
+			yield message.status;
 		}
 	}
 
@@ -116,19 +108,15 @@ export class Ollama {
 			throw new Error("Missing body");
 		}
 
-		for await (const chunk of response.body) {
-			const messages = chunk.toString().split("\n").filter(s => s.length !== 0);
+		const itr = utils.parseJSON<PullResponse>(response.body);
 
-			for (const message of messages) {
-				const res: PullResponse = JSON.parse(message);
-
-				yield {
-					status: res.status,
-					digest: res["digest"] ?? "",
-					total: res["total"] ?? 0,
-					completed: res["completed"] ?? 0
-				};
-			}
+		for await (const message of itr) {
+			yield {
+				status: message.status,
+				digest: message["digest"] ?? "",
+				total: message["total"] ?? 0,
+				completed: message["completed"] ?? 0
+			};
 		}
 	}
 
