@@ -17,7 +17,7 @@
     "url": "https://github.com/organicdesign/node-ollama.git"
   },
   "author": "Saul Boyd",
-  "license": "GPL-3.0-or-later",
+  "license": "MIT",
   "devDependencies": {
     "@swc/core": "^1.3.14",
     "@types/jest": "^29.2.2",
