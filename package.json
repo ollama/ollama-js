@@ -1,8 +1,8 @@
 {
   "type": "module",
   "name": "ollama",
-  "version": "0.2.1",
-  "description": "Interface with an ollama instance over HTTP.",
+  "version": "0.2.2",
+  "description": "An experimental library for the Ollama API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -11,10 +11,10 @@
     "lint": "eslint ./src/* ./test/*",
     "prepublishOnly": "npm run build"
   },
-  "homepage": "https://code.organicdesign.nz/organicdesign/node-ollama",
+  "homepage": "https://github.com/jmorganca/node-ollama",
   "repository": {
     "type": "git",
-    "url": "https://github.com/organicdesign/node-ollama.git"
+    "url": "https://github.com/jmorganca/node-ollama.git"
   },
   "author": "Saul Boyd",
   "license": "MIT",
