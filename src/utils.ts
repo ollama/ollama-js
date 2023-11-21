@@ -1,6 +1,4 @@
-import fetch from "node-fetch";
-import type { Response } from "node-fetch";
-import type { ErrorResponse } from "./interfaces.js";
+import type { Fetch, ErrorResponse } from "./interfaces.js";
 
 export const formatAddress = (address: string): string => {
 	if (!address.startsWith("http://") && !address.startsWith("https://")) {
@@ -28,7 +26,7 @@ const checkOk = async (response: Response): Promise<void> => {
 	}
 };
 
-export const get = async (address: string): Promise<Response> => {
+export const get = async (fetch: Fetch, address: string): Promise<Response> => {
 	const response = await fetch(formatAddress(address));
 
 	await checkOk(response);
@@ -36,7 +34,7 @@ export const get = async (address: string): Promise<Response> => {
 	return response;
 };
 
-export const post = async (address: string, data?: Record<string, unknown>): Promise<Response> => {
+export const post = async (fetch: Fetch, address: string, data?: Record<string, unknown>): Promise<Response> => {
 	const response = await fetch(formatAddress(address), {
 		method: "POST",
 		body: JSON.stringify(data)
@@ -47,7 +45,7 @@ export const post = async (address: string, data?: Record<string, unknown>): Pro
 	return response;
 };
 
-export const del = async (address: string, data?: Record<string, unknown>): Promise<Response> => {
+export const del = async (fetch: Fetch, address: string, data?: Record<string, unknown>): Promise<Response> => {
 	const response = await fetch(formatAddress(address), {
 		method: "DELETE",
 		body: JSON.stringify(data)
@@ -58,11 +56,13 @@ export const del = async (address: string, data?: Record<string, unknown>): Prom
 	return response;
 };
 
-export const parseJSON = async function * <T = unknown>(itr: Iterable<{ toString: () => string }> | AsyncIterable<{ toString: () => string }>): AsyncGenerator<T> {
+export const parseJSON = async function * <T = unknown>(itr: ReadableStream<Uint8Array>): AsyncGenerator<T> {
+	const decoder = new TextDecoder("utf-8");
 	let buffer = "";
 
-	for await (const chunk of itr) {
-		buffer += chunk;
+	// TS is a bit strange here, ReadableStreams are AsyncIterable but TS doesn't see it.
+	for await (const chunk of itr as unknown as AsyncIterable<Uint8Array>) {
+		buffer += decoder.decode(chunk);
 
 		const parts = buffer.split("\n");
 

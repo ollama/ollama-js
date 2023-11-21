@@ -1,6 +1,7 @@
 import * as utils from "./utils.js";
 
 import type {
+	Fetch,
 	Config,
 	TagsResponse,
 	Tag,
@@ -19,15 +20,32 @@ import type {
 
 export class Ollama {
 	private readonly config: Config;
+	private readonly fetch: Fetch;
 
 	constructor (config?: Partial<Config>) {
 		this.config = {
 			address: config?.address ?? "http://localhost:11434"
 		};
+
+		let f: Fetch | null = null;
+
+		if (config?.fetch) {
+			f = config.fetch;
+		} else if (typeof fetch !== "undefined") {
+			f = fetch;
+		} else if (typeof window !== "undefined") {
+			f = window.fetch;
+		}
+
+		if (f == null) {
+			throw new Error("unable to find fetch - please define it via 'config.fetch'");
+		}
+
+		this.fetch = f;
 	}
 
 	async tags (): Promise<Tag[]> {
-		const response = await utils.get(`${this.config.address}/api/tags`);
+		const response = await utils.get(this.fetch, `${this.config.address}/api/tags`);
 		const json = await response.json() as TagsResponse;
 
 		return json.models.map(m => ({
@@ -48,7 +66,7 @@ export class Ollama {
 			request.options = parameters;
 		}
 
-		const response = await utils.post(`${this.config.address}/api/generate`, { ...request });
+		const response = await utils.post(this.fetch, `${this.config.address}/api/generate`, { ...request });
 
 		if (!response.body) {
 			throw new Error("Missing body");
@@ -77,7 +95,7 @@ export class Ollama {
 	}
 
 	async * create (name: string, path: string): AsyncGenerator<CreateStatus> {
-		const response = await utils.post(`${this.config.address}/api/create`, { name, path });
+		const response = await utils.post(this.fetch, `${this.config.address}/api/create`, { name, path });
 
 		if (!response.body) {
 			throw new Error("Missing body");
@@ -91,18 +109,18 @@ export class Ollama {
 	}
 
 	async copy (source: string, destination: string): Promise<void> {
-		await utils.post(`${this.config.address}/api/copy`, {
+		await utils.post(this.fetch, `${this.config.address}/api/copy`, {
 			source,
 			destination
 		});
 	}
 
 	async delete (name: string): Promise<void> {
-		await utils.del(`${this.config.address}/api/delete`, { name });
+		await utils.del(this.fetch, `${this.config.address}/api/delete`, { name });
 	}
 
 	async * pull (name: string): AsyncGenerator<PullResult> {
-		const response = await utils.post(`${this.config.address}/api/pull`, { name });
+		const response = await utils.post(this.fetch, `${this.config.address}/api/pull`, { name });
 
 		if (!response.body) {
 			throw new Error("Missing body");
@@ -121,7 +139,7 @@ export class Ollama {
 	}
 
 	async embeddings (model: string, prompt: string, parameters?: Partial<ModelParameters>): Promise<number[]> {
-		const response = await utils.post(`${this.config.address}/api/embeddings`, {
+		const response = await utils.post(this.fetch, `${this.config.address}/api/embeddings`, {
 			model,
 			prompt,
 			options: parameters ?? {}

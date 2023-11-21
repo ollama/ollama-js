@@ -1,5 +1,8 @@
+export type Fetch = typeof fetch
+
 export interface Config {
-	address: string
+	address: string,
+	fetch?: Fetch
 }
 
 export interface ModelParameters {
