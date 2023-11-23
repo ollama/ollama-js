@@ -29,7 +29,7 @@ export class Ollama {
 
 		let f: Fetch | null = null;
 
-		if (config?.fetch) {
+		if (config?.fetch != null) {
 			f = config.fetch;
 		} else if (typeof fetch !== "undefined") {
 			f = fetch;
