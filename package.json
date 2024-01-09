@@ -1,14 +1,20 @@
 {
-  "type": "module",
   "name": "ollama",
   "version": "0.4.0",
   "description": "Ollama Javascript library",
-  "main": "dist/index.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/mjs/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+        "import": "./dist/mjs/index.js",
+        "require": "./dist/cjs/index.js"
+    }
+  },
   "scripts": {
     "format": "prettier --write .",
     "test": "jest --config=jest.config.cjs ./test/*",
-    "build": "mkdir -p dist && touch dist/cleanup && rm dist/* && tsc -b",
+    "build": "rm -fr dist/* && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json && node scripts/build-cjs-mjs.js",
     "lint": "eslint ./src/* ./test/*",
     "prepublishOnly": "npm run build"
   },
