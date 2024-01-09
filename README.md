@@ -35,6 +35,12 @@ for await (const token of ollama.generate("llama2", "What is a llama?")) {
 }
 ```
 
+### CommonJS
+If you are not using ES modules the library can also be used as a CommonJS module.
+```javascript
+const { Ollama } = require("ollama");
+```
+
 ## API
 
 The API aims to mirror the [HTTP API for Ollama](https://github.com/jmorganca/ollama/blob/main/docs/api.md).
