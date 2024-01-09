@@ -150,3 +150,5 @@ export class Ollama {
 		return json.embedding;
 	}
 }
+
+export default new Ollama();
