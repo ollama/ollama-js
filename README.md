@@ -46,7 +46,7 @@ new Ollama(config);
 ```
 
 - `config` `<Object>` The configuration object for Ollama.
-  - `address` `<string>` The Ollama API address. Default: `"http://localhost:11434"`.
+  - `address` `<string>` The Ollama API address. Default: `"http://127.0.0.1:11434"`.
 
 Create a new API handler for ollama.
 

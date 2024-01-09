@@ -24,7 +24,7 @@ export class Ollama {
 
 	constructor (config?: Partial<Config>) {
 		this.config = {
-			address: config?.address ?? "http://localhost:11434"
+			address: config?.address ?? "http://127.0.0.1:11434"
 		};
 
 		let f: Fetch | null = null;
