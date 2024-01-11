@@ -1,5 +1,3 @@
-import exp from "constants";
-
 export type Fetch = typeof fetch
 
 export interface Config {
