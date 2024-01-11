@@ -12,10 +12,10 @@
     "lint": "eslint ./src/* ./test/*",
     "prepublishOnly": "npm run build"
   },
-  "homepage": "https://github.com/jmorganca/node-ollama",
+  "homepage": "https://github.com/jmorganca/ollama-js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jmorganca/node-ollama.git"
+    "url": "https://github.com/jmorganca/ollama-js.git"
   },
   "author": "Saul Boyd",
   "license": "MIT",
