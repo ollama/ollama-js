@@ -59,7 +59,7 @@ export interface GenerateRequest {
 }
 
 export interface Message {
-	role: "system" | "user" | "assistant"
+	role: string
 	content: string
 	images?: Uint8Array[] | string[]
 }
