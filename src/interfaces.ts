@@ -19,8 +19,6 @@ export interface Options {
     useMmap: boolean;
     useMlock: boolean;
     embeddingOnly: boolean;
-    opeFrequencyBase: number;
-    ropeFrequencyScale: number;
     numThread: number;
 
     // Runtime options
