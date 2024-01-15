@@ -11,7 +11,6 @@ export interface Options {
     numa: boolean;
     numCtx: number;
     numBatch: number;
-    numGqa: number;
     mainGpu: number;
     lowVram: boolean;
     f16Kv: boolean;
