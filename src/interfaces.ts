@@ -71,7 +71,7 @@ export interface ChatRequest {
 }
 
 export interface PullRequest {
-	name: string
+	model: string
 	insecure?: boolean
 	username?: string
 	password?: string
@@ -79,7 +79,7 @@ export interface PullRequest {
 }
 
 export interface PushRequest {
-	name: string
+	model: string
 	insecure?: boolean
 	username?: string
 	password?: string
@@ -87,14 +87,14 @@ export interface PushRequest {
 }
 
 export interface CreateRequest {
-	name: string
+	model: string
 	path?: string
 	modelfile?: string
 	stream?: boolean
 }
 
 export interface DeleteRequest {
-	name: string
+	model: string
 }
 
 export interface CopyRequest {

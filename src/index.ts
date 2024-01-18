@@ -210,14 +210,26 @@ export class Ollama {
     pull(request: PullRequest & { stream?: false }): Promise<ProgressResponse>;
 
     async pull (request: PullRequest):  Promise<ProgressResponse | AsyncGenerator<ProgressResponse>> {
-        return this.processStreamableRequest<ProgressResponse>('pull', request);
+        return this.processStreamableRequest<ProgressResponse>('pull', {
+			name: request.model,
+			stream: request.stream,
+			insecure: request.insecure,
+			username: request.username,
+			password: request.password,
+		});
 	}
 
     push(request: PushRequest & { stream: true }): Promise<AsyncGenerator<ProgressResponse>>;
     push(request: PushRequest & { stream?: false }): Promise<ProgressResponse>;
 
     async push (request: PushRequest):  Promise<ProgressResponse | AsyncGenerator<ProgressResponse>> {
-        return this.processStreamableRequest<ProgressResponse>('push', request);
+        return this.processStreamableRequest<ProgressResponse>('push', {
+			name: request.model,
+			stream: request.stream,
+			insecure: request.insecure,
+			username: request.username,
+			password: request.password,
+		});
 	}
 
     create(request: CreateRequest & { stream: true }): Promise<AsyncGenerator<ProgressResponse>>;
@@ -235,14 +247,14 @@ export class Ollama {
         }
 
         return this.processStreamableRequest<ProgressResponse>('create', {
-            name: request.name,
+            name: request.model,
             stream: request.stream,
             modelfile: modelfileContent,
         });
 	}
 
     async delete (request: DeleteRequest): Promise<StatusResponse> {
-		await utils.del(this.fetch, `${this.config.address}/api/delete`, { ...request });
+		await utils.del(this.fetch, `${this.config.address}/api/delete`, { name: request.model });
         return { status: "success" };
 	}
     
