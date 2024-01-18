@@ -87,15 +87,21 @@ export class Ollama {
         }
     }
 
-    private async encodeImage(image: Uint8Array | string): Promise<string> {
-        if (typeof image === 'string') {
-            // If image is a string, treat it as a file path
-            const fileBuffer = await promises.readFile(resolve(image));
-            return Buffer.from(fileBuffer).toString('base64');
-        } else {
-            return Buffer.from(image).toString('base64');
-        }
-    }
+	private async encodeImage(image: Uint8Array | Buffer | string): Promise<string> {
+		if (typeof image !== 'string') {
+			// image is Uint8Array or Buffer, convert it to base64
+			const result = Buffer.from(image).toString('base64');
+			return result;
+		}
+		const base64Pattern = /^[A-Za-z0-9+/]+={1,2}$/; // detect by checking for equals signs at the end
+		if (base64Pattern.test(image)) {
+			// the string is already base64 encoded
+			return image;
+		} 
+		// this is a filepath, read the file and convert it to base64
+		const fileBuffer = await promises.readFile(resolve(image));
+		return Buffer.from(fileBuffer).toString('base64');
+	}	
 
     private async parseModelfile(modelfile: string, mfDir: string = process.cwd()): Promise<string> {
         const out: string[] = [];
@@ -187,7 +193,7 @@ export class Ollama {
 
     async generate(request: GenerateRequest): Promise<GenerateResponse | AsyncGenerator<GenerateResponse>> {
         if (request.images) {
-            request.images = await Promise.all(request.images.map(this.encodeImage));
+            request.images = await Promise.all(request.images.map(this.encodeImage.bind(this)));
         }
         return this.processStreamableRequest<GenerateResponse>('generate', request);
     }
@@ -199,7 +205,7 @@ export class Ollama {
         if (request.messages) {
             for (const message of request.messages) {
                 if (message.images) {
-                    message.images = await Promise.all(message.images.map(this.encodeImage));
+                    message.images = await Promise.all(message.images.map(this.encodeImage.bind(this)));
                 }
             }
         }
