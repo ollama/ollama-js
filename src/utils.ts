@@ -1,17 +1,5 @@
 import type { Fetch, ErrorResponse } from './interfaces.js'
 
-export const formatAddress = (address: string): string => {
-  if (!address.startsWith('http://') && !address.startsWith('https://')) {
-    address = `http://${address}`
-  }
-
-  while (address.endsWith('/')) {
-    address = address.substring(0, address.length - 1)
-  }
-
-  return address
-}
-
 const checkOk = async (response: Response): Promise<void> => {
   if (!response.ok) {
     let message = `Error ${response.status}: ${response.statusText}`

@@ -31,10 +31,10 @@ export class Ollama {
   private readonly config: Config
   private readonly fetch: Fetch
 
-  constructor(config?: Partial<Config>) {
-    this.config = {
-      address: config?.address ?? 'http://127.0.0.1:11434',
-    }
+	constructor (config?: Partial<Config>) {
+		this.config = {
+			host: config?.host ?? "http://127.0.0.1:11434"
+		};
 
     this.fetch = fetch
     if (config?.fetch != null) {
