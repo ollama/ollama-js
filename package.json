@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "ollama",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "An experimental library for the Ollama API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
