@@ -11,17 +11,17 @@ npm i ollama
 A global default client is provided for convenience and can be used for both single and streaming responses.
 
 ```javascript
-import ollama from "ollama"
+import client from "ollama"
 
-const response = await ollama.chat({model: 'llama2', messages: [{ role: 'user', content: 'Why is the sky blue?' }]})
+const response = await client.chat({model: 'llama2', messages: [{ role: 'user', content: 'Why is the sky blue?' }]})
 console.log(response.message.content)
 ```
 
 ```javascript
-import ollama from "ollama"
+import client from "ollama"
 
 const message = { role: 'user', content: 'Why is the sky blue?' }
-const response = await ollama.chat({model: 'llama2', messages: [message], stream: true})
+const response = await client.chat({model: 'llama2', messages: [message], stream: true})
 for await (const part of response) {
   process.stdout.write(part.message.content)
 }
