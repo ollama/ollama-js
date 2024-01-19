@@ -9,35 +9,35 @@ export interface Config {
 
 export interface Options {
     numa: boolean;
-    numCtx: number;
-    numBatch: number;
-    mainGpu: number;
-    lowVram: boolean;
-    f16Kv: boolean;
-    logitsAll: boolean;
-    vocabOnly: boolean;
-    useMmap: boolean;
-    useMlock: boolean;
-    embeddingOnly: boolean;
-    numThread: number;
+    num_ctx: number;
+    num_batch: number;
+    main_gpu: number;
+    low_vram: boolean;
+    f16_kv: boolean;
+    logits_all: boolean;
+    vocab_only: boolean;
+    use_mmap: boolean;
+    use_mlock: boolean;
+    embedding_only: boolean;
+    num_thread: number;
 
     // Runtime options
-    numKeep: number;
+    num_keep: number;
     seed: number;
-    numPredict: number;
-    topK: number;
-    topP: number;
-    tfsZ: number;
-    typicalP: number;
-    repeatLastN: number;
+    num_predict: number;
+    top_k: number;
+    top_p: number;
+    tfs_z: number;
+    typical_p: number;
+    repeat_last_n: number;
     temperature: number;
-    repeatPenalty: number;
-    presencePenalty: number;
-    frequencyPenalty: number;
+    repeat_penalty: number;
+    presence_penalty: number;
+    frequency_penalty: number;
     mirostat: number;
-    mirostatTau: number;
-    mirostatEta: number;
-    penalizeNewline: boolean;
+    mirostat_tau: number;
+    mirostat_eta: number;
+    penalize_newline: boolean;
     stop: string[];
 }
 
@@ -120,29 +120,29 @@ export interface EmbeddingsRequest {
 
 export interface GenerateResponse {
 	model: string
-	createdAt: Date
+	created_at: Date
 	response: string
 	done: boolean
 	context: number[]
-	totalDuration: number
-	loadDuration: number
-	promptEvalCount: number
-	promptEvalDuration: number
-	evalCount: number
-	evalDuration: number
+	total_duration: number
+	load_duration: number
+	prompt_eval_count: number
+	prompt_eval_duration: number
+	eval_count: number
+	eval_duration: number
 }
 
 export interface ChatResponse {
 	model: string
-	createdAt: Date
+	created_at: Date
 	message: Message
 	done: boolean
-	totalDuration: number
-	loadDuration: number
-	promptEvalCount: number
-	promptEvalDuration: number
-	evalCount: number
-	evalDuration: number
+	total_duration: number
+	load_duration: number
+	prompt_eval_count: number
+	prompt_eval_duration: number
+	eval_count: number
+	eval_duration: number
 }
 
 export interface EmbeddingsResponse {
@@ -158,14 +158,14 @@ export interface ProgressResponse {
 
 export interface ModelResponse {
 	name: string
-	modifiedAt: Date
+	modified_at: Date
 	size: number
 	digest: string
 	format: string
 	family: string
 	families: string[]
-	parameterSize: string
-	quatizationLevel: number
+	parameter_size: string
+	quatization_level: number
 }
 
 export interface ShowResponse {
@@ -177,8 +177,8 @@ export interface ShowResponse {
 	format: string
 	family: string
 	families: string[]
-	parameterSize: string
-	quatizationLevel: number
+	parameter_size: string
+	quatization_level: number
 }
 
 export interface ListResponse {
