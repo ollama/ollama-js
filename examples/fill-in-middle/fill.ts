@@ -7,10 +7,9 @@ async function main(): Promise<void> {
     const suffix = `
 return result
 `;
-
-    const respose = await new Ollama().generate({model: "codellama:7b-code", prompt: `<PRE> ${prefix} <SUF>${suffix} <MID>`, options: {num_predict: 128, temperature: 0, top_p: 0.9, presence_penalty: 0, stop: ["<EOT>"]}});
+    const client: Ollama = new Ollama();
+    const respose = await client.generate({model: "codellama:7b-code", prompt: `<PRE> ${prefix} <SUF>${suffix} <MID>`, options: {num_predict: 128, temperature: 0, top_p: 0.9, presence_penalty: 0, stop: ["<EOT>"]}});
     console.log(respose.response);
-
 }
 
 await main();
