@@ -13,17 +13,28 @@ export const formatAddress = (address: string): string => {
 };
 
 const checkOk = async (response: Response): Promise<void> => {
-	if (!response.ok) {
-		let message = await response.text();
+    if (!response.ok) {
+        let message = `Error ${response.status}: ${response.statusText}`;
 
-		try {
-			message = (JSON.parse(message) as ErrorResponse).error;
-		} catch(error) {
-			// Do nothing.
-		}
+        if (response.headers.get('content-type')?.includes('application/json')) {
+            try {
+                const errorResponse = await response.json() as ErrorResponse;
+                message = errorResponse.error || message;
+            } catch(error) {
+                console.log("Failed to parse error response as JSON");
+            }
+        } else {
+            try {
+                console.log("Getting text from response");
+                const textResponse = await response.text();
+                message = textResponse || message;
+            } catch (error) {
+                console.log("Failed to get text from error response");
+            }
+        }
 
-		throw new Error(message);
-	}
+        throw new Error(message);
+    }
 };
 
 export const get = async (fetch: Fetch, address: string): Promise<Response> => {
@@ -34,16 +45,33 @@ export const get = async (fetch: Fetch, address: string): Promise<Response> => {
 	return response;
 };
 
-export const post = async (fetch: Fetch, address: string, data?: Record<string, unknown>): Promise<Response> => {
-	const response = await fetch(formatAddress(address), {
-		method: "POST",
-		body: JSON.stringify(data)
-	});
+export const head = async (fetch: Fetch, address: string): Promise<Response> => {
+    const response = await fetch(formatAddress(address), {
+        method: "HEAD"
+    });
 
-	await checkOk(response);
+    await checkOk(response);
 
-	return response;
+    return response;
 };
+
+export const post = async (fetch: Fetch, address: string, data?: Record<string, unknown> | BodyInit): Promise<Response> => {
+    const isRecord = (input: any): input is Record<string, unknown> => {
+        return input !== null && typeof input === 'object' && !Array.isArray(input);
+    };
+
+    const formattedData = isRecord(data) ? JSON.stringify(data) : data;
+
+    const response = await fetch(formatAddress(address), {
+        method: "POST",
+        body: formattedData
+    });
+
+    await checkOk(response);
+
+    return response;
+};
+
 
 export const del = async (fetch: Fetch, address: string, data?: Record<string, unknown>): Promise<Response> => {
 	const response = await fetch(formatAddress(address), {

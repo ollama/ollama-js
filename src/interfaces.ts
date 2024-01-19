@@ -5,118 +5,190 @@ export interface Config {
 	fetch?: Fetch
 }
 
-export interface ModelParameters {
-	mirostat: number
-	mirostat_eta: number
-	mirostat_tau: number
-	num_ctx: number
-	num_gqa: number
-	num_thread: number
-	repeat_last_n: number
-	repeat_penalty: number
-	temperature: number
-	stop: string
-	tfs_z: number
-	top_k: number
-	top_p: number
-}
+// request types
 
-export interface GenerateOptions {
-	parameters: Partial<ModelParameters>
-	context: number[]
-	template: string
-	system: string
-}
+export interface Options {
+    numa: boolean;
+    num_ctx: number;
+    num_batch: number;
+    main_gpu: number;
+    low_vram: boolean;
+    f16_kv: boolean;
+    logits_all: boolean;
+    vocab_only: boolean;
+    use_mmap: boolean;
+    use_mlock: boolean;
+    embedding_only: boolean;
+    num_thread: number;
 
-export interface GenerateResult {
-	model: string
-	createdAt: Date
-	context: number[]
-	totalDuration: number
-	loadDuration: number
-	promptEvalCount: number
-	evalCount: number
-	evalDuration: number
-}
-
-export interface Tag {
-	name: string
-	modifiedAt: Date
-	size: number
-}
-
-export interface PullResult {
-	status: PullStatus
-	digest: string
-	total: number
-	completed: number
-}
-
-// Responses:
-export interface ErrorResponse {
-	error: string
-}
-
-export interface TagsResponse {
-	models: {
-		name: string
-		modified_at: string
-		size: number
-	}[]
+    // Runtime options
+    num_keep: number;
+    seed: number;
+    num_predict: number;
+    top_k: number;
+    top_p: number;
+    tfs_z: number;
+    typical_p: number;
+    repeat_last_n: number;
+    temperature: number;
+    repeat_penalty: number;
+    presence_penalty: number;
+    frequency_penalty: number;
+    mirostat: number;
+    mirostat_tau: number;
+    mirostat_eta: number;
+    penalize_newline: boolean;
+    stop: string[];
 }
 
 export interface GenerateRequest {
 	model: string
 	prompt: string
-	options?: Partial<ModelParameters>
 	system?: string
 	template?: string
 	context?: number[]
+	stream?: boolean
+	raw?: boolean
+	format?: string
+	images?: Uint8Array[] | string[]
+
+	options?: Partial<Options>
 }
+
+export interface Message {
+	role: string
+	content: string
+	images?: Uint8Array[] | string[]
+}
+
+export interface ChatRequest {
+	model: string
+	messages?: Message[]
+	stream?: boolean
+	format?: string
+
+	options?: Partial<Options>
+}
+
+export interface PullRequest {
+	model: string
+	insecure?: boolean
+	username?: string
+	password?: string
+	stream?: boolean
+}
+
+export interface PushRequest {
+	model: string
+	insecure?: boolean
+	username?: string
+	password?: string
+	stream?: boolean
+}
+
+export interface CreateRequest {
+	model: string
+	path?: string
+	modelfile?: string
+	stream?: boolean
+}
+
+export interface DeleteRequest {
+	model: string
+}
+
+export interface CopyRequest {
+	source: string
+	destination: string
+}
+
+export interface ShowRequest {
+	model: string
+	system?: string
+	template?: string
+	options?: Partial<Options>
+}
+
+export interface EmbeddingsRequest {
+	model: string
+	prompt: string
+
+	options?: Partial<Options>
+}
+
+// response types
 
 export interface GenerateResponse {
 	model: string
-	created_at: string
+	created_at: Date
 	response: string
-	done: false
-}
-
-export interface GenerateResponseEnd {
-	model: string
-	created_at: string
-	done: true
+	done: boolean
 	context: number[]
 	total_duration: number
 	load_duration: number
 	prompt_eval_count: number
+	prompt_eval_duration: number
 	eval_count: number
 	eval_duration: number
 }
 
-export type CreateStatus = "parsing modelfile" | "looking for model" | "creating model layer" | "creating model template layer" | "creating model system layer" | "creating parameter layer" | "creating config layer" | `writing layer ${string}` | `using already created layer ${string}` | "writing manifest" | "removing any unused layers" | "success"
-
-export interface CreateResponse {
-	status: CreateStatus
+export interface ChatResponse {
+	model: string
+	created_at: Date
+	message: Message
+	done: boolean
+	total_duration: number
+	load_duration: number
+	prompt_eval_count: number
+	prompt_eval_duration: number
+	eval_count: number
+	eval_duration: number
 }
-
-export type PullStatus = "" | "pulling manifest" | "verifying sha256 digest" | "writing manifest" | "removing any unused layers" | "success" | `downloading ${string}`
-
-interface PullResponseStatus {
-	status: PullStatus
-}
-
-interface PullResponseDownloadStart {
-	status: `downloading ${string}`
-	digest: string
-	total: number
-}
-
-interface PullResponseDownloadUpdate extends PullResponseDownloadStart {
-	completed: number
-}
-
-export type PullResponse = PullResponseStatus | PullResponseDownloadStart | PullResponseDownloadUpdate
 
 export interface EmbeddingsResponse {
 	embedding: number[]
+}
+
+export interface ProgressResponse {
+	status: string
+	digest: string
+	total: number
+	completed: number
+}
+
+export interface ModelResponse {
+	name: string
+	modified_at: Date
+	size: number
+	digest: string
+	format: string
+	family: string
+	families: string[]
+	parameter_size: string
+	quatization_level: number
+}
+
+export interface ShowResponse {
+	license: string
+	modelfile: string
+	parameters: string
+	template: string
+	system: string
+	format: string
+	family: string
+	families: string[]
+	parameter_size: string
+	quatization_level: number
+}
+
+export interface ListResponse {
+	models: ModelResponse[]
+}
+
+export interface ErrorResponse {
+	error: string
+}
+
+export interface StatusResponse {
+	status: string
 }
