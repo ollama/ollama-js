@@ -2,7 +2,7 @@
   "type": "module",
   "name": "ollama",
   "version": "0.4.0",
-  "description": "An experimental library for the Ollama API",
+  "description": "The official Ollama JavaScript client library.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -11,10 +11,10 @@
     "lint": "eslint ./src/* ./test/*",
     "prepublishOnly": "npm run build"
   },
-  "homepage": "https://github.com/jmorganca/node-ollama",
+  "homepage": "https://github.com/jmorganca/ollama-js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jmorganca/node-ollama.git"
+    "url": "https://github.com/jmorganca/ollama-js.git"
   },
   "author": "Saul Boyd",
   "license": "MIT",
