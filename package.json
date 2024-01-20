@@ -2,7 +2,7 @@
   "type": "module",
   "name": "ollama",
   "version": "0.4.0",
-  "description": "The official Ollama JavaScript client library.",
+  "description": "Ollama Javascript library",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
