@@ -1,194 +1,194 @@
 export type Fetch = typeof fetch
 
 export interface Config {
-	address: string,
-	fetch?: Fetch
+  address: string
+  fetch?: Fetch
 }
 
 // request types
 
 export interface Options {
-    numa: boolean;
-    num_ctx: number;
-    num_batch: number;
-    main_gpu: number;
-    low_vram: boolean;
-    f16_kv: boolean;
-    logits_all: boolean;
-    vocab_only: boolean;
-    use_mmap: boolean;
-    use_mlock: boolean;
-    embedding_only: boolean;
-    num_thread: number;
+  numa: boolean
+  num_ctx: number
+  num_batch: number
+  main_gpu: number
+  low_vram: boolean
+  f16_kv: boolean
+  logits_all: boolean
+  vocab_only: boolean
+  use_mmap: boolean
+  use_mlock: boolean
+  embedding_only: boolean
+  num_thread: number
 
-    // Runtime options
-    num_keep: number;
-    seed: number;
-    num_predict: number;
-    top_k: number;
-    top_p: number;
-    tfs_z: number;
-    typical_p: number;
-    repeat_last_n: number;
-    temperature: number;
-    repeat_penalty: number;
-    presence_penalty: number;
-    frequency_penalty: number;
-    mirostat: number;
-    mirostat_tau: number;
-    mirostat_eta: number;
-    penalize_newline: boolean;
-    stop: string[];
+  // Runtime options
+  num_keep: number
+  seed: number
+  num_predict: number
+  top_k: number
+  top_p: number
+  tfs_z: number
+  typical_p: number
+  repeat_last_n: number
+  temperature: number
+  repeat_penalty: number
+  presence_penalty: number
+  frequency_penalty: number
+  mirostat: number
+  mirostat_tau: number
+  mirostat_eta: number
+  penalize_newline: boolean
+  stop: string[]
 }
 
 export interface GenerateRequest {
-	model: string
-	prompt: string
-	system?: string
-	template?: string
-	context?: number[]
-	stream?: boolean
-	raw?: boolean
-	format?: string
-	images?: Uint8Array[] | string[]
+  model: string
+  prompt: string
+  system?: string
+  template?: string
+  context?: number[]
+  stream?: boolean
+  raw?: boolean
+  format?: string
+  images?: Uint8Array[] | string[]
 
-	options?: Partial<Options>
+  options?: Partial<Options>
 }
 
 export interface Message {
-	role: string
-	content: string
-	images?: Uint8Array[] | string[]
+  role: string
+  content: string
+  images?: Uint8Array[] | string[]
 }
 
 export interface ChatRequest {
-	model: string
-	messages?: Message[]
-	stream?: boolean
-	format?: string
+  model: string
+  messages?: Message[]
+  stream?: boolean
+  format?: string
 
-	options?: Partial<Options>
+  options?: Partial<Options>
 }
 
 export interface PullRequest {
-	model: string
-	insecure?: boolean
-	username?: string
-	password?: string
-	stream?: boolean
+  model: string
+  insecure?: boolean
+  username?: string
+  password?: string
+  stream?: boolean
 }
 
 export interface PushRequest {
-	model: string
-	insecure?: boolean
-	username?: string
-	password?: string
-	stream?: boolean
+  model: string
+  insecure?: boolean
+  username?: string
+  password?: string
+  stream?: boolean
 }
 
 export interface CreateRequest {
-	model: string
-	path?: string
-	modelfile?: string
-	stream?: boolean
+  model: string
+  path?: string
+  modelfile?: string
+  stream?: boolean
 }
 
 export interface DeleteRequest {
-	model: string
+  model: string
 }
 
 export interface CopyRequest {
-	source: string
-	destination: string
+  source: string
+  destination: string
 }
 
 export interface ShowRequest {
-	model: string
-	system?: string
-	template?: string
-	options?: Partial<Options>
+  model: string
+  system?: string
+  template?: string
+  options?: Partial<Options>
 }
 
 export interface EmbeddingsRequest {
-	model: string
-	prompt: string
+  model: string
+  prompt: string
 
-	options?: Partial<Options>
+  options?: Partial<Options>
 }
 
 // response types
 
 export interface GenerateResponse {
-	model: string
-	created_at: Date
-	response: string
-	done: boolean
-	context: number[]
-	total_duration: number
-	load_duration: number
-	prompt_eval_count: number
-	prompt_eval_duration: number
-	eval_count: number
-	eval_duration: number
+  model: string
+  created_at: Date
+  response: string
+  done: boolean
+  context: number[]
+  total_duration: number
+  load_duration: number
+  prompt_eval_count: number
+  prompt_eval_duration: number
+  eval_count: number
+  eval_duration: number
 }
 
 export interface ChatResponse {
-	model: string
-	created_at: Date
-	message: Message
-	done: boolean
-	total_duration: number
-	load_duration: number
-	prompt_eval_count: number
-	prompt_eval_duration: number
-	eval_count: number
-	eval_duration: number
+  model: string
+  created_at: Date
+  message: Message
+  done: boolean
+  total_duration: number
+  load_duration: number
+  prompt_eval_count: number
+  prompt_eval_duration: number
+  eval_count: number
+  eval_duration: number
 }
 
 export interface EmbeddingsResponse {
-	embedding: number[]
+  embedding: number[]
 }
 
 export interface ProgressResponse {
-	status: string
-	digest: string
-	total: number
-	completed: number
+  status: string
+  digest: string
+  total: number
+  completed: number
 }
 
 export interface ModelResponse {
-	name: string
-	modified_at: Date
-	size: number
-	digest: string
-	format: string
-	family: string
-	families: string[]
-	parameter_size: string
-	quatization_level: number
+  name: string
+  modified_at: Date
+  size: number
+  digest: string
+  format: string
+  family: string
+  families: string[]
+  parameter_size: string
+  quatization_level: number
 }
 
 export interface ShowResponse {
-	license: string
-	modelfile: string
-	parameters: string
-	template: string
-	system: string
-	format: string
-	family: string
-	families: string[]
-	parameter_size: string
-	quatization_level: number
+  license: string
+  modelfile: string
+  parameters: string
+  template: string
+  system: string
+  format: string
+  family: string
+  families: string[]
+  parameter_size: string
+  quatization_level: number
 }
 
 export interface ListResponse {
-	models: ModelResponse[]
+  models: ModelResponse[]
 }
 
 export interface ErrorResponse {
-	error: string
+  error: string
 }
 
 export interface StatusResponse {
-	status: string
+  status: string
 }

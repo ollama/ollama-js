@@ -1,3 +1,3 @@
-describe("Empty test", () => {
-	it("runs", () => {});
-});
+describe('Empty test', () => {
+  it('runs', () => {})
+})

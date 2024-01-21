@@ -1,4 +1,5 @@
 # ollama
+
 Interface with an ollama instance over HTTP.
 
 ## Table of Contents
@@ -26,12 +27,12 @@ npm i ollama
 ## Usage
 
 ```javascript
-import { Ollama } from "ollama";
+import { Ollama } from 'ollama'
 
-const ollama = new Ollama();
+const ollama = new Ollama()
 
-for await (const token of ollama.generate("llama2", "What is a llama?")) {
-	process.stdout.write(token);
+for await (const token of ollama.generate('llama2', 'What is a llama?')) {
+  process.stdout.write(token)
 }
 ```
 
@@ -42,7 +43,7 @@ The API aims to mirror the [HTTP API for Ollama](https://github.com/jmorganca/ol
 ### Ollama
 
 ```javascript
-new Ollama(config);
+new Ollama(config)
 ```
 
 - `config` `<Object>` The configuration object for Ollama.
@@ -53,7 +54,7 @@ Create a new API handler for ollama.
 ### generate
 
 ```javascript
-ollama.generate(model, prompt, [options]);
+ollama.generate(model, prompt, [options])
 ```
 
 - `model` `<string>` The name of the model to use for the prompt.
@@ -70,7 +71,7 @@ Generate a response for a given prompt with a provided model. The final response
 ### create
 
 ```javascript
-ollama.create(name, path);
+ollama.create(name, path)
 ```
 
 - `name` `<string>` The name of the model.
@@ -82,7 +83,7 @@ Create a model from a Modelfile.
 ### tags
 
 ```javascript
-ollama.tags();
+ollama.tags()
 ```
 
 - Returns: `Promise<Tag[]>` A list of tags.
@@ -92,7 +93,7 @@ List models that are available locally.
 ### copy
 
 ```javascript
-ollama.copy(source, destination);
+ollama.copy(source, destination)
 ```
 
 - `source` `<string>` The name of the model to copy.
@@ -104,7 +105,7 @@ Copy a model. Creates a model with another name from an existing model.
 ### delete
 
 ```javascript
-ollama.delete(model);
+ollama.delete(model)
 ```
 
 - `model` `<string>` The name of the model to delete.
@@ -115,7 +116,7 @@ Delete a model and its data.
 ### pull
 
 ```javascript
-ollama.pull(name);
+ollama.pull(name)
 ```
 
 - `name` `<string>` The name of the model to download.
@@ -126,7 +127,7 @@ Download a model from a the model registry. Cancelled pulls are resumed from whe
 ### embeddings
 
 ```javascript
-ollama.embeddings(model, prompt, [parameters]);
+ollama.embeddings(model, prompt, [parameters])
 ```
 
 - `model` `<string>` The name of the model to generate embeddings for.
