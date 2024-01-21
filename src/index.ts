@@ -1,4 +1,5 @@
 import * as utils from "./utils.js";
+import 'whatwg-fetch';
 import { promises, createReadStream } from 'fs';
 import { join, resolve, dirname } from 'path';
 import { createHash } from 'crypto';
@@ -31,27 +32,16 @@ export class Ollama {
 	private readonly config: Config;
 	private readonly fetch: Fetch;
 
-	constructor (config?: Partial<Config>) {
-		this.config = {
-			address: config?.address ?? "http://127.0.0.1:11434"
-		};
-
-		let f: Fetch | null = null;
-
-		if (config?.fetch != null) {
-			f = config.fetch;
-		} else if (typeof fetch !== "undefined") {
-			f = fetch;
-		} else if (typeof window !== "undefined") {
-			f = window.fetch;
-		}
-
-		if (f == null) {
-			throw new Error("unable to find fetch - please define it via 'config.fetch'");
-		}
-
-		this.fetch = f;
-	}
+    constructor (config?: Partial<Config>) {
+        this.config = {
+            address: config?.address ?? "http://127.0.0.1:11434"
+        };
+    
+        this.fetch = fetch;
+        if (config?.fetch != null) {
+            this.fetch = config.fetch;
+        }
+    }
 
     private async processStreamableRequest<T extends object>(endpoint: string, request: { stream?: boolean } & Record<string, any>): Promise<T | AsyncGenerator<T>> {
         request.stream = request.stream ?? false;
@@ -287,3 +277,5 @@ export class Ollama {
 		return embeddingsResponse;
 	}
 }
+
+export default new Ollama();
