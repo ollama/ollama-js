@@ -1,9 +1,9 @@
-import * as utils from "./utils.js";
-import 'whatwg-fetch';
-import { promises, createReadStream } from 'fs';
-import { join, resolve, dirname } from 'path';
-import { createHash } from 'crypto';
-import { homedir } from 'os';
+import * as utils from './utils.js'
+import 'whatwg-fetch'
+import { promises, createReadStream } from 'fs'
+import { join, resolve, dirname } from 'path'
+import { createHash } from 'crypto'
+import { homedir } from 'os'
 
 import type {
   Fetch,
@@ -31,16 +31,16 @@ export class Ollama {
   private readonly config: Config
   private readonly fetch: Fetch
 
-    constructor (config?: Partial<Config>) {
-        this.config = {
-            address: config?.address ?? "http://127.0.0.1:11434"
-        };
-    
-        this.fetch = fetch;
-        if (config?.fetch != null) {
-            this.fetch = config.fetch;
-        }
+  constructor(config?: Partial<Config>) {
+    this.config = {
+      address: config?.address ?? 'http://127.0.0.1:11434',
     }
+
+    this.fetch = fetch
+    if (config?.fetch != null) {
+      this.fetch = config.fetch
+    }
+  }
 
   private async processStreamableRequest<T extends object>(
     endpoint: string,
@@ -316,4 +316,4 @@ export class Ollama {
   }
 }
 
-export default new Ollama();
+export default new Ollama()
