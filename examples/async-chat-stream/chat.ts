@@ -1,6 +1,6 @@
 import { spawn, ChildProcessWithoutNullStreams, execSync } from 'child_process';
 import readline, { Interface } from 'readline';
-import { Ollama } from '../../src/index';
+import ollama from '../../src/index';
 import { Message } from '../../src/interfaces';
 
 interface CommandLineArguments {
@@ -46,7 +46,6 @@ async function main(): Promise<void> {
         }
     }
 
-    const client: Ollama = new Ollama();
     const messages: Message[] = [];
     const rl: Interface = readline.createInterface({
         input: process.stdin,
@@ -62,7 +61,7 @@ async function main(): Promise<void> {
 
             let contentOut: string = '';
             let message = { role: 'assistant', content: '' };
-            for await (const response of await client.chat({ model: 'mistral', messages: messages, stream: true })) {
+            for await (const response of await ollama.chat({ model: 'mistral', messages: messages, stream: true })) {
                 if (response.done) {
                     messages.push(message);
                 }
