@@ -1,4 +1,5 @@
 # Ollama JavaScript Library
+
 The Ollama JavaScript library provides the easiest way to integrate your JavaScript project with [Ollama](https://github.com/jmorganca/ollama).
 
 ## Getting Started
@@ -8,20 +9,24 @@ npm i ollama
 ```
 
 ## Usage
+
 A global default client is provided for convenience and can be used for both single and streaming responses.
 
 ```javascript
-import client from "ollama"
+import client from 'ollama'
 
-const response = await client.chat({model: 'llama2', messages: [{ role: 'user', content: 'Why is the sky blue?' }]})
+const response = await client.chat({
+  model: 'llama2',
+  messages: [{ role: 'user', content: 'Why is the sky blue?' }],
+})
 console.log(response.message.content)
 ```
 
 ```javascript
-import client from "ollama"
+import client from 'ollama'
 
 const message = { role: 'user', content: 'Why is the sky blue?' }
-const response = await client.chat({model: 'llama2', messages: [message], stream: true})
+const response = await client.chat({ model: 'llama2', messages: [message], stream: true })
 for await (const part of response) {
   process.stdout.write(part.message.content)
 }
@@ -42,16 +47,18 @@ new Ollama(config)
   - `fetch` `<fetch>` (Optional) The fetch library used to make requests to the Ollama host.
 
 ### chat
+
 ```javascript
 ollama.chat(request)
 ```
 
 - `request` `<Object>`: The request object containing chat parameters.
+
   - `model` `<string>` The name of the model to use for the chat.
   - `messages` `<Message[]>`: Array of message objects representing the chat history.
-      - `role` `<string>`: The role of the message sender ('user', 'system', or 'assistant').
-      - `content` `<string>`: The content of the message.
-      - `images` `<Uint8Array[] | string[]>`: (Optional) Images to be included in the message, either as Uint8Array or base64 encoded strings.
+    - `role` `<string>`: The role of the message sender ('user', 'system', or 'assistant').
+    - `content` `<string>`: The content of the message.
+    - `images` `<Uint8Array[] | string[]>`: (Optional) Images to be included in the message, either as Uint8Array or base64 encoded strings.
   - `format` `<string>`: (Optional) Set the expected format of the response (`json`).
   - `options` `<Options>`: (Optional) Options to configure the runtime.
   - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
@@ -59,6 +66,7 @@ ollama.chat(request)
 - Returns: `<ChatResponse>`
 
 ### generate
+
 ```javascript
 ollama.generate(request)
 ```
@@ -73,7 +81,6 @@ ollama.generate(request)
   - `format` `<string>`: (Optional) Set the expected format of the response (`json`).
   - `options` `<Options>`: (Optional) Options to configure the runtime.
   - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
-  
 - Returns: `<GenerateResponse>`
 
 ### pull
@@ -88,7 +95,6 @@ ollama.pull(request)
   - `username` `<string>`: (Optional) Username of the user pulling the model.
   - `password` `<string>`: (Optional) Password of the user pulling the model.
   - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
-  
 - Returns: `<ProgressResponse>`
 
 ### push
@@ -103,7 +109,6 @@ ollama.push(request)
   - `username` `<string>`: (Optional) Username of the user pushing the model.
   - `password` `<string>`: (Optional) Password of the user pushing the model.
   - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
-  
 - Returns: `<ProgressResponse>`
 
 ### create
@@ -117,7 +122,6 @@ ollama.create(request)
   - `path` `<string>`: (Optional) The path to the Modelfile of the model to create.
   - `modelfile` `<string>`: (Optional) The content of the Modelfile to create.
   - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
-  
 - Returns: `<ProgressResponse>`
 
 ### delete
@@ -128,7 +132,6 @@ ollama.delete(request)
 
 - `request` `<Object>`: The request object containing delete parameters.
   - `model` `<string>` The name of the model to delete.
-  
 - Returns: `<StatusResponse>`
 
 ### copy
@@ -140,7 +143,6 @@ ollama.copy(request)
 - `request` `<Object>`: The request object containing copy parameters.
   - `source` `<string>` The name of the model to copy from.
   - `destination` `<string>` The name of the model to copy to.
-  
 - Returns: `<StatusResponse>`
 
 ### list
@@ -148,7 +150,7 @@ ollama.copy(request)
 ```javascript
 ollama.list()
 ```
-  
+
 - Returns: `<ListResponse>`
 
 ### show
@@ -162,7 +164,6 @@ ollama.show(request)
   - `system` `<string>`: (Optional) Override the model system prompt returned.
   - `template` `<string>`: (Optional) Override the model template returned.
   - `options` `<Options>`: (Optional) Options to configure the runtime.
-  
 - Returns: `<ShowResponse>`
 
 ### embeddings
@@ -175,7 +176,6 @@ ollama.embeddings(request)
   - `model` `<string>` The name of the model used to generate the embeddings.
   - `prompt` `<string>`: The prompt used to generate the embedding.
   - `options` `<Options>`: (Optional) Options to configure the runtime.
-  
 - Returns: `<EmbeddingsResponse>`
 
 ## Building
