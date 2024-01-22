@@ -1,7 +1,7 @@
 export type Fetch = typeof fetch
 
 export interface Config {
-  address: string
+  host: string
   fetch?: Fetch
 }
 

@@ -33,7 +33,7 @@ export class Ollama {
 
   constructor(config?: Partial<Config>) {
     this.config = {
-      address: config?.address ?? 'http://127.0.0.1:11434',
+      host: utils.formatHost(config?.host ?? 'http://127.0.0.1:11434'),
     }
 
     this.fetch = fetch
@@ -47,11 +47,9 @@ export class Ollama {
     request: { stream?: boolean } & Record<string, any>,
   ): Promise<T | AsyncGenerator<T>> {
     request.stream = request.stream ?? false
-    const response = await utils.post(
-      this.fetch,
-      `${this.config.address}/api/${endpoint}`,
-      { ...request },
-    )
+    const response = await utils.post(this.fetch, `${this.config.host}/api/${endpoint}`, {
+      ...request,
+    })
 
     if (!response.body) {
       throw new Error('Missing body')
@@ -158,7 +156,7 @@ export class Ollama {
     const digest = `sha256:${sha256sum}`
 
     try {
-      await utils.head(this.fetch, `${this.config.address}/api/blobs/${digest}`)
+      await utils.head(this.fetch, `${this.config.host}/api/blobs/${digest}`)
     } catch (e) {
       if (e instanceof Error && e.message.includes('404')) {
         // Create a new readable stream for the fetch request
@@ -180,7 +178,7 @@ export class Ollama {
 
         await utils.post(
           this.fetch,
-          `${this.config.address}/api/blobs/${digest}`,
+          `${this.config.host}/api/blobs/${digest}`,
           readableStream,
         )
       } else {
@@ -280,25 +278,25 @@ export class Ollama {
   }
 
   async delete(request: DeleteRequest): Promise<StatusResponse> {
-    await utils.del(this.fetch, `${this.config.address}/api/delete`, {
+    await utils.del(this.fetch, `${this.config.host}/api/delete`, {
       name: request.model,
     })
     return { status: 'success' }
   }
 
   async copy(request: CopyRequest): Promise<StatusResponse> {
-    await utils.post(this.fetch, `${this.config.address}/api/copy`, { ...request })
+    await utils.post(this.fetch, `${this.config.host}/api/copy`, { ...request })
     return { status: 'success' }
   }
 
   async list(): Promise<ListResponse> {
-    const response = await utils.get(this.fetch, `${this.config.address}/api/tags`)
+    const response = await utils.get(this.fetch, `${this.config.host}/api/tags`)
     const listResponse = (await response.json()) as ListResponse
     return listResponse
   }
 
   async show(request: ShowRequest): Promise<ShowResponse> {
-    const response = await utils.post(this.fetch, `${this.config.address}/api/show`, {
+    const response = await utils.post(this.fetch, `${this.config.host}/api/show`, {
       ...request,
     })
     const showResponse = (await response.json()) as ShowResponse
@@ -306,11 +304,9 @@ export class Ollama {
   }
 
   async embeddings(request: EmbeddingsRequest): Promise<EmbeddingsResponse> {
-    const response = await utils.post(
-      this.fetch,
-      `${this.config.address}/api/embeddings`,
-      { request },
-    )
+    const response = await utils.post(this.fetch, `${this.config.host}/api/embeddings`, {
+      request,
+    })
     const embeddingsResponse = (await response.json()) as EmbeddingsResponse
     return embeddingsResponse
   }

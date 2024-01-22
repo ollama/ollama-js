@@ -1,17 +1,5 @@
 import type { Fetch, ErrorResponse } from './interfaces.js'
 
-export const formatAddress = (address: string): string => {
-  if (!address.startsWith('http://') && !address.startsWith('https://')) {
-    address = `http://${address}`
-  }
-
-  while (address.endsWith('/')) {
-    address = address.substring(0, address.length - 1)
-  }
-
-  return address
-}
-
 const checkOk = async (response: Response): Promise<void> => {
   if (!response.ok) {
     let message = `Error ${response.status}: ${response.statusText}`
@@ -38,16 +26,16 @@ const checkOk = async (response: Response): Promise<void> => {
   }
 }
 
-export const get = async (fetch: Fetch, address: string): Promise<Response> => {
-  const response = await fetch(formatAddress(address))
+export const get = async (fetch: Fetch, host: string): Promise<Response> => {
+  const response = await fetch(host)
 
   await checkOk(response)
 
   return response
 }
 
-export const head = async (fetch: Fetch, address: string): Promise<Response> => {
-  const response = await fetch(formatAddress(address), {
+export const head = async (fetch: Fetch, host: string): Promise<Response> => {
+  const response = await fetch(host, {
     method: 'HEAD',
   })
 
@@ -58,7 +46,7 @@ export const head = async (fetch: Fetch, address: string): Promise<Response> => 
 
 export const post = async (
   fetch: Fetch,
-  address: string,
+  host: string,
   data?: Record<string, unknown> | BodyInit,
 ): Promise<Response> => {
   const isRecord = (input: any): input is Record<string, unknown> => {
@@ -67,7 +55,7 @@ export const post = async (
 
   const formattedData = isRecord(data) ? JSON.stringify(data) : data
 
-  const response = await fetch(formatAddress(address), {
+  const response = await fetch(host, {
     method: 'POST',
     body: formattedData,
   })
@@ -79,10 +67,10 @@ export const post = async (
 
 export const del = async (
   fetch: Fetch,
-  address: string,
+  host: string,
   data?: Record<string, unknown>,
 ): Promise<Response> => {
-  const response = await fetch(formatAddress(address), {
+  const response = await fetch(host, {
     method: 'DELETE',
     body: JSON.stringify(data),
   })
@@ -122,4 +110,42 @@ export const parseJSON = async function* <T = unknown>(
       console.warn('invalid json: ', part)
     }
   }
+}
+
+export const formatHost = (host: string): string => {
+  if (!host) {
+    return 'http://127.0.0.1:11434'
+  }
+
+  let isExplicitProtocol = host.includes('://')
+
+  if (host.startsWith(':')) {
+    // if host starts with ':', prepend the default hostname
+    host = `http://127.0.0.1${host}`
+    isExplicitProtocol = false
+  }
+
+  if (!isExplicitProtocol) {
+    host = `http://${host}`
+  }
+
+  const url = new URL(host)
+
+  let port = url.port
+  if (!port) {
+    if (!isExplicitProtocol) {
+      port = '11434'
+    } else {
+      // Assign default ports based on the protocol
+      port = url.protocol === 'https:' ? '443' : '80'
+    }
+  }
+
+  let formattedHost = `${url.protocol}//${url.hostname}:${port}${url.pathname}`
+  // remove trailing slashes
+  if (formattedHost.endsWith('/')) {
+    formattedHost = formattedHost.slice(0, -1)
+  }
+
+  return formattedHost
 }
