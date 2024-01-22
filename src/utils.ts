@@ -113,7 +113,7 @@ export const parseJSON = async function* <T = unknown>(
 
 export const formatHost = (host: string): string => {
   if (!host) {
-    host = 'http://127.0.0.1:11434'
+    return 'http://127.0.0.1:11434'
   }
 
   let isExplicitProtocol = host.includes('://')
