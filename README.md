@@ -1,24 +1,8 @@
-# ollama
+# Ollama JavaScript Library
 
-Interface with an ollama instance over HTTP.
+The Ollama JavaScript library provides the easiest way to integrate your JavaScript project with [Ollama](https://github.com/jmorganca/ollama).
 
-## Table of Contents
-
-- [Install](#install)
-- [Usage](#usage)
-- [API](#api)
-  - [Ollama](#Ollama)
-  - [generate](#generate)
-  - [create](#create)
-  - [tags](#tags)
-  - [copy](#copy)
-  - [delete](#delete)
-  - [pull](#pull)
-  - [embeddings](#embeddings)
-- [Building](#building)
-- [Testing](#testing)
-
-## Install
+## Getting Started
 
 ```
 npm i ollama
@@ -26,13 +10,25 @@ npm i ollama
 
 ## Usage
 
+A global default client is provided for convenience and can be used for both single and streaming responses.
+
 ```javascript
-import { Ollama } from 'ollama'
+import ollama from 'ollama'
 
-const ollama = new Ollama()
+const response = await ollama.chat({
+  model: 'llama2',
+  messages: [{ role: 'user', content: 'Why is the sky blue?' }],
+})
+console.log(response.message.content)
+```
 
-for await (const token of ollama.generate('llama2', 'What is a llama?')) {
-  process.stdout.write(token)
+```javascript
+import ollama from 'ollama'
+
+const message = { role: 'user', content: 'Why is the sky blue?' }
+const { response } = await ollama.chat({ model: 'llama2', messages: [message], stream: true })
+for await (const part of response) {
+  process.stdout.write(part.message.content)
 }
 ```
 
@@ -46,96 +42,141 @@ The API aims to mirror the [HTTP API for Ollama](https://github.com/jmorganca/ol
 new Ollama(config)
 ```
 
-- `config` `<Object>` The configuration object for Ollama.
-  - `address` `<string>` The Ollama API address. Default: `"http://127.0.0.1:11434"`.
+- `config` `<Object>` (Optional) Configuration object for Ollama.
+  - `host` `<string>` (Optional) The Ollama host address. Default: `"http://127.0.0.1:11434"`.
+  - `fetch` `<fetch>` (Optional) The fetch library used to make requests to the Ollama host.
 
-Create a new API handler for ollama.
+### chat
+
+```javascript
+ollama.chat(request)
+```
+
+- `request` `<Object>`: The request object containing chat parameters.
+
+  - `model` `<string>` The name of the model to use for the chat.
+  - `messages` `<Message[]>`: Array of message objects representing the chat history.
+    - `role` `<string>`: The role of the message sender ('user', 'system', or 'assistant').
+    - `content` `<string>`: The content of the message.
+    - `images` `<Uint8Array[] | string[]>`: (Optional) Images to be included in the message, either as Uint8Array or base64 encoded strings.
+  - `format` `<string>`: (Optional) Set the expected format of the response (`json`).
+  - `options` `<Options>`: (Optional) Options to configure the runtime.
+  - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
+
+- Returns: `<ChatResponse>`
 
 ### generate
 
 ```javascript
-ollama.generate(model, prompt, [options])
+ollama.generate(request)
 ```
 
-- `model` `<string>` The name of the model to use for the prompt.
-- `prompt` `<string>` The prompt to give the model.
-- `options` `<GenerateOptions>` Optional options to pass to the model.
-  - `parameters` `<ModelParameters>` Model Parameters.
-  - `context` `<number[]>` Context returned from previous calls.
-  - `template` `<string>` Override the default template.
-  - `system` `<string>` Override the default system string.
-- Returns: `<AsyncGenerator<string, GenerateResult>>` A generator that outputs the tokens as strings.
-
-Generate a response for a given prompt with a provided model. The final response object will include statistics and additional data from the request.
-
-### create
-
-```javascript
-ollama.create(name, path)
-```
-
-- `name` `<string>` The name of the model.
-- `path` `<string>` The path to the Modelfile.
-- Returns: `AsyncGenerator<CreateStatus>` A generator that outputs the status of creation.
-
-Create a model from a Modelfile.
-
-### tags
-
-```javascript
-ollama.tags()
-```
-
-- Returns: `Promise<Tag[]>` A list of tags.
-
-List models that are available locally.
-
-### copy
-
-```javascript
-ollama.copy(source, destination)
-```
-
-- `source` `<string>` The name of the model to copy.
-- `destination` `<string>` The name of copied model.
-- Returns: `Promise<void>`
-
-Copy a model. Creates a model with another name from an existing model.
-
-### delete
-
-```javascript
-ollama.delete(model)
-```
-
-- `model` `<string>` The name of the model to delete.
-- Returns: `Promise<void>`
-
-Delete a model and its data.
+- `request` `<Object>`: The request object containing generate parameters.
+  - `model` `<string>` The name of the model to use for the chat.
+  - `prompt` `<string>`: The prompt to send to the model.
+  - `system` `<string>`: (Optional) Override the model system prompt.
+  - `template` `<string>`: (Optional) Override the model template.
+  - `raw` `<boolean>`: (Optional) Bypass the prompt template and pass the prompt directly to the model.
+  - `images` `<Uint8Array[] | string[]>`: (Optional) Images to be included, either as Uint8Array or base64 encoded strings.
+  - `format` `<string>`: (Optional) Set the expected format of the response (`json`).
+  - `options` `<Options>`: (Optional) Options to configure the runtime.
+  - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
+- Returns: `<GenerateResponse>`
 
 ### pull
 
 ```javascript
-ollama.pull(name)
+ollama.pull(request)
 ```
 
-- `name` `<string>` The name of the model to download.
-- Returns: `AsyncGenerator<PullResult>` A generator that outputs the status of the download.
+- `request` `<Object>`: The request object containing pull parameters.
+  - `model` `<string>` The name of the model to pull.
+  - `insecure` `<boolean>`: (Optional) Pull from servers whose identity cannot be verified.
+  - `username` `<string>`: (Optional) Username of the user pulling the model.
+  - `password` `<string>`: (Optional) Password of the user pulling the model.
+  - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
+- Returns: `<ProgressResponse>`
 
-Download a model from a the model registry. Cancelled pulls are resumed from where they left off, and multiple calls to will share the same download progress.
+### push
+
+```javascript
+ollama.push(request)
+```
+
+- `request` `<Object>`: The request object containing push parameters.
+  - `model` `<string>` The name of the model to push.
+  - `insecure` `<boolean>`: (Optional) Push to servers whose identity cannot be verified.
+  - `username` `<string>`: (Optional) Username of the user pushing the model.
+  - `password` `<string>`: (Optional) Password of the user pushing the model.
+  - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
+- Returns: `<ProgressResponse>`
+
+### create
+
+```javascript
+ollama.create(request)
+```
+
+- `request` `<Object>`: The request object containing create parameters.
+  - `model` `<string>` The name of the model to create.
+  - `path` `<string>`: (Optional) The path to the Modelfile of the model to create.
+  - `modelfile` `<string>`: (Optional) The content of the Modelfile to create.
+  - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
+- Returns: `<ProgressResponse>`
+
+### delete
+
+```javascript
+ollama.delete(request)
+```
+
+- `request` `<Object>`: The request object containing delete parameters.
+  - `model` `<string>` The name of the model to delete.
+- Returns: `<StatusResponse>`
+
+### copy
+
+```javascript
+ollama.copy(request)
+```
+
+- `request` `<Object>`: The request object containing copy parameters.
+  - `source` `<string>` The name of the model to copy from.
+  - `destination` `<string>` The name of the model to copy to.
+- Returns: `<StatusResponse>`
+
+### list
+
+```javascript
+ollama.list()
+```
+
+- Returns: `<ListResponse>`
+
+### show
+
+```javascript
+ollama.show(request)
+```
+
+- `request` `<Object>`: The request object containing show parameters.
+  - `model` `<string>` The name of the model to show.
+  - `system` `<string>`: (Optional) Override the model system prompt returned.
+  - `template` `<string>`: (Optional) Override the model template returned.
+  - `options` `<Options>`: (Optional) Options to configure the runtime.
+- Returns: `<ShowResponse>`
 
 ### embeddings
 
 ```javascript
-ollama.embeddings(model, prompt, [parameters])
+ollama.embeddings(request)
 ```
 
-- `model` `<string>` The name of the model to generate embeddings for.
-- `prompt` `<string>` The prompt to generate embeddings with.
-- `parameters` `<ModelParameters>` Model Parameters.
-- Returns: `Promise<number[]>` The embeddings.
-
-Generate embeddings from a model.
+- `request` `<Object>`: The request object containing embedding parameters.
+  - `model` `<string>` The name of the model used to generate the embeddings.
+  - `prompt` `<string>`: The prompt used to generate the embedding.
+  - `options` `<Options>`: (Optional) Options to configure the runtime.
+- Returns: `<EmbeddingsResponse>`
 
 ## Building
 
@@ -143,12 +184,4 @@ To build the project files run:
 
 ```sh
 npm run build
-```
-
-## Testing
-
-To lint files:
-
-```sh
-npm run lint
 ```
