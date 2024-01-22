@@ -15,11 +15,12 @@ export const formatAddress = (address: string): string => {
 const checkOk = async (response: Response): Promise<void> => {
   if (!response.ok) {
     let message = `Error ${response.status}: ${response.statusText}`
+    let errorData: ErrorResponse | null = null
 
     if (response.headers.get('content-type')?.includes('application/json')) {
       try {
-        const errorResponse = (await response.json()) as ErrorResponse
-        message = errorResponse.error || message
+        errorData = (await response.json()) as ErrorResponse
+        message = errorData.error || message
       } catch (error) {
         console.log('Failed to parse error response as JSON')
       }
@@ -33,7 +34,7 @@ const checkOk = async (response: Response): Promise<void> => {
       }
     }
 
-    throw new Error(message)
+    throw new ResponseError(message, response.status)
   }
 }
 
