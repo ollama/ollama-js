@@ -1,0 +1,25 @@
+name: test
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        node-version: ['16', '18', '20']
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test -- --coverage --coverageDirectory=coverage/results-${{ matrix.node-version }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: jest-results-${{ matrix.node-version }}
+          path: coverage/results-${{ matrix.node-version }}/*.xml
+        if: ${{ always() }}
