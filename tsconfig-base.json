@@ -1,20 +1,16 @@
 {
-	"compilerOptions": {
-		"noImplicitAny": false,
-		"noImplicitThis": true,
-		"strictNullChecks": true,
-		"esModuleInterop": true,
-		"declaration": true,
-		"declarationMap": true,
-		"skipLibCheck": true,
-		"strict": true,
-		"forceConsistentCasingInFileNames": true,
-		"moduleResolution": "node",
-	},
-	"include": [
-		"./src/**/*.ts"
-	],
-	"exclude": [
-		"node_modules"
-	]
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "esModuleInterop": true,
+    "declaration": true,
+    "declarationMap": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node"
+  },
+  "include": ["./src/**/*.ts"],
+  "exclude": ["node_modules"]
 }
