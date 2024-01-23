@@ -1,4 +1,4 @@
-import ollama, { Message } from 'ollama'
+import ollama from 'ollama'
 
 const prefix = `def remove_non_ascii(s: str) -> str:
 """
