@@ -10,8 +10,6 @@ npm i ollama
 
 ## Usage
 
-A global default client is provided for convenience and can be used for both single and streaming responses.
-
 ```javascript
 import ollama from 'ollama'
 
@@ -21,6 +19,9 @@ const response = await ollama.chat({
 })
 console.log(response.message.content)
 ```
+
+## Streaming responses
+Response streaming can be enabled by setting `stream: true`, modifying function calls to return an `AsyncGenerator` where each part is an object in the stream.
 
 ```javascript
 import ollama from 'ollama'
@@ -32,19 +33,19 @@ for await (const part of response) {
 }
 ```
 
-## API
-
-The API aims to mirror the [HTTP API for Ollama](https://github.com/jmorganca/ollama/blob/main/docs/api.md).
-
-### Ollama
-
+## Create
 ```javascript
-new Ollama(config)
+import ollama from 'ollama'
+
+const modelfile = `
+FROM llama2
+SYSTEM "You are mario from super mario bros."
+`
+await ollama.create({ model: 'example', modelfile: modelfile })
 ```
 
-- `config` `<Object>` (Optional) Configuration object for Ollama.
-  - `host` `<string>` (Optional) The Ollama host address. Default: `"http://127.0.0.1:11434"`.
-  - `fetch` `<fetch>` (Optional) The fetch library used to make requests to the Ollama host.
+## API
+The Ollama JavaScript library's API is designed around the [Ollama REST API](https://github.com/jmorganca/ollama/blob/main/docs/api.md)
 
 ### chat
 
@@ -177,6 +178,23 @@ ollama.embeddings(request)
   - `prompt` `<string>`: The prompt used to generate the embedding.
   - `options` `<Options>`: (Optional) Options to configure the runtime.
 - Returns: `<EmbeddingsResponse>`
+
+## Custom client
+
+A custom client can be created with the following fields:
+
+- `host` `<string>`: (Optional) The Ollama host address. Default: `"http://127.0.0.1:11434"`.
+- `fetch` `<Object>`: (Optional) The fetch library used to make requests to the Ollama host.
+
+```javascript
+import { Ollama } from 'ollama'
+
+const ollama = new Ollama({ host: 'http://localhost:11434' })
+const response = await ollama.chat({
+  model: 'llama2',
+  messages: [{ role: 'user', content: 'Why is the sky blue?' }],
+})
+```
 
 ## Building
 
