@@ -187,7 +187,7 @@ A custom client can be created with the following fields:
 - `fetch` `<Object>`: (Optional) The fetch library used to make requests to the Ollama host.
 
 ```javascript
-import { Ollama } from '../src/index'
+import { Ollama } from 'ollama'
 
 const ollama = new Ollama({ host: 'http://localhost:11434' })
 const response = await ollama.chat({
