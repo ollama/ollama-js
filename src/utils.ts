@@ -1,5 +1,19 @@
 import type { Fetch, ErrorResponse } from './interfaces.js'
 
+class ResponseError extends Error {
+  constructor(
+    public error: string,
+    public status_code: number,
+  ) {
+    super(error)
+    this.name = 'ResponseError'
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, ResponseError)
+    }
+  }
+}
+
 const checkOk = async (response: Response): Promise<void> => {
   if (!response.ok) {
     let message = `Error ${response.status}: ${response.statusText}`
