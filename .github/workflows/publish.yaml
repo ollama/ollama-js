@@ -17,7 +17,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: |
-          npm version ${GITHUB_REF_NAME#v}
+          npm version --no-git-tag-version ${GITHUB_REF_NAME#v}
           npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
