@@ -7,7 +7,7 @@ async function main(): Promise<void> {
   const suffix = `
 return result
 `
-  const respose = await ollama.generate({
+  const response = await ollama.generate({
     model: 'codellama:7b-code',
     prompt: `<PRE> ${prefix} <SUF>${suffix} <MID>`,
     options: {
