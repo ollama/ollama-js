@@ -5,6 +5,9 @@
   "description": "Ollama Javascript library",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
   "scripts": {
     "format": "prettier --write .",
     "test": "jest --config=jest.config.cjs ./test/*",
