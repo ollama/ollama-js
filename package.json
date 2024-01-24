@@ -9,7 +9,7 @@
     "format": "prettier --write .",
     "test": "jest --config=jest.config.cjs ./test/*",
     "build": "mkdir -p dist && touch dist/cleanup && rm dist/* && tsc -b",
-    "lint": "eslint ./src/* ./test/*",
+    "lint": "eslint ./src/*" ,
     "prepublishOnly": "npm run build"
   },
   "homepage": "https://github.com/ollama/ollama-js",
