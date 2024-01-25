@@ -1,6 +1,5 @@
 import * as utils from './utils.js'
 import 'whatwg-fetch'
-import { promises, createReadStream } from 'fs'
 import { join, resolve, dirname } from 'path'
 import { createHash } from 'crypto'
 import { homedir } from 'os'
@@ -93,8 +92,14 @@ export class Ollama {
       return image
     }
     // this is a filepath, read the file and convert it to base64
-    const fileBuffer = await promises.readFile(resolve(image))
-    return Buffer.from(fileBuffer).toString('base64')
+    if (typeof window === 'undefined') {
+      // this is server-side, so we can read the filepath
+      const promises = await import('fs').then((module) => module.promises)
+      const fileBuffer = await promises.readFile(resolve(image))
+      return Buffer.from(fileBuffer).toString('base64')
+    }
+
+    throw new Error('image must be Uint8Array or base64 string in the browser')
   }
 
   private async parseModelfile(
@@ -127,7 +132,13 @@ export class Ollama {
   }
 
   private async fileExists(path: string): Promise<boolean> {
+    if (typeof window === 'undefined') {
+      // cannot read file paths from the browser
+      return false
+    }
     try {
+      // this is server-side, so we can read the filepath
+      const promises = await import('fs').then((module) => module.promises)
       await promises.access(path)
       return true
     } catch {
@@ -136,12 +147,18 @@ export class Ollama {
   }
 
   private async createBlob(path: string): Promise<string> {
+    if (typeof window === 'undefined') {
+      // cannot read file paths from the browser
+      throw new Error('Cannot create blob in the browser')
+    }
     if (typeof ReadableStream === 'undefined') {
       // Not all fetch implementations support streaming
       // TODO: support non-streaming uploads
       throw new Error('Streaming uploads are not supported in this environment.')
     }
 
+    // this is server-side, so we can read the file
+    const createReadStream = await import('fs').then((module) => module.createReadStream)
     // Create a stream for reading the file
     const fileStream = createReadStream(path)
 
@@ -259,6 +276,12 @@ export class Ollama {
   ): Promise<ProgressResponse | AsyncGenerator<ProgressResponse>> {
     let modelfileContent = ''
     if (request.path) {
+      if (typeof window === 'undefined') {
+        // cannot read file paths from the browser
+        throw new Error('Cannot read file paths in the browser')
+      }
+      // this is server-side, so we can read the filepath
+      const promises = await import('fs').then((module) => module.promises)
       modelfileContent = await promises.readFile(request.path, { encoding: 'utf8' })
       modelfileContent = await this.parseModelfile(
         modelfileContent,

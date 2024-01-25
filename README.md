@@ -21,6 +21,7 @@ console.log(response.message.content)
 ```
 
 ## Streaming responses
+
 Response streaming can be enabled by setting `stream: true`, modifying function calls to return an `AsyncGenerator` where each part is an object in the stream.
 
 ```javascript
@@ -34,6 +35,7 @@ for await (const part of response) {
 ```
 
 ## Create
+
 ```javascript
 import ollama from 'ollama'
 
@@ -45,6 +47,7 @@ await ollama.create({ model: 'example', modelfile: modelfile })
 ```
 
 ## API
+
 The Ollama JavaScript library's API is designed around the [Ollama REST API](https://github.com/jmorganca/ollama/blob/main/docs/api.md)
 
 ### chat
