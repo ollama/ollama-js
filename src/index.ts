@@ -305,7 +305,7 @@ export class Ollama {
 
   async embeddings(request: EmbeddingsRequest): Promise<EmbeddingsResponse> {
     const response = await utils.post(this.fetch, `${this.config.host}/api/embeddings`, {
-      request,
+      ...request,
     })
     const embeddingsResponse = (await response.json()) as EmbeddingsResponse
     return embeddingsResponse
