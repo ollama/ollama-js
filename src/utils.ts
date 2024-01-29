@@ -100,8 +100,15 @@ export const parseJSON = async function* <T = unknown>(
   const decoder = new TextDecoder('utf-8')
   let buffer = ''
 
-  // TS is a bit strange here, ReadableStreams are AsyncIterable but TS doesn't see it.
-  for await (const chunk of itr as unknown as AsyncIterable<Uint8Array>) {
+  const reader = itr.getReader()
+
+  while (true) {
+    const { done, value: chunk } = await reader.read()
+
+    if (done) {
+      break
+    }
+
     buffer += decoder.decode(chunk)
 
     const parts = buffer.split('\n')
