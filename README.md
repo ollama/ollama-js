@@ -21,6 +21,7 @@ console.log(response.message.content)
 ```
 
 ## Streaming responses
+
 Response streaming can be enabled by setting `stream: true`, modifying function calls to return an `AsyncGenerator` where each part is an object in the stream.
 
 ```javascript
@@ -34,6 +35,7 @@ for await (const part of response) {
 ```
 
 ## Create
+
 ```javascript
 import ollama from 'ollama'
 
@@ -45,6 +47,7 @@ await ollama.create({ model: 'example', modelfile: modelfile })
 ```
 
 ## API
+
 The Ollama JavaScript library's API is designed around the [Ollama REST API](https://github.com/jmorganca/ollama/blob/main/docs/api.md)
 
 ### chat
@@ -61,8 +64,9 @@ ollama.chat(request)
     - `content` `<string>`: The content of the message.
     - `images` `<Uint8Array[] | string[]>`: (Optional) Images to be included in the message, either as Uint8Array or base64 encoded strings.
   - `format` `<string>`: (Optional) Set the expected format of the response (`json`).
-  - `options` `<Options>`: (Optional) Options to configure the runtime.
   - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
+  - `keep_alive` `<string | number>`: (Optional) How long to keep the model loaded.
+  - `options` `<Options>`: (Optional) Options to configure the runtime.
 
 - Returns: `<ChatResponse>`
 
@@ -80,8 +84,9 @@ ollama.generate(request)
   - `raw` `<boolean>`: (Optional) Bypass the prompt template and pass the prompt directly to the model.
   - `images` `<Uint8Array[] | string[]>`: (Optional) Images to be included, either as Uint8Array or base64 encoded strings.
   - `format` `<string>`: (Optional) Set the expected format of the response (`json`).
-  - `options` `<Options>`: (Optional) Options to configure the runtime.
   - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
+  - `keep_alive` `<string | number>`: (Optional) How long to keep the model loaded.
+  - `options` `<Options>`: (Optional) Options to configure the runtime.
 - Returns: `<GenerateResponse>`
 
 ### pull
@@ -176,6 +181,7 @@ ollama.embeddings(request)
 - `request` `<Object>`: The request object containing embedding parameters.
   - `model` `<string>` The name of the model used to generate the embeddings.
   - `prompt` `<string>`: The prompt used to generate the embedding.
+  - `keep_alive` `<string | number>`: (Optional) How long to keep the model loaded.
   - `options` `<Options>`: (Optional) Options to configure the runtime.
 - Returns: `<EmbeddingsResponse>`
 
