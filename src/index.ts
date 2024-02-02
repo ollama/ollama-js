@@ -1,6 +1,6 @@
 import * as utils from './utils.js'
 import 'whatwg-fetch'
-import { promises, createReadStream } from 'fs'
+import fs, { promises, createReadStream } from 'fs'
 import { join, resolve, dirname } from 'path'
 import { createHash } from 'crypto'
 import { homedir } from 'os'
@@ -87,14 +87,17 @@ export class Ollama {
       const result = Buffer.from(image).toString('base64')
       return result
     }
-    const base64Pattern = /^[A-Za-z0-9+/]+={1,2}$/ // detect by checking for equals signs at the end
-    if (base64Pattern.test(image)) {
-      // the string is already base64 encoded
-      return image
+    try {
+      if (fs.existsSync(image)) {
+        // this is a filepath, read the file and convert it to base64
+        const fileBuffer = await promises.readFile(resolve(image))
+        return Buffer.from(fileBuffer).toString('base64')
+      }
+    } catch {
+      // continue
     }
-    // this is a filepath, read the file and convert it to base64
-    const fileBuffer = await promises.readFile(resolve(image))
-    return Buffer.from(fileBuffer).toString('base64')
+    // the string may be base64 encoded
+    return image
   }
 
   private async parseModelfile(
