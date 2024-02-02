@@ -174,11 +174,13 @@ export interface ShowResponse {
   parameters: string
   template: string
   system: string
+  parent_model: string
   format: string
   family: string
   families: string[]
   parameter_size: string
   quatization_level: number
+  messages: Message[]
 }
 
 export interface ListResponse {
