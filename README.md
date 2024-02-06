@@ -98,8 +98,6 @@ ollama.pull(request)
 - `request` `<Object>`: The request object containing pull parameters.
   - `model` `<string>` The name of the model to pull.
   - `insecure` `<boolean>`: (Optional) Pull from servers whose identity cannot be verified.
-  - `username` `<string>`: (Optional) Username of the user pulling the model.
-  - `password` `<string>`: (Optional) Password of the user pulling the model.
   - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
 - Returns: `<ProgressResponse>`
 
@@ -112,8 +110,6 @@ ollama.push(request)
 - `request` `<Object>`: The request object containing push parameters.
   - `model` `<string>` The name of the model to push.
   - `insecure` `<boolean>`: (Optional) Push to servers whose identity cannot be verified.
-  - `username` `<string>`: (Optional) Username of the user pushing the model.
-  - `password` `<string>`: (Optional) Password of the user pushing the model.
   - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
 - Returns: `<ProgressResponse>`
 
