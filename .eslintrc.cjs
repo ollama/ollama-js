@@ -25,4 +25,4 @@ module.exports = {
     'no-constant-condition': 0,
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
   },
-};
+}
