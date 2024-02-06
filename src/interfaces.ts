@@ -3,6 +3,7 @@ export type Fetch = typeof fetch
 export interface Config {
   host: string
   fetch?: Fetch
+  proxy?: boolean
 }
 
 // request types

@@ -33,7 +33,10 @@ export class Ollama {
 
   constructor(config?: Partial<Config>) {
     this.config = {
-      host: utils.formatHost(config?.host ?? 'http://127.0.0.1:11434'),
+      host: '',
+    }
+    if (!config?.proxy) {
+      this.config.host = utils.formatHost(config?.host ?? 'http://127.0.0.1:11434')
     }
 
     this.fetch = fetch
