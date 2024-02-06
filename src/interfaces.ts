@@ -76,16 +76,12 @@ export interface ChatRequest {
 export interface PullRequest {
   model: string
   insecure?: boolean
-  username?: string
-  password?: string
   stream?: boolean
 }
 
 export interface PushRequest {
   model: string
   insecure?: boolean
-  username?: string
-  password?: string
   stream?: boolean
 }
 

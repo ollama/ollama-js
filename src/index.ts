@@ -249,8 +249,6 @@ export class Ollama {
       name: request.model,
       stream: request.stream,
       insecure: request.insecure,
-      username: request.username,
-      password: request.password,
     })
   }
 
@@ -264,8 +262,6 @@ export class Ollama {
       name: request.model,
       stream: request.stream,
       insecure: request.insecure,
-      username: request.username,
-      password: request.password,
     })
   }
 
