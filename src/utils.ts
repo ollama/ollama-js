@@ -62,6 +62,7 @@ export const post = async (
   fetch: Fetch,
   host: string,
   data?: Record<string, unknown> | BodyInit,
+  options?: { signal: AbortSignal },
 ): Promise<Response> => {
   const isRecord = (input: any): input is Record<string, unknown> => {
     return input !== null && typeof input === 'object' && !Array.isArray(input)
@@ -72,6 +73,7 @@ export const post = async (
   const response = await fetch(host, {
     method: 'POST',
     body: formattedData,
+    signal: options?.signal,
   })
 
   await checkOk(response)

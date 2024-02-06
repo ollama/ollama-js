@@ -30,6 +30,7 @@ import type {
 export class Ollama {
   private readonly config: Config
   private readonly fetch: Fetch
+  private abortController: AbortController
 
   constructor(config?: Partial<Config>) {
     this.config = {
@@ -43,6 +44,14 @@ export class Ollama {
     if (config?.fetch != null) {
       this.fetch = config.fetch
     }
+
+    this.abortController = new AbortController()
+  }
+
+  // Abort any ongoing requests to Ollama
+  public abort() {
+    this.abortController.abort()
+    this.abortController = new AbortController()
   }
 
   private async processStreamableRequest<T extends object>(
@@ -50,9 +59,14 @@ export class Ollama {
     request: { stream?: boolean } & Record<string, any>,
   ): Promise<T | AsyncGenerator<T>> {
     request.stream = request.stream ?? false
-    const response = await utils.post(this.fetch, `${this.config.host}/api/${endpoint}`, {
-      ...request,
-    })
+    const response = await utils.post(
+      this.fetch,
+      `${this.config.host}/api/${endpoint}`,
+      {
+        ...request,
+      },
+      { signal: this.abortController.signal },
+    )
 
     if (!response.body) {
       throw new Error('Missing body')
