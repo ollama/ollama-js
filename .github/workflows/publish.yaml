@@ -17,6 +17,8 @@ jobs:
           registry-url: https://registry.npmjs.org
           cache: npm
       - run: npm ci
+      - name: Set version in src/version.js
+        run: echo "export const version = '${GITHUB_REF_NAME#v}';" > src/version.js
       - run: |
           npm version --no-git-tag-version ${GITHUB_REF_NAME#v}
           npm publish
