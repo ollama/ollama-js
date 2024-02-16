@@ -47,7 +47,7 @@ function getPlatform() {
   } else if (typeof process !== 'undefined') {
     return `${process.arch} ${process.platform} Node.js/${process.version}`
   }
-  return 'unknown platform'
+  return '' // unknown
 }
 
 const fetchWithHeaders = async (
