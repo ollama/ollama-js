@@ -205,14 +205,3 @@ To build the project files run:
 ```sh
 npm run build
 ```
-
-## Examples
-
-> [!IMPORTANT]
-> Note: Ensure that `npm build` has been run before running the examples.
-
-To run the examples run:
-
-```sh
-npx tsx examples/<folder-name>/<file-name>.ts
-```
