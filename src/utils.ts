@@ -1,3 +1,4 @@
+import { version } from './version'
 import type { Fetch, ErrorResponse } from './interfaces.js'
 
 class ResponseError extends Error {
@@ -40,8 +41,40 @@ const checkOk = async (response: Response): Promise<void> => {
   }
 }
 
+function getPlatform() {
+  if (typeof window !== 'undefined' && window.navigator) {
+    return `${window.navigator.platform.toLowerCase()} Browser/${navigator.userAgent};`
+  } else if (typeof process !== 'undefined') {
+    return `${process.arch} ${process.platform} Node.js/${process.version}`
+  }
+  return '' // unknown
+}
+
+const fetchWithHeaders = async (
+  fetch: Fetch,
+  url: string,
+  options: RequestInit = {},
+): Promise<Response> => {
+  const defaultHeaders = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+    'User-Agent': `ollama-js/${version} (${getPlatform()})`,
+  }
+
+  if (!options.headers) {
+    options.headers = {}
+  }
+
+  options.headers = {
+    ...defaultHeaders,
+    ...options.headers,
+  }
+
+  return fetch(url, options)
+}
+
 export const get = async (fetch: Fetch, host: string): Promise<Response> => {
-  const response = await fetch(host)
+  const response = await fetchWithHeaders(fetch, host)
 
   await checkOk(response)
 
@@ -49,7 +82,7 @@ export const get = async (fetch: Fetch, host: string): Promise<Response> => {
 }
 
 export const head = async (fetch: Fetch, host: string): Promise<Response> => {
-  const response = await fetch(host, {
+  const response = await fetchWithHeaders(fetch, host, {
     method: 'HEAD',
   })
 
@@ -70,7 +103,7 @@ export const post = async (
 
   const formattedData = isRecord(data) ? JSON.stringify(data) : data
 
-  const response = await fetch(host, {
+  const response = await fetchWithHeaders(fetch, host, {
     method: 'POST',
     body: formattedData,
     signal: options?.signal,
@@ -86,7 +119,7 @@ export const del = async (
   host: string,
   data?: Record<string, unknown>,
 ): Promise<Response> => {
-  const response = await fetch(host, {
+  const response = await fetchWithHeaders(fetch, host, {
     method: 'DELETE',
     body: JSON.stringify(data),
   })
