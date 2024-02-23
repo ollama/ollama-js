@@ -50,6 +50,12 @@ function getPlatform() {
   return '' // unknown
 }
 
+export const isNode = () => {
+  return typeof process !== "undefined" &&
+      process.versions != null &&
+      process.versions.node != null;
+};
+
 const fetchWithHeaders = async (
   fetch: Fetch,
   url: string,

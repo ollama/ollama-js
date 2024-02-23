@@ -20,7 +20,7 @@
     "esm": true,
   },
 
-  "include": ["./src/**/*.ts"],
+  "include": ["./src/**/*.ts", "src/node.js"],
 
   "exclude": ["node_modules"],
 }
