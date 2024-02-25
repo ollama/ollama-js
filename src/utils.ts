@@ -1,4 +1,4 @@
-import { version } from './version'
+import { version } from './version.js'
 import type { Fetch, ErrorResponse } from './interfaces.js'
 
 class ResponseError extends Error {
