@@ -165,7 +165,7 @@ export interface ModelResponse {
   family: string
   families: string[]
   parameter_size: string
-  quantization_level: number
+  quantization_level: string
 }
 
 export interface ShowResponse {
@@ -179,7 +179,7 @@ export interface ShowResponse {
   family: string
   families: string[]
   parameter_size: string
-  quantization_level: number
+  quantization_level: string
   messages: Message[]
 }
 
