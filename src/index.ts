@@ -101,7 +101,7 @@ export class Ollama {
       return result
     }
     if (utils.isNode()) {
-      const { readImage } = await import('../src/node.js');
+      const { readImage } = await import('../src/node.js')
       try {
         // if this succeeds the image exists locally at this filepath and has been read
         return await readImage(image)
@@ -122,7 +122,17 @@ export class Ollama {
     request: GenerateRequest,
   ): Promise<GenerateResponse | AsyncGenerator<GenerateResponse>> {
     if (request.images) {
-      request.images = await Promise.all(request.images.map(this.encodeImage.bind(this)))
+      const encodedImages: (Uint8Array | string)[] = await Promise.all(
+        request.images.map(this.encodeImage.bind(this)),
+      )
+      // Fix type checks by only allowing one type in the array.
+      if (encodedImages.length > 0) {
+        if (typeof encodedImages[0] === 'string') {
+          request.images = encodedImages as string[]
+        } else {
+          request.images = encodedImages as Uint8Array[]
+        }
+      }
     }
     return this.processStreamableRequest<GenerateResponse>('generate', request)
   }
@@ -134,9 +144,17 @@ export class Ollama {
     if (request.messages) {
       for (const message of request.messages) {
         if (message.images) {
-          message.images = await Promise.all(
+          const encodedImages: (Uint8Array | string)[] = await Promise.all(
             message.images.map(this.encodeImage.bind(this)),
           )
+          // Fix type checks by only allowing one type in the array.
+          if (encodedImages.length > 0) {
+            if (typeof encodedImages[0] === 'string') {
+              message.images = encodedImages as string[]
+            } else {
+              message.images = encodedImages as Uint8Array[]
+            }
+          }
         }
       }
     }
@@ -177,16 +195,15 @@ export class Ollama {
   async create(
     request: CreateRequest,
   ): Promise<ProgressResponse | AsyncGenerator<ProgressResponse>> {
-
     if (utils.isNode()) {
-      const { readModelfile } = await import('../src/node.js');
-      let modelfileContent = await readModelfile(this, request);
+      const { readModelfile } = await import('../src/node.js')
+      const modelfileContent = await readModelfile(this, request)
       request.modelfile = modelfileContent
     }
 
-    if (request.modelfile == "") {
+    if (request.modelfile == '') {
       // request.path will resolve to a modelfile in node environments, otherwise is it required
-      throw new Error("modelfile is requrired")
+      throw new Error('modelfile is requrired')
     }
 
     return this.processStreamableRequest<ProgressResponse>('create', {

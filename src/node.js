@@ -1,113 +1,111 @@
-const fs = require('fs');
-const path = require('path');
-const utils = require('./utils');
-const { createHash } = require('crypto');
-const { homedir } = require('os');
+const fs = require('fs')
+const path = require('path')
+const utils = require('./utils')
+const { createHash } = require('crypto')
+const { homedir } = require('os')
 
 async function parseModelfile(ollama, modelfile, mfDir = process.cwd()) {
-  const out = [];
-  const lines = modelfile.split('\n');
+  const out = []
+  const lines = modelfile.split('\n')
   for (const line of lines) {
-    const [command, args] = line.split(' ', 2);
+    const [command, args] = line.split(' ', 2)
     if (['FROM', 'ADAPTER'].includes(command.toUpperCase())) {
-      const resolvedPath = resolvePath(args.trim(), mfDir);
+      const resolvedPath = resolvePath(args.trim(), mfDir)
       if (await fileExists(resolvedPath)) {
-        out.push(`${command} @${await createBlob(ollama, resolvedPath)}`);
+        out.push(`${command} @${await createBlob(ollama, resolvedPath)}`)
       } else {
-        out.push(`${command} ${args}`);
+        out.push(`${command} ${args}`)
       }
     } else {
-      out.push(line);
+      out.push(line)
     }
   }
-  return out.join('\n');
+  return out.join('\n')
 }
 
 function resolvePath(inputPath, mfDir) {
   if (inputPath.startsWith('~')) {
-    return path.join(homedir(), inputPath.slice(1));
+    return path.join(homedir(), inputPath.slice(1))
   }
-  return path.resolve(mfDir, inputPath);
+  return path.resolve(mfDir, inputPath)
 }
 
 async function fileExists(filePath) {
   try {
-    await fs.promises.access(filePath);
-    return true;
+    await fs.promises.access(filePath)
+    return true
   } catch {
-    return false;
+    return false
   }
 }
 
 async function createBlob(ollama, filePath) {
   if (typeof ReadableStream === 'undefined') {
-    throw new Error('Streaming uploads are not supported in this environment.');
+    throw new Error('Streaming uploads are not supported in this environment.')
   }
 
-  const fileStream = fs.createReadStream(filePath);
+  const fileStream = fs.createReadStream(filePath)
   const sha256sum = await new Promise((resolve, reject) => {
-    const hash = createHash('sha256');
-    fileStream.on('data', (data) => hash.update(data));
-    fileStream.on('end', () => resolve(hash.digest('hex')));
-    fileStream.on('error', reject);
-  });
+    const hash = createHash('sha256')
+    fileStream.on('data', (data) => hash.update(data))
+    fileStream.on('end', () => resolve(hash.digest('hex')))
+    fileStream.on('error', reject)
+  })
 
-  const digest = `sha256:${sha256sum}`;
+  const digest = `sha256:${sha256sum}`
 
   try {
-    await utils.head(
-      ollama.fetch,
-      `${ollama.config.host}/api/blobs/${digest}`,
-      { signal: ollama.abortController.signal },
-    );
+    await utils.head(ollama.fetch, `${ollama.config.host}/api/blobs/${digest}`, {
+      signal: ollama.abortController.signal,
+    })
   } catch (e) {
     if (e instanceof Error && e.message.includes('404')) {
       const readableStream = new ReadableStream({
         start(controller) {
           fileStream.on('data', (chunk) => {
-            controller.enqueue(chunk);
-          });
+            controller.enqueue(chunk)
+          })
 
           fileStream.on('end', () => {
-            controller.close();
-          });
+            controller.close()
+          })
 
           fileStream.on('error', (err) => {
-            controller.error(err);
-          });
+            controller.error(err)
+          })
         },
-      });
+      })
 
       await utils.post(
         ollama.fetch,
         `${ollama.config.host}/api/blobs/${digest}`,
         readableStream,
         { signal: ollama.abortController.signal },
-      );
+      )
     } else {
-      throw e;
+      throw e
     }
   }
 
-  return digest;
+  return digest
 }
 
 export async function readModelfile(ollama, request) {
-    let modelfileContent = ''
-    if (request.path) {
-      modelfileContent = await fs.promises.readFile(request.path, { encoding: 'utf8' })
-      modelfileContent = await parseModelfile(
-        ollama,
-        modelfileContent,
-        path.dirname(request.path),
-      )
-    } else if (request.modelfile) {
-      modelfileContent = await parseModelfile(ollama, request.modelfile)
-    } else {
-      throw new Error('Must provide either path or modelfile to create a model')
-    }
+  let modelfileContent = ''
+  if (request.path) {
+    modelfileContent = await fs.promises.readFile(request.path, { encoding: 'utf8' })
+    modelfileContent = await parseModelfile(
+      ollama,
+      modelfileContent,
+      path.dirname(request.path),
+    )
+  } else if (request.modelfile) {
+    modelfileContent = await parseModelfile(ollama, request.modelfile)
+  } else {
+    throw new Error('Must provide either path or modelfile to create a model')
+  }
 
-    return modelfileContent;
+  return modelfileContent
 }
 
 export async function readImage(imgPath) {
