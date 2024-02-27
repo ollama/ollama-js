@@ -14,7 +14,9 @@ export class Ollama extends OllamaBrowser {
 
   async encodeImage(image: Uint8Array | Buffer | string): Promise<string> {
     if (typeof image !== 'string') {
-      return super.encodeImage(image)
+      // image is Uint8Array or Buffer, convert it to base64
+      const result = Buffer.from(image).toString('base64')
+      return result
     }
     try {
       if (fs.existsSync(image)) {
@@ -141,12 +143,14 @@ export class Ollama extends OllamaBrowser {
     } else {
       throw new Error('Must provide either path or modelfile to create a model')
     }
+    request.modelfile = modelfileContent
 
-    return this.processStreamableRequest<ProgressResponse>('create', {
-      name: request.model,
-      stream: request.stream,
-      modelfile: modelfileContent,
-    })
+    // check stream here so that typescript knows which overload to use
+    if (request.stream) {
+      return super.create(request as CreateRequest & { stream: true });
+    } else {
+      return super.create(request as CreateRequest & { stream: false });
+    }
   }
 }
 

@@ -20,6 +20,7 @@ import type {
   ShowRequest,
   ChatRequest,
   ChatResponse,
+  CreateRequest
 } from './interfaces.js'
 
 export class Ollama {
@@ -93,11 +94,13 @@ export class Ollama {
     }
   }
 
-  async encodeImage(image: Uint8Array | Buffer | string): Promise<string> {
+  async encodeImage(image: Uint8Array | string): Promise<string> {
     if (typeof image !== 'string') {
-      // image is Uint8Array or Buffer, convert it to base64
-      const result = Buffer.from(image).toString('base64')
-      return result
+      // image is Uint8Array convert it to base64
+      const uint8Array = new Uint8Array(image);
+      const numberArray = Array.from(uint8Array);
+      const base64String = btoa(String.fromCharCode.apply(null, numberArray));
+      return base64String;
     }
     // the string may be base64 encoded
     return image
@@ -131,6 +134,21 @@ export class Ollama {
       }
     }
     return this.processStreamableRequest<ChatResponse>('chat', request)
+  }
+
+  create(
+    request: CreateRequest & { stream: true },
+  ): Promise<AsyncGenerator<ProgressResponse>>
+  create(request: CreateRequest & { stream?: false }): Promise<ProgressResponse>
+
+  async create(
+    request: CreateRequest,
+  ): Promise<ProgressResponse | AsyncGenerator<ProgressResponse>> {
+    return this.processStreamableRequest<ProgressResponse>('create', {
+      name: request.model,
+      stream: request.stream,
+      modelfile: request.modelfile,
+    })
   }
 
   pull(request: PullRequest & { stream: true }): Promise<AsyncGenerator<ProgressResponse>>
