@@ -20,7 +20,7 @@ import type {
   ShowRequest,
   ChatRequest,
   ChatResponse,
-  CreateRequest
+  CreateRequest,
 } from './interfaces.js'
 
 export class Ollama {
@@ -97,10 +97,10 @@ export class Ollama {
   async encodeImage(image: Uint8Array | string): Promise<string> {
     if (typeof image !== 'string') {
       // image is Uint8Array convert it to base64
-      const uint8Array = new Uint8Array(image);
-      const numberArray = Array.from(uint8Array);
-      const base64String = btoa(String.fromCharCode.apply(null, numberArray));
-      return base64String;
+      const uint8Array = new Uint8Array(image)
+      const numberArray = Array.from(uint8Array)
+      const base64String = btoa(String.fromCharCode.apply(null, numberArray))
+      return base64String
     }
     // the string may be base64 encoded
     return image

@@ -5,13 +5,9 @@ import { createHash } from 'crypto'
 import { homedir } from 'os'
 import { Ollama as OllamaBrowser } from './browser.js'
 
-import type {
-  CreateRequest,
-  ProgressResponse,
-} from './interfaces.js'
+import type { CreateRequest, ProgressResponse } from './interfaces.js'
 
 export class Ollama extends OllamaBrowser {
-
   async encodeImage(image: Uint8Array | Buffer | string): Promise<string> {
     if (typeof image !== 'string') {
       // image is Uint8Array or Buffer, convert it to base64
@@ -147,9 +143,9 @@ export class Ollama extends OllamaBrowser {
 
     // check stream here so that typescript knows which overload to use
     if (request.stream) {
-      return super.create(request as CreateRequest & { stream: true });
+      return super.create(request as CreateRequest & { stream: true })
     } else {
-      return super.create(request as CreateRequest & { stream: false });
+      return super.create(request as CreateRequest & { stream: false })
     }
   }
 }
