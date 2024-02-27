@@ -20,6 +20,12 @@ const response = await ollama.chat({
 console.log(response.message.content)
 ```
 
+### Browser Usage
+To use the library without node, import the browser module.
+```javascript
+import ollama from 'ollama/browser'
+```
+
 ## Streaming responses
 
 Response streaming can be enabled by setting `stream: true`, modifying function calls to return an `AsyncGenerator` where each part is an object in the stream.
