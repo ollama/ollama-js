@@ -94,16 +94,42 @@ export class Ollama {
     }
   }
 
-  async encodeImage(image: Uint8Array | string): Promise<string> {
-    if (typeof image !== 'string') {
-      // image is Uint8Array convert it to base64
-      const uint8Array = new Uint8Array(image)
-      const numberArray = Array.from(uint8Array)
-      const base64String = btoa(String.fromCharCode.apply(null, numberArray))
-      return base64String
+  /**
+   * Encodes an image as a base64 string.
+   * @param image - The image to encode. Can be a Blob, Uint8Array, ArrayBuffer, or a base64 string.
+   * @returns A promise that resolves to the base64 encoded image.
+   */
+  async encodeImage(
+    image: Blob | Uint8Array | ArrayBuffer | string,
+  ): Promise<string> {
+    if (typeof image === "string" && !image.startsWith("blob:")) {
+      return image; // possibly already base64
     }
-    // the string may be base64 encoded
-    return image
+
+    const base64url = (await new Promise((r) => {
+      const reader = new FileReader();
+      reader.onload = () => r(reader.result);
+      if (typeof image === "string" && image.startsWith("blob:")) {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", image, true);
+        xhr.responseType = "blob";
+        xhr.onload = function () {
+          const reader = new FileReader();
+          reader.onload = function () {
+            r(reader.result);
+          };
+          reader.readAsDataURL(xhr.response);
+        };
+        xhr.send();
+      } else if (image instanceof Blob) {
+        reader.readAsDataURL(image);
+      } else {
+        reader.readAsDataURL(new Blob([image]));
+      }
+    })) as any;
+
+    // remove the `data:...;base64,` part
+    return base64url.slice(base64url.indexOf(",") + 1);
   }
 
   generate(
