@@ -9,8 +9,6 @@
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
-    "module": "ES2022",
     "outDir": "./dist",
     "target": "ES6",
   },
@@ -21,6 +19,5 @@
   },
 
   "include": ["./src/**/*.ts"],
-
   "exclude": ["node_modules"],
 }
