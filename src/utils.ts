@@ -73,17 +73,26 @@ const fetchWithHeaders = async (
   return fetch(url, options)
 }
 
-export const get = async (fetch: Fetch, host: string): Promise<Response> => {
-  const response = await fetchWithHeaders(fetch, host)
+export const get = async (
+  fetch: Fetch,
+  host: string,
+  headers?: Headers,
+): Promise<Response> => {
+  const response = await fetchWithHeaders(fetch, host, { headers })
 
   await checkOk(response)
 
   return response
 }
 
-export const head = async (fetch: Fetch, host: string): Promise<Response> => {
+export const head = async (
+  fetch: Fetch,
+  host: string,
+  headers?: Headers,
+): Promise<Response> => {
   const response = await fetchWithHeaders(fetch, host, {
     method: 'HEAD',
+    headers,
   })
 
   await checkOk(response)
@@ -95,6 +104,7 @@ export const post = async (
   fetch: Fetch,
   host: string,
   data?: Record<string, unknown> | BodyInit,
+  headers?: Headers,
   options?: { signal: AbortSignal },
 ): Promise<Response> => {
   const isRecord = (input: any): input is Record<string, unknown> => {
@@ -107,6 +117,7 @@ export const post = async (
     method: 'POST',
     body: formattedData,
     signal: options?.signal,
+    headers,
   })
 
   await checkOk(response)
@@ -118,10 +129,12 @@ export const del = async (
   fetch: Fetch,
   host: string,
   data?: Record<string, unknown>,
+  headers?: Headers,
 ): Promise<Response> => {
   const response = await fetchWithHeaders(fetch, host, {
     method: 'DELETE',
     body: JSON.stringify(data),
+    headers,
   })
 
   await checkOk(response)

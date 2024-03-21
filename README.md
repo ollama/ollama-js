@@ -21,7 +21,9 @@ console.log(response.message.content)
 ```
 
 ### Browser Usage
+
 To use the library without node, import the browser module.
+
 ```javascript
 import ollama from 'ollama/browser'
 ```
