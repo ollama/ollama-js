@@ -13,11 +13,7 @@
     "module": "ES2022",
     "outDir": "./dist",
     "target": "ES6",
-    "lib": [
-      "es6",
-      "es2018.asyncgenerator",
-      "dom"
-    ]
+    "lib": ["es6", "es2018.asyncgenerator", "dom"],
   },
 
   "ts-node": {
