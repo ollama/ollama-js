@@ -12,6 +12,8 @@ export interface Options {
   numa: boolean
   num_ctx: number
   num_batch: number
+  num_gpu: number
+  num_gqa: number
   main_gpu: number
   low_vram: boolean
   f16_kv: boolean
@@ -40,6 +42,8 @@ export interface Options {
   mirostat_eta: number
   penalize_newline: boolean
   stop: string[]
+  rope_frequency_base: number
+  rope_frequency_scale: number
 }
 
 export interface GenerateRequest {
