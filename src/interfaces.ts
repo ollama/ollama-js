@@ -41,8 +41,6 @@ export interface Options {
   mirostat_eta: number
   penalize_newline: boolean
   stop: string[]
-  rope_frequency_base: number
-  rope_frequency_scale: number
 }
 
 export interface GenerateRequest {
