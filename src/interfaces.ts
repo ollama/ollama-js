@@ -13,7 +13,6 @@ export interface Options {
   num_ctx: number
   num_batch: number
   num_gpu: number
-  num_gqa: number
   main_gpu: number
   low_vram: boolean
   f16_kv: boolean
