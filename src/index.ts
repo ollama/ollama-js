@@ -1,6 +1,6 @@
 import * as utils from './utils.js'
-import fs, { promises, createReadStream } from 'fs'
-import { join, resolve, dirname } from 'path'
+import fs, { createReadStream, promises } from 'fs'
+import { dirname, join, resolve } from 'path'
 import { createHash } from 'crypto'
 import { homedir } from 'os'
 import { Ollama as OllamaBrowser } from './browser.js'
@@ -11,8 +11,7 @@ export class Ollama extends OllamaBrowser {
   async encodeImage(image: Uint8Array | Buffer | string): Promise<string> {
     if (typeof image !== 'string') {
       // image is Uint8Array or Buffer, convert it to base64
-      const result = Buffer.from(image).toString('base64')
-      return result
+      return Buffer.from(image).toString('base64')
     }
     try {
       if (fs.existsSync(image)) {
@@ -27,6 +26,12 @@ export class Ollama extends OllamaBrowser {
     return image
   }
 
+  /**
+   * Parse the modelfile and replace the FROM and ADAPTER commands with the corresponding blob hashes.
+   * @param modelfile {string} - The modelfile content
+   * @param mfDir {string} - The directory of the modelfile
+   * @private @internal
+   */
   private async parseModelfile(
     modelfile: string,
     mfDir: string = process.cwd(),
@@ -49,6 +54,12 @@ export class Ollama extends OllamaBrowser {
     return out.join('\n')
   }
 
+  /**
+   * Resolve the path to an absolute path.
+   * @param inputPath {string} - The input path
+   * @param mfDir {string} - The directory of the modelfile
+   * @private @internal
+   */
   private resolvePath(inputPath, mfDir) {
     if (inputPath.startsWith('~')) {
       return join(homedir(), inputPath.slice(1))
@@ -56,6 +67,12 @@ export class Ollama extends OllamaBrowser {
     return resolve(mfDir, inputPath)
   }
 
+  /**
+   * checks if a file exists
+   * @param path {string} - The path to the file
+   * @private @internal
+   * @returns {Promise<boolean>} - Whether the file exists or not
+   */
   private async fileExists(path: string): Promise<boolean> {
     try {
       await promises.access(path)
