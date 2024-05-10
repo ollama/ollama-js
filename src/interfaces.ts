@@ -90,6 +90,7 @@ export interface CreateRequest {
   model: string
   path?: string
   modelfile?: string
+  quantize?: string
   stream?: boolean
 }
 
