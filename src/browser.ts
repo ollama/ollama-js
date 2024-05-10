@@ -126,7 +126,7 @@ export class Ollama {
   ): Promise<AsyncGenerator<GenerateResponse>>
   generate(request: GenerateRequest & { stream?: false }): Promise<GenerateResponse>
   /**
-   * Generates an image from a text prompt.
+   * Generates a response from a text prompt.
    * @param request {GenerateRequest} - The request object.
    * @returns {Promise<GenerateResponse | AsyncGenerator<GenerateResponse>>} - The response object or
    * an AsyncGenerator that yields response messages.
