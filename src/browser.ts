@@ -53,6 +53,7 @@ export class Ollama {
   protected async processStreamableRequest<T extends object>(
     endpoint: string,
     request: { stream?: boolean } & Record<string, any>,
+    headers?: Headers,
   ): Promise<T | AsyncGenerator<T>> {
     request.stream = request.stream ?? false
     const response = await utils.post(
@@ -61,6 +62,7 @@ export class Ollama {
       {
         ...request,
       },
+      headers,
       { signal: this.abortController.signal },
     )
 
@@ -113,17 +115,21 @@ export class Ollama {
 
   async generate(
     request: GenerateRequest,
+    headers?: Headers,
   ): Promise<GenerateResponse | AsyncGenerator<GenerateResponse>> {
     if (request.images) {
       request.images = await Promise.all(request.images.map(this.encodeImage.bind(this)))
     }
-    return this.processStreamableRequest<GenerateResponse>('generate', request)
+    return this.processStreamableRequest<GenerateResponse>('generate', request, headers)
   }
 
   chat(request: ChatRequest & { stream: true }): Promise<AsyncGenerator<ChatResponse>>
   chat(request: ChatRequest & { stream?: false }): Promise<ChatResponse>
 
-  async chat(request: ChatRequest): Promise<ChatResponse | AsyncGenerator<ChatResponse>> {
+  async chat(
+    request: ChatRequest,
+    headers?: Headers,
+  ): Promise<ChatResponse | AsyncGenerator<ChatResponse>> {
     if (request.messages) {
       for (const message of request.messages) {
         if (message.images) {
@@ -133,7 +139,7 @@ export class Ollama {
         }
       }
     }
-    return this.processStreamableRequest<ChatResponse>('chat', request)
+    return this.processStreamableRequest<ChatResponse>('chat', request, headers)
   }
 
   create(
@@ -143,12 +149,17 @@ export class Ollama {
 
   async create(
     request: CreateRequest,
+    headers?: Headers,
   ): Promise<ProgressResponse | AsyncGenerator<ProgressResponse>> {
-    return this.processStreamableRequest<ProgressResponse>('create', {
-      name: request.model,
-      stream: request.stream,
-      modelfile: request.modelfile,
-    })
+    return this.processStreamableRequest<ProgressResponse>(
+      'create',
+      {
+        name: request.model,
+        stream: request.stream,
+        modelfile: request.modelfile,
+      },
+      headers,
+    )
   }
 
   pull(request: PullRequest & { stream: true }): Promise<AsyncGenerator<ProgressResponse>>
@@ -156,12 +167,17 @@ export class Ollama {
 
   async pull(
     request: PullRequest,
+    headers?: Headers,
   ): Promise<ProgressResponse | AsyncGenerator<ProgressResponse>> {
-    return this.processStreamableRequest<ProgressResponse>('pull', {
-      name: request.model,
-      stream: request.stream,
-      insecure: request.insecure,
-    })
+    return this.processStreamableRequest<ProgressResponse>(
+      'pull',
+      {
+        name: request.model,
+        stream: request.stream,
+        insecure: request.insecure,
+      },
+      headers,
+    )
   }
 
   push(request: PushRequest & { stream: true }): Promise<AsyncGenerator<ProgressResponse>>
@@ -169,44 +185,67 @@ export class Ollama {
 
   async push(
     request: PushRequest,
+    headers?: Headers,
   ): Promise<ProgressResponse | AsyncGenerator<ProgressResponse>> {
-    return this.processStreamableRequest<ProgressResponse>('push', {
-      name: request.model,
-      stream: request.stream,
-      insecure: request.insecure,
-    })
+    return this.processStreamableRequest<ProgressResponse>(
+      'push',
+      {
+        name: request.model,
+        stream: request.stream,
+        insecure: request.insecure,
+      },
+      headers,
+    )
   }
 
-  async delete(request: DeleteRequest): Promise<StatusResponse> {
-    await utils.del(this.fetch, `${this.config.host}/api/delete`, {
-      name: request.model,
-    })
+  async delete(request: DeleteRequest, headers?: Headers): Promise<StatusResponse> {
+    await utils.del(
+      this.fetch,
+      `${this.config.host}/api/delete`,
+      {
+        name: request.model,
+      },
+      headers,
+    )
     return { status: 'success' }
   }
 
-  async copy(request: CopyRequest): Promise<StatusResponse> {
-    await utils.post(this.fetch, `${this.config.host}/api/copy`, { ...request })
+  async copy(request: CopyRequest, headers?: Headers): Promise<StatusResponse> {
+    await utils.post(this.fetch, `${this.config.host}/api/copy`, { ...request }, headers)
     return { status: 'success' }
   }
 
-  async list(): Promise<ListResponse> {
-    const response = await utils.get(this.fetch, `${this.config.host}/api/tags`)
+  async list(headers?: Headers): Promise<ListResponse> {
+    const response = await utils.get(this.fetch, `${this.config.host}/api/tags`, headers)
     const listResponse = (await response.json()) as ListResponse
     return listResponse
   }
 
-  async show(request: ShowRequest): Promise<ShowResponse> {
-    const response = await utils.post(this.fetch, `${this.config.host}/api/show`, {
-      ...request,
-    })
+  async show(request: ShowRequest, headers?: Headers): Promise<ShowResponse> {
+    const response = await utils.post(
+      this.fetch,
+      `${this.config.host}/api/show`,
+      {
+        ...request,
+      },
+      headers,
+    )
     const showResponse = (await response.json()) as ShowResponse
     return showResponse
   }
 
-  async embeddings(request: EmbeddingsRequest): Promise<EmbeddingsResponse> {
-    const response = await utils.post(this.fetch, `${this.config.host}/api/embeddings`, {
-      ...request,
-    })
+  async embeddings(
+    request: EmbeddingsRequest,
+    headers?: Headers,
+  ): Promise<EmbeddingsResponse> {
+    const response = await utils.post(
+      this.fetch,
+      `${this.config.host}/api/embeddings`,
+      {
+        ...request,
+      },
+      headers,
+    )
     const embeddingsResponse = (await response.json()) as EmbeddingsResponse
     return embeddingsResponse
   }
