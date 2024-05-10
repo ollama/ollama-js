@@ -148,6 +148,7 @@ export class Ollama {
       name: request.model,
       stream: request.stream,
       modelfile: request.modelfile,
+      quantization: request.quantization,
     })
   }
 
