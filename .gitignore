@@ -129,5 +129,8 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-#IDEs
+# IDEs
 .idea
+
+# MacOS
+.DS_Store
