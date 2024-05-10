@@ -170,7 +170,7 @@ export class Ollama {
   /**
    * Creates a new model from a stream of data.
    * @param request {CreateRequest} - The request object.
-   * @returns {Promise<ProgressResponse | AsyncGenerator<ProgressResponse>>} - The response object or
+   * @returns {Promise<ProgressResponse | AsyncGenerator<ProgressResponse>>} - The response object or a stream of progress responses.
    */
   async create(
     request: CreateRequest,
