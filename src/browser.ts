@@ -204,7 +204,7 @@ export class Ollama {
   push(request: PushRequest & { stream: true }): Promise<AsyncGenerator<ProgressResponse>>
   push(request: PushRequest & { stream?: false }): Promise<ProgressResponse>
   /**
-   * Pushes a model to the server. The request object can contain a stream flag to indicate if the
+   * Pushes a model to the Ollama registry. The request object can contain a stream flag to indicate if the
    * response should be streamed.
    * @param request {PushRequest} - The request object.
    * @returns {Promise<ProgressResponse | AsyncGenerator<ProgressResponse>>} - The response object or
