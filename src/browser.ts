@@ -185,7 +185,7 @@ export class Ollama {
   pull(request: PullRequest & { stream: true }): Promise<AsyncGenerator<ProgressResponse>>
   pull(request: PullRequest & { stream?: false }): Promise<ProgressResponse>
   /**
-   * Pulls a model from the server. The request object can contain a stream flag to indicate if the
+   * Pulls a model from the Ollama registry. The request object can contain a stream flag to indicate if the
    * response should be streamed.
    * @param request {PullRequest} - The request object.
    * @returns {Promise<ProgressResponse | AsyncGenerator<ProgressResponse>>} - The response object or
