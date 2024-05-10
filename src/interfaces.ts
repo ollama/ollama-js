@@ -125,6 +125,7 @@ export interface GenerateResponse {
   created_at: Date
   response: string
   done: boolean
+  done_reason: string
   context: number[]
   total_duration: number
   load_duration: number
@@ -139,6 +140,7 @@ export interface ChatResponse {
   created_at: Date
   message: Message
   done: boolean
+  done_reason: string
   total_duration: number
   load_duration: number
   prompt_eval_count: number
