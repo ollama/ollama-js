@@ -59,7 +59,7 @@ export class Ollama {
    * @protected {T | AsyncGenerator<T>} - The response object or an AsyncGenerator that yields
    * response messages.
    * @throws {Error} - If the response body is missing or if the response is an error.
-   * @returns {Promise<T | AsyncGenerator<T>>} - The response object or an AsyncGenerator that
+   * @returns {Promise<T | AsyncGenerator<T>>} - The response object or an AsyncGenerator that yields the streamed response.
    */
   protected async processStreamableRequest<T extends object>(
     endpoint: string,
