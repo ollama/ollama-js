@@ -6,18 +6,25 @@ import { homedir } from 'os'
 import { Ollama as OllamaBrowser } from './browser.js'
 
 import type { CreateRequest, ProgressResponse } from './interfaces.js'
+import {
+  EMPTY_STRING,
+  ENCODING,
+  MESSAGES,
+  MODEL_FILE_COMMANDS,
+  SHA256,
+} from './constants'
 
 export class Ollama extends OllamaBrowser {
   async encodeImage(image: Uint8Array | Buffer | string): Promise<string> {
     if (typeof image !== 'string') {
       // image is Uint8Array or Buffer, convert it to base64
-      return Buffer.from(image).toString('base64')
+      return Buffer.from(image).toString(ENCODING.BASE64)
     }
     try {
       if (fs.existsSync(image)) {
         // this is a filepath, read the file and convert it to base64
         const fileBuffer = await promises.readFile(resolve(image))
-        return Buffer.from(fileBuffer).toString('base64')
+        return Buffer.from(fileBuffer).toString(ENCODING.BASE64)
       }
     } catch {
       // continue
@@ -40,7 +47,7 @@ export class Ollama extends OllamaBrowser {
     const lines = modelfile.split('\n')
     for (const line of lines) {
       const [command, args] = line.split(' ', 2)
-      if (['FROM', 'ADAPTER'].includes(command.toUpperCase())) {
+      if (MODEL_FILE_COMMANDS.includes(command.toUpperCase())) {
         const path = this.resolvePath(args.trim(), mfDir)
         if (await this.fileExists(path)) {
           out.push(`${command} @${await this.createBlob(path)}`)
@@ -94,13 +101,13 @@ export class Ollama extends OllamaBrowser {
 
     // Compute the SHA256 digest
     const sha256sum = await new Promise<string>((resolve, reject) => {
-      const hash = createHash('sha256')
+      const hash = createHash(SHA256)
       fileStream.on('data', (data) => hash.update(data))
-      fileStream.on('end', () => resolve(hash.digest('hex')))
+      fileStream.on('end', () => resolve(hash.digest(ENCODING.HEX)))
       fileStream.on('error', reject)
     })
 
-    const digest = `sha256:${sha256sum}`
+    const digest = `${SHA256}:${sha256sum}`
 
     try {
       await utils.head(this.fetch, `${this.config.host}/api/blobs/${digest}`)
@@ -144,9 +151,11 @@ export class Ollama extends OllamaBrowser {
   async create(
     request: CreateRequest,
   ): Promise<ProgressResponse | AsyncGenerator<ProgressResponse>> {
-    let modelfileContent = ''
+    let modelfileContent = EMPTY_STRING
     if (request.path) {
-      modelfileContent = await promises.readFile(request.path, { encoding: 'utf8' })
+      modelfileContent = await promises.readFile(request.path, {
+        encoding: ENCODING.UTF8,
+      })
       modelfileContent = await this.parseModelfile(
         modelfileContent,
         dirname(request.path),
@@ -154,16 +163,15 @@ export class Ollama extends OllamaBrowser {
     } else if (request.modelfile) {
       modelfileContent = await this.parseModelfile(request.modelfile)
     } else {
-      throw new Error('Must provide either path or modelfile to create a model')
+      throw new Error(MESSAGES.ERROR_NO_MODEL_FILE)
     }
     request.modelfile = modelfileContent
 
     // check stream here so that typescript knows which overload to use
     if (request.stream) {
       return super.create(request as CreateRequest & { stream: true })
-    } else {
-      return super.create(request as CreateRequest & { stream: false })
     }
+    return super.create(request as CreateRequest & { stream: false })
   }
 }
 

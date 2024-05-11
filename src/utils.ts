@@ -1,5 +1,6 @@
 import { version } from './version.js'
 import type { Fetch, ErrorResponse } from './interfaces.js'
+import { EMPTY_STRING, ENCODING, MESSAGES, OLLAMA_LOCAL_URL } from './constants'
 
 /**
  * An error class for response errors.
@@ -36,15 +37,15 @@ const checkOk = async (response: Response): Promise<void> => {
       errorData = (await response.json()) as ErrorResponse
       message = errorData.error || message
     } catch (error) {
-      console.log('Failed to parse error response as JSON')
+      console.log(MESSAGES.ERROR_JSON_PARSE)
     }
   } else {
     try {
-      console.log('Getting text from response')
+      console.log(MESSAGES.FETCHING_TEXT)
       const textResponse = await response.text()
       message = textResponse || message
     } catch (error) {
-      console.log('Failed to get text from error response')
+      console.log(MESSAGES.ERROR_FETCHING_TEXT)
     }
   }
 
@@ -181,8 +182,8 @@ export const del = async (
 export const parseJSON = async function* <T = unknown>(
   itr: ReadableStream<Uint8Array>,
 ): AsyncGenerator<T> {
-  const decoder = new TextDecoder('utf-8')
-  let buffer = ''
+  const decoder = new TextDecoder(ENCODING.UTF8)
+  let buffer = EMPTY_STRING
 
   const reader = itr.getReader()
 
@@ -197,7 +198,7 @@ export const parseJSON = async function* <T = unknown>(
 
     const parts = buffer.split('\n')
 
-    buffer = parts.pop() ?? ''
+    buffer = parts.pop() ?? EMPTY_STRING
 
     for (const part of parts) {
       try {
@@ -223,7 +224,7 @@ export const parseJSON = async function* <T = unknown>(
  */
 export const formatHost = (host: string): string => {
   if (!host) {
-    return 'http://127.0.0.1:11434'
+    return OLLAMA_LOCAL_URL
   }
 
   let isExplicitProtocol = host.includes('://')

@@ -22,6 +22,7 @@ import type {
   ShowResponse,
   StatusResponse,
 } from './interfaces.js'
+import { EMPTY_STRING, MESSAGES, OLLAMA_LOCAL_URL, REQUEST_CONSTANTS } from './constants'
 
 export class Ollama {
   protected readonly config: Config
@@ -30,10 +31,10 @@ export class Ollama {
 
   constructor(config?: Partial<Config>) {
     this.config = {
-      host: '',
+      host: EMPTY_STRING,
     }
     if (!config?.proxy) {
-      this.config.host = utils.formatHost(config?.host ?? 'http://127.0.0.1:11434')
+      this.config.host = utils.formatHost(config?.host ?? OLLAMA_LOCAL_URL)
     }
 
     this.fetch = fetch
@@ -76,7 +77,7 @@ export class Ollama {
     )
 
     if (!response.body) {
-      throw new Error('Missing body')
+      throw new Error(MESSAGES.MISSING_BODY)
     }
 
     const itr = utils.parseJSON<T | ErrorResponse>(response.body)
@@ -90,7 +91,7 @@ export class Ollama {
           yield message
           // message will be done in the case of chat and generate
           // message will be success in the case of a progress response (pull, push, create)
-          if ((message as any).done || (message as any).status === 'success') {
+          if ((message as any).done || (message as any).status === MESSAGES.SUCCESS) {
             return
           }
         }
@@ -98,7 +99,7 @@ export class Ollama {
       })()
     } else {
       const message = await itr.next()
-      if (!message.value.done && (message.value as any).status !== 'success') {
+      if (!message.value.done && (message.value as any).status !== MESSAGES.SUCCESS) {
         throw new Error('Expected a completed response.')
       }
       return message.value
@@ -137,7 +138,10 @@ export class Ollama {
     if (request.images) {
       request.images = await Promise.all(request.images.map(this.encodeImage.bind(this)))
     }
-    return this.processStreamableRequest<GenerateResponse>('generate', request)
+    return this.processStreamableRequest<GenerateResponse>(
+      REQUEST_CONSTANTS.GENERATE,
+      request,
+    )
   }
 
   chat(request: ChatRequest & { stream: true }): Promise<AsyncGenerator<ChatResponse>>
@@ -175,7 +179,7 @@ export class Ollama {
   async create(
     request: CreateRequest,
   ): Promise<ProgressResponse | AsyncGenerator<ProgressResponse>> {
-    return this.processStreamableRequest<ProgressResponse>('create', {
+    return this.processStreamableRequest<ProgressResponse>(REQUEST_CONSTANTS.CREATE, {
       name: request.model,
       stream: request.stream,
       modelfile: request.modelfile,
@@ -213,7 +217,7 @@ export class Ollama {
   async push(
     request: PushRequest,
   ): Promise<ProgressResponse | AsyncGenerator<ProgressResponse>> {
-    return this.processStreamableRequest<ProgressResponse>('push', {
+    return this.processStreamableRequest<ProgressResponse>(REQUEST_CONSTANTS.PUSH, {
       name: request.model,
       stream: request.stream,
       insecure: request.insecure,
@@ -230,7 +234,7 @@ export class Ollama {
     await utils.del(this.fetch, `${this.config.host}/api/delete`, {
       name: request.model,
     })
-    return { status: 'success' }
+    return { status: MESSAGES.SUCCESS }
   }
 
   /**
@@ -241,7 +245,7 @@ export class Ollama {
    */
   async copy(request: CopyRequest): Promise<StatusResponse> {
     await utils.post(this.fetch, `${this.config.host}/api/copy`, { ...request })
-    return { status: 'success' }
+    return { status: MESSAGES.SUCCESS }
   }
 
   /**
