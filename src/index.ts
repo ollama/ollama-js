@@ -18,7 +18,7 @@ export class Ollama extends OllamaBrowser {
   async encodeImage(image: Uint8Array | Buffer | string): Promise<string> {
     if (typeof image !== 'string') {
       // image is Uint8Array or Buffer, convert it to base64
-      return Buffer.from(image).toString(ENCODING.BASE64)
+      return Buffer.from(image).toString('base64')
     }
     try {
       if (fs.existsSync(image)) {

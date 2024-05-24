@@ -37,15 +37,15 @@ const checkOk = async (response: Response): Promise<void> => {
       errorData = (await response.json()) as ErrorResponse
       message = errorData.error || message
     } catch (error) {
-      console.log(MESSAGES.ERROR_JSON_PARSE)
+      console.log('Failed to parse error response as JSON')
     }
   } else {
     try {
-      console.log(MESSAGES.FETCHING_TEXT)
+      console.log('Getting text from response')
       const textResponse = await response.text()
       message = textResponse || message
     } catch (error) {
-      console.log(MESSAGES.ERROR_FETCHING_TEXT)
+      console.log('Failed to get text from error response')
     }
   }
 
