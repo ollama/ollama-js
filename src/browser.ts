@@ -38,8 +38,7 @@ export class Ollama {
     }
 
     this.fetch = fetch
-    // NOTE: fetch could either be undefined or an instance of Fetch
-    if (config?.fetch) {
+    if (config?.fetch != null) {
       this.fetch = config.fetch
     }
 
@@ -98,12 +97,13 @@ export class Ollama {
         }
         throw new Error('Did not receive done or success response in stream.')
       })()
+    } else {
+      const message = await itr.next()
+      if (!message.value.done && (message.value as any).status !== MESSAGES.SUCCESS) {
+        throw new Error('Expected a completed response.')
+      }
+      return message.value
     }
-    const message = await itr.next()
-    if (!message.value.done && (message.value as any).status !== MESSAGES.SUCCESS) {
-      throw new Error('Expected a completed response.')
-    }
-    return message.value
   }
 
   /**
@@ -112,14 +112,14 @@ export class Ollama {
    * @returns {Promise<string>} - The base64 encoded image.
    */
   async encodeImage(image: Uint8Array | string): Promise<string> {
-    if (typeof image === 'string') {
-      // image is already base64 encoded
-      return image
+    if (typeof image !== 'string') {
+      // image is Uint8Array convert it to base64
+      const uint8Array = new Uint8Array(image)
+      const numberArray = Array.from(uint8Array)
+      return btoa(String.fromCharCode.apply(null, numberArray))
     }
-    // image is Uint8Array convert it to base64
-    const uint8Array = new Uint8Array(image)
-    const numberArray = Array.from(uint8Array)
-    return btoa(String.fromCharCode.apply(null, numberArray))
+    // the string may be base64 encoded
+    return image
   }
 
   generate(
@@ -183,6 +183,7 @@ export class Ollama {
       name: request.model,
       stream: request.stream,
       modelfile: request.modelfile,
+      quantize: request.quantize,
     })
   }
 
@@ -198,7 +199,7 @@ export class Ollama {
   async pull(
     request: PullRequest,
   ): Promise<ProgressResponse | AsyncGenerator<ProgressResponse>> {
-    return this.processStreamableRequest<ProgressResponse>(REQUEST_CONSTANTS.PULL, {
+    return this.processStreamableRequest<ProgressResponse>('pull', {
       name: request.model,
       stream: request.stream,
       insecure: request.insecure,
