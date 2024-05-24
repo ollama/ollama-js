@@ -1,6 +1,14 @@
 import { version } from './version.js'
 import type { Fetch, ErrorResponse } from './interfaces.js'
-import { EMPTY_STRING, ENCODING, MESSAGES, OLLAMA_LOCAL_URL } from './constants'
+import {
+  EMPTY_STRING,
+  ENCODING,
+  MESSAGES,
+  OLLAMA_LOCAL_URL,
+  PORTS,
+  PROTOCOLS,
+} from './constants'
+import { promises } from 'fs'
 
 /**
  * An error class for response errors.
@@ -247,7 +255,7 @@ export const formatHost = (host: string): string => {
       port = '11434'
     } else {
       // Assign default ports based on the protocol
-      port = url.protocol === 'https:' ? '443' : '80'
+      port = url.protocol === `${PROTOCOLS.HTTPS}:` ? PORTS.HTTPS : PORTS.HTTP
     }
   }
 
@@ -258,4 +266,32 @@ export const formatHost = (host: string): string => {
   }
 
   return formattedHost
+}
+
+/**
+ * Checks if a path is a file path
+ * @param path {string} - The path to check
+ * @returns {Promise<boolean>} - Whether the path is a file path or not
+ */
+export async function isFilePath(path: string): Promise<boolean> {
+  try {
+    await promises.access(path)
+    return true
+  } catch {
+    return false
+  }
+}
+/**
+ * checks if a file exists
+ * @param path {string} - The path to the file
+ * @private @internal
+ * @returns {Promise<boolean>} - Whether the file exists or not
+ */
+export async function fileExists(path: string): Promise<boolean> {
+  try {
+    await promises.access(path)
+    return true
+  } catch {
+    return false
+  }
 }
