@@ -60,8 +60,10 @@ export class Ollama extends OllamaBrowser {
     mfDir: string,
   ): Promise<string> {
     const path = this.resolvePath(args, mfDir)
-    if (await fileExists(path)) {
-      return `${command} @${await this.createBlob(path)}`
+    const exists = await fileExists(path)
+    if (exists) {
+      const blob = await this.createBlob(path)
+      return `${command} @${blob}`
     }
     return `${command} ${args}`
   }
@@ -200,5 +202,5 @@ export class Ollama extends OllamaBrowser {
 
 export default new Ollama()
 
-// export all types from the main entry point so that packages importing types dont need to specify paths
+// export all types from the main entry point so that packages importing types don't need to specify paths
 export * from './interfaces.js'
