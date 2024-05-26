@@ -1,5 +1,5 @@
 import { version } from './version.js'
-import type { Fetch, ErrorResponse } from './interfaces.js'
+import type { ErrorResponse, Fetch } from './interfaces.js'
 
 /**
  * An error class for response errors.
@@ -16,6 +16,38 @@ class ResponseError extends Error {
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, ResponseError)
     }
+  }
+}
+
+/**
+ * An AsyncIterator which can be aborted
+ */
+export class AbortableAsyncIterator<T extends object> {
+  private readonly abortController: AbortController
+  private readonly itr: AsyncGenerator<T | ErrorResponse>
+
+  constructor(abortController: AbortController, itr: AsyncGenerator<T | ErrorResponse>) {
+    this.abortController = abortController
+    this.itr = itr
+  }
+
+  abort() {
+    this.abortController.abort()
+  }
+
+  async *[Symbol.asyncIterator]() {
+    for await (const message of this.itr) {
+      if ('error' in message) {
+        throw new Error(message.error)
+      }
+      yield message
+      // message will be done in the case of chat and generate
+      // message will be success in the case of a progress response (pull, push, create)
+      if ((message as any).done || (message as any).status === 'success') {
+        return
+      }
+    }
+    throw new Error('Did not receive done or success response in stream.')
   }
 }
 
