@@ -187,7 +187,7 @@ ollama.embeddings(request)
   - `options` `<Options>`: (Optional) Options to configure the runtime.
 - Returns: `<EmbeddingsResponse>`
 
-### process
+### ps
 
 ```javascript
 ollama.ps()
