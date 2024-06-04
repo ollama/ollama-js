@@ -187,6 +187,14 @@ ollama.embeddings(request)
   - `options` `<Options>`: (Optional) Options to configure the runtime.
 - Returns: `<EmbeddingsResponse>`
 
+### process
+
+```javascript
+ollama.process()
+```
+
+- Returns: `<ListResponse>`
+
 ## Custom client
 
 A custom client can be created with the following fields:
