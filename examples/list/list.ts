@@ -12,5 +12,5 @@ await ollama.chat({
 var response = await ollama.list()
 console.log(response)
 
-response = await ollama.process()
+response = await ollama.ps()
 console.log(response)

@@ -284,7 +284,7 @@ export class Ollama {
    * @returns {Promise<ListResponse>} - The response object.
    * @throws {Error} - If the response body is missing.
    */
-  async process(): Promise<ListResponse> {
+  async ps(): Promise<ListResponse> {
     const response = await utils.get(this.fetch, `${this.config.host}/api/ps`)
     return (await response.json()) as ListResponse
   }

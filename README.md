@@ -190,7 +190,7 @@ ollama.embeddings(request)
 ### process
 
 ```javascript
-ollama.process()
+ollama.ps()
 ```
 
 - Returns: `<ListResponse>`
