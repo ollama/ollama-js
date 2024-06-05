@@ -278,6 +278,16 @@ export class Ollama {
     })
     return (await response.json()) as EmbeddingsResponse
   }
+
+  /**
+   * Lists the running models on the server
+   * @returns {Promise<ListResponse>} - The response object.
+   * @throws {Error} - If the response body is missing.
+   */
+  async ps(): Promise<ListResponse> {
+    const response = await utils.get(this.fetch, `${this.config.host}/api/ps`)
+    return (await response.json()) as ListResponse
+  }
 }
 
 export default new Ollama()
