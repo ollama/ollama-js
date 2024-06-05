@@ -106,20 +106,24 @@ export class Ollama {
   }
 
   /**
-   * Encodes an image to base64 if it is a Uint8Array.
-   * @param image {Uint8Array | string} - The image to encode.
-   * @returns {Promise<string>} - The base64 encoded image.
-   */
-  async encodeImage(image: Uint8Array | string): Promise<string> {
-    if (typeof image !== 'string') {
-      // image is Uint8Array convert it to base64
-      const uint8Array = new Uint8Array(image)
-      const numberArray = Array.from(uint8Array)
-      return btoa(String.fromCharCode.apply(null, numberArray))
+ * Encodes an image to base64 if it is a Uint8Array.
+ * @param image {Uint8Array | string} - The image to encode.
+ * @returns {Promise<string>} - The base64 encoded image.
+ */
+async encodeImage(image: Uint8Array | string): Promise<string> {
+  if (typeof image !== 'string') {
+    // image is Uint8Array, convert it to base64
+    const uint8Array = new Uint8Array(image);
+    let byteString = '';
+    const len = uint8Array.byteLength;
+    for (let i = 0; i < len; i++) {
+      byteString += String.fromCharCode(uint8Array[i]);
     }
-    // the string may be base64 encoded
-    return image
+    return btoa(byteString);
   }
+  // the string may be base64 encoded
+  return image;
+}
 
   generate(
     request: GenerateRequest & { stream: true },
