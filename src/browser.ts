@@ -27,6 +27,7 @@ import type {
 export class Ollama {
   protected readonly config: Config
   protected readonly fetch: Fetch
+  protected readonly ongoingStreamedRequests: AbortableAsyncIterator<object>[] = []
 
   constructor(config?: Partial<Config>) {
     this.config = {
@@ -40,6 +41,14 @@ export class Ollama {
     if (config?.fetch != null) {
       this.fetch = config.fetch
     }
+  }
+
+  // Abort any ongoing streamed requests to Ollama
+  public abort() {
+    for (const request of this.ongoingStreamedRequests) {
+      request.abort()
+    }
+    this.ongoingStreamedRequests.length = 0
   }
 
   /**
@@ -70,7 +79,18 @@ export class Ollama {
       }
 
       const itr = parseJSON<T | ErrorResponse>(response.body)
-      return new AbortableAsyncIterator(abortController, itr)
+      const abortableAsyncIterator = new AbortableAsyncIterator(
+        abortController,
+        itr,
+        () => {
+          const i = this.ongoingStreamedRequests.indexOf(abortableAsyncIterator)
+          if (i > -1) {
+            this.ongoingStreamedRequests.splice(i, 1)
+          }
+        },
+      )
+      this.ongoingStreamedRequests.push(abortableAsyncIterator)
+      return abortableAsyncIterator
     }
     const response = await utils.post(this.fetch, host, request)
     return await response.json()
