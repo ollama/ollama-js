@@ -1,4 +1,6 @@
 import * as utils from './utils.js'
+import { AbortableAsyncIterator } from './utils.js'
+
 import fs, { createReadStream, promises } from 'fs'
 import { dirname, join, resolve } from 'path'
 import { createHash } from 'crypto'
@@ -138,12 +140,12 @@ export class Ollama extends OllamaBrowser {
 
   create(
     request: CreateRequest & { stream: true },
-  ): Promise<AsyncGenerator<ProgressResponse>>
+  ): Promise<AbortableAsyncIterator<ProgressResponse>>
   create(request: CreateRequest & { stream?: false }): Promise<ProgressResponse>
 
   async create(
     request: CreateRequest,
-  ): Promise<ProgressResponse | AsyncGenerator<ProgressResponse>> {
+  ): Promise<ProgressResponse | AbortableAsyncIterator<ProgressResponse>> {
     let modelfileContent = ''
     if (request.path) {
       modelfileContent = await promises.readFile(request.path, { encoding: 'utf8' })
