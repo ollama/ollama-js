@@ -163,6 +163,8 @@ export interface ModelResponse {
   size: number
   digest: string
   details: ModelDetails
+  expires_at: Date
+  size_vram: number
 }
 
 export interface ModelDetails {

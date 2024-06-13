@@ -107,20 +107,24 @@ export class Ollama {
   }
 
   /**
-   * Encodes an image to base64 if it is a Uint8Array.
-   * @param image {Uint8Array | string} - The image to encode.
-   * @returns {Promise<string>} - The base64 encoded image.
-   */
-  async encodeImage(image: Uint8Array | string): Promise<string> {
-    if (typeof image === 'string') {
-      // image is already base64 encoded
-      return image
+ * Encodes an image to base64 if it is a Uint8Array.
+ * @param image {Uint8Array | string} - The image to encode.
+ * @returns {Promise<string>} - The base64 encoded image.
+ */
+async encodeImage(image: Uint8Array | string): Promise<string> {
+  if (typeof image !== 'string') {
+    // image is Uint8Array, convert it to base64
+    const uint8Array = new Uint8Array(image);
+    let byteString = '';
+    const len = uint8Array.byteLength;
+    for (let i = 0; i < len; i++) {
+      byteString += String.fromCharCode(uint8Array[i]);
     }
-    // image is Uint8Array convert it to base64
-    const uint8Array = new Uint8Array(image)
-    const numberArray = Array.from(uint8Array)
-    return btoa(String.fromCharCode.apply(null, numberArray))
+    return btoa(byteString);
   }
+  // the string may be base64 encoded
+  return image;
+}
 
   generate(
     request: GenerateRequest & { stream: true },
@@ -280,6 +284,16 @@ export class Ollama {
       ...request,
     })
     return (await response.json()) as EmbeddingsResponse
+  }
+
+  /**
+   * Lists the running models on the server
+   * @returns {Promise<ListResponse>} - The response object.
+   * @throws {Error} - If the response body is missing.
+   */
+  async ps(): Promise<ListResponse> {
+    const response = await utils.get(this.fetch, `${this.config.host}/api/ps`)
+    return (await response.json()) as ListResponse
   }
 }
 
