@@ -187,6 +187,9 @@ export interface ShowResponse {
   system: string
   details: ModelDetails
   messages: Message[]
+  modified_at: Date
+  model_info: Map<string, any>
+  projector_info?: Map<string, any>
 }
 
 export interface ListResponse {
