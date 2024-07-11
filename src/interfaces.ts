@@ -110,6 +110,15 @@ export interface ShowRequest {
   options?: Partial<Options>
 }
 
+export interface EmbedRequest {
+  model: string
+  input: string | string[]
+  truncate?: boolean
+  keep_alive?: string | number
+
+  options?: Partial<Options>
+}
+
 export interface EmbeddingsRequest {
   model: string
   prompt: string
@@ -147,6 +156,11 @@ export interface ChatResponse {
   prompt_eval_duration: number
   eval_count: number
   eval_duration: number
+}
+
+export interface EmbedResponse {
+  model: string
+  embeddings: number[][]
 }
 
 export interface EmbeddingsResponse {
