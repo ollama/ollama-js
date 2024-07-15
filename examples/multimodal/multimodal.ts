@@ -1,4 +1,3 @@
-import https from 'https'
 import ollama from 'ollama'
 
 const imagePath = './examples/multimodal/cat.jpg'
