@@ -9,6 +9,8 @@ import type {
   CopyRequest,
   CreateRequest,
   DeleteRequest,
+  EmbedRequest,
+  EmbedResponse,
   EmbeddingsRequest,
   EmbeddingsResponse,
   ErrorResponse,
@@ -269,6 +271,18 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
     })
     return (await response.json()) as ShowResponse
   }
+
+  /**
+   * Embeds text input into vectors.
+   * @param request {EmbedRequest} - The request object.
+   * @returns {Promise<EmbedResponse>} - The response object.
+   */
+    async embed(request: EmbedRequest): Promise<EmbedResponse> {
+      const response = await utils.post(this.fetch, `${this.config.host}/api/embed`, {
+        ...request,
+      })
+      return (await response.json()) as EmbedResponse
+    }
 
   /**
    * Embeds a text prompt into a vector.
