@@ -286,6 +286,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
 
   /**
    * Embeds a text prompt into a vector.
+   * @deprecated Use the `embed` method instead.
    * @param request {EmbeddingsRequest} - The request object.
    * @returns {Promise<EmbeddingsResponse>} - The response object.
    */

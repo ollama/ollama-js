@@ -119,6 +119,9 @@ export interface EmbedRequest {
   options?: Partial<Options>
 }
 
+/**
+ * @deprecated Use the EmbedRequest interface with the embed() method instead.
+ */
 export interface EmbeddingsRequest {
   model: string
   prompt: string
@@ -163,6 +166,9 @@ export interface EmbedResponse {
   embeddings: number[][]
 }
 
+/**
+ * @deprecated Use the embed() method with the EmbedResponse instead.
+ */
 export interface EmbeddingsResponse {
   embedding: number[]
 }
