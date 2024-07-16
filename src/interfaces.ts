@@ -178,7 +178,6 @@ export interface ChatResponse {
   model: string
   created_at: Date
   message: Message
-  tool_calls: ToolCall[]
   done: boolean
   done_reason: string
   total_duration: number
