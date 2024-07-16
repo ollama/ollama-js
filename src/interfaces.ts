@@ -66,7 +66,6 @@ export interface Message {
 }
 
 export interface ToolCall {
-  type: string;
   function: {
     name: string;
     arguments: {
