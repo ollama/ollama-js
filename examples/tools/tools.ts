@@ -85,4 +85,4 @@ async function run(model: string) {
     console.log(finalResponse.message.content);
 }
 
-run('firefunction').catch(error => console.error("An error occurred:", error));
+run('mistral').catch(error => console.error("An error occurred:", error));
