@@ -62,6 +62,35 @@ export interface Message {
   role: string
   content: string
   images?: Uint8Array[] | string[]
+  tool_calls?: ToolCall[]
+}
+
+export interface ToolCall {
+  function: {
+    name: string;
+    arguments: {
+      [key: string]: any;
+    };
+  };
+}
+
+export interface Tool {
+  type: string;
+  function: {
+    name: string;
+    description: string;
+    parameters: {
+      type: string;
+      required: string[];
+      properties: {
+        [key: string]: {
+          type: string;
+          description: string;
+          enum?: string[];
+        };
+      };
+    };
+  };
 }
 
 export interface ChatRequest {
@@ -70,6 +99,7 @@ export interface ChatRequest {
   stream?: boolean
   format?: string
   keep_alive?: string | number
+  tools?: Tool[]
 
   options?: Partial<Options>
 }
