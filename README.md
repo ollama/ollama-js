@@ -85,6 +85,7 @@ ollama.generate(request)
 - `request` `<Object>`: The request object containing generate parameters.
   - `model` `<string>` The name of the model to use for the chat.
   - `prompt` `<string>`: The prompt to send to the model.
+  - `suffix` `<string>`: (Optional) Suffix is the text that comes after the inserted text.
   - `system` `<string>`: (Optional) Override the model system prompt.
   - `template` `<string>`: (Optional) Override the model template.
   - `raw` `<boolean>`: (Optional) Bypass the prompt template and pass the prompt directly to the model.

@@ -46,6 +46,7 @@ export interface Options {
 export interface GenerateRequest {
   model: string
   prompt: string
+  suffix?: string
   system?: string
   template?: string
   context?: number[]
