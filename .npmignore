@@ -12,3 +12,4 @@ yarn.lock
 jest.config.cjs
 tsconfig.json
 test
+examples
