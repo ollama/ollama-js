@@ -266,7 +266,7 @@ export const formatHost = (host: string): string => {
   if (host.startsWith(':')) {
     // if host starts with ':', prepend the default hostname
     host = `http://127.0.0.1${host}`
-    isExplicitProtocol = false
+    isExplicitProtocol = true
   }
 
   if (!isExplicitProtocol) {
