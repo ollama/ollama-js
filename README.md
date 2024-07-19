@@ -175,10 +175,10 @@ ollama.show(request)
   - `options` `<Options>`: (Optional) Options to configure the runtime.
 - Returns: `<ShowResponse>`
 
-### embed
+### embeddings
 
 ```javascript
-ollama.embed(request)
+ollama.embeddings(request)
 ```
 
 - `request` `<Object>`: The request object containing embedding parameters.
@@ -187,7 +187,7 @@ ollama.embed(request)
   - `truncate` `<boolean>`: (Optional) Truncate the input to fit the maximum context length supported by the model.
   - `keep_alive` `<string | number>`: (Optional) How long to keep the model loaded.
   - `options` `<Options>`: (Optional) Options to configure the runtime.
-- Returns: `<EmbedResponse>`
+- Returns: `<EmbeddingsResponse>`
 
 ### ps
 
