@@ -13,6 +13,10 @@ describe('formatHost Function Tests', () => {
     expect(formatHost('1.2.3.4:56789')).toBe('http://1.2.3.4:56789')
   })
 
+  it('should parse with only a port', () => {
+    expect(formatHost(':56789')).toBe('http://127.0.0.1:56789')
+  })
+
   it('should parse HTTP URL', () => {
     expect(formatHost('http://1.2.3.4')).toBe('http://1.2.3.4:80')
   })
@@ -51,5 +55,9 @@ describe('formatHost Function Tests', () => {
 
   it('should handle trailing slash in domain with port', () => {
     expect(formatHost('example.com:56789/')).toBe('http://example.com:56789')
+  })
+
+  it('should handle traling slash with only a port', () => {
+    expect(formatHost(':56789/')).toBe('http://127.0.0.1:56789')
   })
 })
