@@ -9,7 +9,9 @@ yarn.lock
 .gitignore
 .eslintrc.cjs
 .eslintignore
+.prettierrc.json
 jest.config.cjs
 tsconfig.json
 test
 examples
+.github
