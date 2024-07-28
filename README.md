@@ -14,7 +14,7 @@ npm i ollama
 import ollama from 'ollama'
 
 const response = await ollama.chat({
-  model: 'llama2',
+  model: 'llama3.1',
   messages: [{ role: 'user', content: 'Why is the sky blue?' }],
 })
 console.log(response.message.content)
@@ -34,7 +34,7 @@ Response streaming can be enabled by setting `stream: true`, modifying function 
 import ollama from 'ollama'
 
 const message = { role: 'user', content: 'Why is the sky blue?' }
-const response = await ollama.chat({ model: 'llama2', messages: [message], stream: true })
+const response = await ollama.chat({ model: 'llama3.1', messages: [message], stream: true })
 for await (const part of response) {
   process.stdout.write(part.message.content)
 }
@@ -46,7 +46,7 @@ for await (const part of response) {
 import ollama from 'ollama'
 
 const modelfile = `
-FROM llama2
+FROM llama3.1
 SYSTEM "You are mario from super mario bros."
 `
 await ollama.create({ model: 'example', modelfile: modelfile })
@@ -209,7 +209,7 @@ import { Ollama } from 'ollama'
 
 const ollama = new Ollama({ host: 'http://127.0.0.1:11434' })
 const response = await ollama.chat({
-  model: 'llama2',
+  model: 'llama3.1',
   messages: [{ role: 'user', content: 'Why is the sky blue?' }],
 })
 ```

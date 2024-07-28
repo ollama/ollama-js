@@ -1,6 +1,6 @@
 import ollama from 'ollama'
 
-const model = 'llama2'
+const model = 'llama3.1'
 console.log(`downloading ${model}...`)
 let currentDigestDone = false
 const stream = await ollama.pull({ model: model, stream: true })
