@@ -72,6 +72,7 @@ ollama.chat(request)
   - `format` `<string>`: (Optional) Set the expected format of the response (`json`).
   - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
   - `keep_alive` `<string | number>`: (Optional) How long to keep the model loaded.
+  - `tools` `<Tool[]>`: (Optional) A list of tool calls the model may make.
   - `options` `<Options>`: (Optional) Options to configure the runtime.
 
 - Returns: `<ChatResponse>`
