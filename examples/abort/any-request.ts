@@ -8,7 +8,7 @@ setTimeout(() => {
 
 try {
   ollama.generate({
-    model: 'llama2',
+    model: 'llama3.1',
     prompt: 'Write a long story',
     stream: true,
   }).then(
