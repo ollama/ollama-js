@@ -6,8 +6,7 @@ setTimeout(() => {
   ollama.abort()
 }, 1000) // 1000 milliseconds = 1 second
 
-try {
-  ollama.generate({
+ollama.generate({
     model: 'llama3.1',
     prompt: 'Write a long story',
     stream: true,
@@ -17,11 +16,12 @@ try {
         process.stdout.write(chunk.response)
       }
     }
+  ).catch(
+    (error) => {
+      if (error.name === 'AbortError') {
+        console.log('The request has been aborted')
+      } else {
+        console.error('An error occurred:', error)
+      }
+    }
   )
-} catch (error) {
-  if (error.name === 'AbortError') {
-    console.log('The request has been aborted')
-  } else {
-    console.error('An error occurred:', error)
-  }
-}
