@@ -97,8 +97,6 @@ ollama.generate(request)
   - `options` `<Options>`: (Optional) Options to configure the runtime.
 - Returns: `<GenerateResponse>`
 
-
-
 ### pull
 
 ```javascript
