@@ -97,6 +97,8 @@ ollama.generate(request)
   - `options` `<Options>`: (Optional) Options to configure the runtime.
 - Returns: `<GenerateResponse>`
 
+
+
 ### pull
 
 ```javascript
@@ -197,6 +199,15 @@ ollama.ps()
 ```
 
 - Returns: `<ListResponse>`
+
+### abort
+
+```javascript
+ollama.abort()
+```
+
+This method will abort all streamed generations currently running.
+All asynchronous threads listening to streams (typically the ```for await (const part of response)```) will throw an ```AbortError``` exception
 
 ## Custom client
 
