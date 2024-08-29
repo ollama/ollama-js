@@ -74,6 +74,7 @@ export class Ollama {
       const abortController = new AbortController()
       const response = await post(this.fetch, host, request, {
         signal: abortController.signal,
+        headers: this.config.headers
       })
 
       if (!response.body) {
@@ -94,7 +95,9 @@ export class Ollama {
       this.ongoingStreamedRequests.push(abortableAsyncIterator)
       return abortableAsyncIterator
     }
-    const response = await utils.post(this.fetch, host, request)
+    const response = await utils.post(this.fetch, host, request, {
+      headers: this.config.headers
+    })
     return await response.json()
   }
 

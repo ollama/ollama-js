@@ -169,7 +169,7 @@ export const post = async (
   fetch: Fetch,
   host: string,
   data?: Record<string, unknown> | BodyInit,
-  options?: { signal: AbortSignal },
+  options?: { signal?: AbortSignal, headers?: Headers },
 ): Promise<Response> => {
   const isRecord = (input: any): input is Record<string, unknown> => {
     return input !== null && typeof input === 'object' && !Array.isArray(input)
@@ -181,6 +181,7 @@ export const post = async (
     method: 'POST',
     body: formattedData,
     signal: options?.signal,
+    headers: options?.headers
   })
 
   await checkOk(response)
