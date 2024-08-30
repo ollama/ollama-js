@@ -198,6 +198,15 @@ ollama.ps()
 
 - Returns: `<ListResponse>`
 
+### abort
+
+```javascript
+ollama.abort()
+```
+
+This method will abort all streamed generations currently running.
+All asynchronous threads listening to streams (typically the ```for await (const part of response)```) will throw an ```AbortError``` exception
+
 ## Custom client
 
 A custom client can be created with the following fields:
