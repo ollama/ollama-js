@@ -35,13 +35,10 @@ export class Ollama {
     this.config = {
       host: '',
     }
+    
+    this.fetch = config?.fetch ? config.fetch : fetch;
     if (!config?.proxy) {
-      this.config.host = utils.formatHost(config?.host ?? 'http://127.0.0.1:11434')
-    }
-
-    this.fetch = fetch
-    if (config?.fetch != null) {
-      this.fetch = config.fetch
+      this.config.host = utils.formatHost(config?.host || 'http://127.0.0.1:11434');
     }
   }
 
@@ -66,36 +63,36 @@ export class Ollama {
    */
   protected async processStreamableRequest<T extends object>(
     endpoint: string,
-    request: { stream?: boolean } & Record<string, any>,
+    request: { stream?: boolean } & Record<string, any> = { stream: false },
   ): Promise<T | AbortableAsyncIterator<T>> {
-    request.stream = request.stream ?? false
     const host = `${this.config.host}/api/${endpoint}`
     if (request.stream) {
       const abortController = new AbortController()
       const response = await post(this.fetch, host, request, {
         signal: abortController.signal,
-      })
+      });
 
       if (!response.body) {
         throw new Error('Missing body')
       }
 
-      const itr = parseJSON<T | ErrorResponse>(response.body)
+      const itr = parseJSON<T | ErrorResponse>(response.body);
       const abortableAsyncIterator = new AbortableAsyncIterator(
         abortController,
         itr,
         () => {
-          const i = this.ongoingStreamedRequests.indexOf(abortableAsyncIterator)
-          if (i > -1) {
+          const i = this.ongoingStreamedRequests.indexOf(abortableAsyncIterator);
+          if (i >= 0) {
             this.ongoingStreamedRequests.splice(i, 1)
-          }
+          };
         },
       )
       this.ongoingStreamedRequests.push(abortableAsyncIterator)
-      return abortableAsyncIterator
+      return abortableAsyncIterator;
     }
-    const response = await utils.post(this.fetch, host, request)
-    return await response.json()
+
+    const response = await post(this.fetch, host, request);
+    return await response.json();
   }
 
   /**
@@ -137,10 +134,6 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
     return this.processStreamableRequest<GenerateResponse>('generate', request)
   }
 
-  chat(
-    request: ChatRequest & { stream: true },
-  ): Promise<AbortableAsyncIterator<ChatResponse>>
-  chat(request: ChatRequest & { stream?: false }): Promise<ChatResponse>
   /**
    * Chats with the model. The request object can contain messages with images that are either
    * Uint8Arrays or base64 encoded strings. The images will be base64 encoded before sending the
@@ -149,6 +142,10 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @returns {Promise<ChatResponse | AbortableAsyncIterator<ChatResponse>>} - The response object or an
    * AbortableAsyncIterator that yields response messages.
    */
+  async chat(
+    request: ChatRequest & { stream: true },
+  ): Promise<AbortableAsyncIterator<ChatResponse>>
+  async chat(request: ChatRequest & { stream?: false }): Promise<ChatResponse>
   async chat(
     request: ChatRequest,
   ): Promise<ChatResponse | AbortableAsyncIterator<ChatResponse>> {
@@ -161,19 +158,20 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
         }
       }
     }
-    return this.processStreamableRequest<ChatResponse>('chat', request)
+
+    return this.processStreamableRequest<ChatResponse>('chat', request);
   }
 
-  create(
-    request: CreateRequest & { stream: true },
-  ): Promise<AbortableAsyncIterator<ProgressResponse>>
-  create(request: CreateRequest & { stream?: false }): Promise<ProgressResponse>
   /**
    * Creates a new model from a stream of data.
    * @param request {CreateRequest} - The request object.
    * @returns {Promise<ProgressResponse | AbortableAsyncIterator<ProgressResponse>>} - The response object or a stream of progress responses.
    */
   async create(
+    request: CreateRequest & { stream: true },
+  ): Promise<AbortableAsyncIterator<ProgressResponse>>
+  create(request: CreateRequest & { stream?: false }): Promise<ProgressResponse>
+  create(
     request: CreateRequest,
   ): Promise<ProgressResponse | AbortableAsyncIterator<ProgressResponse>> {
     return this.processStreamableRequest<ProgressResponse>('create', {
@@ -181,13 +179,9 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
       stream: request.stream,
       modelfile: request.modelfile,
       quantize: request.quantize,
-    })
+    });
   }
 
-  pull(
-    request: PullRequest & { stream: true },
-  ): Promise<AbortableAsyncIterator<ProgressResponse>>
-  pull(request: PullRequest & { stream?: false }): Promise<ProgressResponse>
   /**
    * Pulls a model from the Ollama registry. The request object can contain a stream flag to indicate if the
    * response should be streamed.
@@ -196,19 +190,19 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * an AbortableAsyncIterator that yields response messages.
    */
   async pull(
+    request: PullRequest & { stream: true },
+  ): Promise<AbortableAsyncIterator<ProgressResponse>>
+  pull(request: PullRequest & { stream?: false }): Promise<ProgressResponse>
+  pull(
     request: PullRequest,
   ): Promise<ProgressResponse | AbortableAsyncIterator<ProgressResponse>> {
     return this.processStreamableRequest<ProgressResponse>('pull', {
       name: request.model,
       stream: request.stream,
       insecure: request.insecure,
-    })
+    });
   }
 
-  push(
-    request: PushRequest & { stream: true },
-  ): Promise<AbortableAsyncIterator<ProgressResponse>>
-  push(request: PushRequest & { stream?: false }): Promise<ProgressResponse>
   /**
    * Pushes a model to the Ollama registry. The request object can contain a stream flag to indicate if the
    * response should be streamed.
@@ -217,13 +211,17 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * an AbortableAsyncIterator that yields response messages.
    */
   async push(
+    request: PushRequest & { stream: true },
+  ): Promise<AbortableAsyncIterator<ProgressResponse>>
+  push(request: PushRequest & { stream?: false }): Promise<ProgressResponse>
+  push(
     request: PushRequest,
   ): Promise<ProgressResponse | AbortableAsyncIterator<ProgressResponse>> {
     return this.processStreamableRequest<ProgressResponse>('push', {
       name: request.model,
       stream: request.stream,
       insecure: request.insecure,
-    })
+    });
   }
 
   /**
@@ -233,10 +231,10 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @returns {Promise<StatusResponse>} - The response object.
    */
   async delete(request: DeleteRequest): Promise<StatusResponse> {
-    await utils.del(this.fetch, `${this.config.host}/api/delete`, {
+    await del(this.fetch, `${this.config.host}/api/delete`, {
       name: request.model,
-    })
-    return { status: 'success' }
+    });
+    return { status: 'success' };
   }
 
   /**
@@ -246,8 +244,8 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @returns {Promise<StatusResponse>} - The response object.
    */
   async copy(request: CopyRequest): Promise<StatusResponse> {
-    await utils.post(this.fetch, `${this.config.host}/api/copy`, { ...request })
-    return { status: 'success' }
+    await post(this.fetch, `${this.config.host}/api/copy`, { ...request });
+    return { status: 'success' };
   }
 
   /**
@@ -256,8 +254,8 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @throws {Error} - If the response body is missing.
    */
   async list(): Promise<ListResponse> {
-    const response = await utils.get(this.fetch, `${this.config.host}/api/tags`)
-    return (await response.json()) as ListResponse
+    const response = await get(this.fetch, `${this.config.host}/api/tags`);
+    return await response.json() as ListResponse;
   }
 
   /**
@@ -266,10 +264,8 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @returns {Promise<ShowResponse>} - The response object.
    */
   async show(request: ShowRequest): Promise<ShowResponse> {
-    const response = await utils.post(this.fetch, `${this.config.host}/api/show`, {
-      ...request,
-    })
-    return (await response.json()) as ShowResponse
+    const response = await post(this.fetch, `${this.config.host}/api/show`, { ...request });
+    return await response.json() as ShowResponse;
   }
 
   /**
@@ -278,10 +274,8 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @returns {Promise<EmbedResponse>} - The response object.
    */
     async embed(request: EmbedRequest): Promise<EmbedResponse> {
-      const response = await utils.post(this.fetch, `${this.config.host}/api/embed`, {
-        ...request,
-      })
-      return (await response.json()) as EmbedResponse
+      const response = await post(this.fetch, `${this.config.host}/api/embed`, { ...request });
+      return await response.json() as EmbedResponse;
     }
 
   /**
@@ -290,10 +284,8 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @returns {Promise<EmbeddingsResponse>} - The response object.
    */
   async embeddings(request: EmbeddingsRequest): Promise<EmbeddingsResponse> {
-    const response = await utils.post(this.fetch, `${this.config.host}/api/embeddings`, {
-      ...request,
-    })
-    return (await response.json()) as EmbeddingsResponse
+    const response = await post(this.fetch, `${this.config.host}/api/embeddings`, { ...request });
+    return await response.json() as EmbeddingsResponse;
   }
 
   /**
@@ -302,12 +294,12 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @throws {Error} - If the response body is missing.
    */
   async ps(): Promise<ListResponse> {
-    const response = await utils.get(this.fetch, `${this.config.host}/api/ps`)
-    return (await response.json()) as ListResponse
+    const response = await get(this.fetch, `${this.config.host}/api/ps`)
+    return await response.json() as ListResponse;
   }
 }
 
-export default new Ollama()
+export default new Ollama();
 
 // export all types from the main entry point so that packages importing types dont need to specify paths
 export * from './interfaces.js'
