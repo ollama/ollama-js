@@ -2,7 +2,11 @@ import ollama from 'ollama';
 
 // Simulates an API call to get flight times
 // In a real application, this would fetch data from a live database or API
-function getFlightTimes(departure: string, arrival: string) {
+function getFlightTimes(args: { [key: string]: any }) {
+    // this is where you would validate the arguments you received
+    const departure = args.departure;
+    const arrival = args.arrival;
+
     const flights = {
         "NYC-LAX": { departure: "08:00 AM", arrival: "11:30 AM", duration: "5h 30m" },
         "LAX-NYC": { departure: "02:00 PM", arrival: "10:30 PM", duration: "5h 30m" },
@@ -65,10 +69,7 @@ async function run(model: string) {
         };
         for (const tool of response.message.tool_calls) {
             const functionToCall = availableFunctions[tool.function.name];
-            const functionResponse = functionToCall(
-                tool.function.arguments.departure,
-                tool.function.arguments.arrival
-            );
+            const functionResponse = functionToCall(tool.function.arguments);
             // Add function response to the conversation
             messages.push({
                 role: 'tool',
