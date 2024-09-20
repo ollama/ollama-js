@@ -1,6 +1,5 @@
 import * as utils from './utils.js'
 import { AbortableAsyncIterator, parseJSON, post } from './utils.js'
-import 'whatwg-fetch'
 
 import type {
   ChatRequest,
@@ -39,9 +38,24 @@ export class Ollama {
       this.config.host = utils.formatHost(config?.host ?? 'http://127.0.0.1:11434')
     }
 
-    this.fetch = fetch
-    if (config?.fetch != null) {
-      this.fetch = config.fetch
+    this.fetch = config?.fetch || this.getFetch();
+  }
+
+  private getFetch(): Fetch {
+    if (typeof window !== 'undefined' && window.fetch) {
+      return window.fetch.bind(window);
+    }
+    
+    if (typeof global !== 'undefined' && global.fetch) {
+      return global.fetch;
+    }
+    
+    try {
+      // Use dynamic import to allow for environments where whatwg-fetch is not available
+      return require('whatwg-fetch');
+    } catch (error) {
+      console.error('Failed to import whatwg-fetch:', error);
+      throw new Error('Fetch is not available. Please provide a fetch implementation in the config.');
     }
   }
 
