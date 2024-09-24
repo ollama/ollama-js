@@ -4,7 +4,7 @@ import ollama from 'ollama'
 setTimeout(() => {
   console.log('\nAborting request...\n')
   ollama.abort()
-}, 1000) // 1000 milliseconds = 1 second
+}, 500) // 1000 milliseconds = 1 second
 
 ollama.generate({
     model: 'llama3.1',
