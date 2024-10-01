@@ -108,7 +108,6 @@ export interface ChatRequest extends AbortableRequest {
   tools?: Tool[]
 
   options?: Partial<Options>
-  abortCtrl?: AbortController
 }
 
 export interface PullRequest extends AbortableRequest {
