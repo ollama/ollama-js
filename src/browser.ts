@@ -1,5 +1,5 @@
 import * as utils from './utils.js'
-import { AbortableAsyncIterator, parseJSON, post } from './utils.js'
+import { parseJSON, post } from './utils.js'
 import 'whatwg-fetch'
 
 import type {
@@ -25,6 +25,7 @@ import type {
   ShowResponse,
   StatusResponse,
 } from './interfaces.js'
+import { AbortableAsyncIterator } from './index'
 
 export class Ollama {
   protected readonly config: Config

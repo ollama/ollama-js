@@ -1,5 +1,4 @@
-import ollama from 'ollama'
-import { AbortableAsyncIterator } from '../../src/utils'
+import ollama, { AbortableAsyncIterator } from '../../src'
 
 let stream: AbortableAsyncIterator<object>
 
@@ -7,6 +6,7 @@ let stream: AbortableAsyncIterator<object>
 setTimeout(() => {
   console.log('\nAborting request...\n')
   stream.abort()
+  // Note: This will error if Ollama doesn't start responding within 1 second!
 }, 1000) // 1000 milliseconds = 1 second
 
 ollama.generate({
