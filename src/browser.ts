@@ -35,8 +35,18 @@ export class Ollama {
     this.config = {
       host: '',
     }
+    
     if (!config?.proxy) {
       this.config.host = utils.formatHost(config?.host ?? 'http://127.0.0.1:11434')
+    }
+
+    if (config?.headers) {
+      // Is it of an instance of Headers or a plain object?
+      if (config.headers instanceof Headers) {
+        this.config.headers = Object.fromEntries(config.headers.entries())
+      } else {
+        this.config.headers = config.headers
+      }
     }
 
     this.fetch = fetch
