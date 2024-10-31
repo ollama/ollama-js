@@ -135,8 +135,14 @@ const fetchWithHeaders = async (
  * @param host {string} - The host to fetch
  * @returns {Promise<Response>} - The fetch response
  */
-export const get = async (fetch: Fetch, host: string): Promise<Response> => {
-  const response = await fetchWithHeaders(fetch, host)
+export const get = async (
+  fetch: Fetch,
+  host: string,
+  options?: { headers?: Record<string, string> },
+): Promise<Response> => {
+  const response = await fetchWithHeaders(fetch, host, {
+    headers: options?.headers
+  })
 
   await checkOk(response)
 
@@ -148,9 +154,14 @@ export const get = async (fetch: Fetch, host: string): Promise<Response> => {
  * @param host {string} - The host to fetch
  * @returns {Promise<Response>} - The fetch response
  */
-export const head = async (fetch: Fetch, host: string): Promise<Response> => {
+export const head = async (
+  fetch: Fetch,
+  host: string,
+  options?: { headers?: Record<string, string> },
+): Promise<Response> => {
   const response = await fetchWithHeaders(fetch, host, {
     method: 'HEAD',
+    headers: options?.headers
   })
 
   await checkOk(response)
@@ -169,7 +180,7 @@ export const post = async (
   fetch: Fetch,
   host: string,
   data?: Record<string, unknown> | BodyInit,
-  options?: { signal?: AbortSignal, headers?: Headers },
+  options?: { signal?: AbortSignal, headers?: Record<string, string> },
 ): Promise<Response> => {
   const isRecord = (input: any): input is Record<string, unknown> => {
     return input !== null && typeof input === 'object' && !Array.isArray(input)
@@ -199,10 +210,12 @@ export const del = async (
   fetch: Fetch,
   host: string,
   data?: Record<string, unknown>,
+  options?: { headers?: Record<string, string> },
 ): Promise<Response> => {
   const response = await fetchWithHeaders(fetch, host, {
     method: 'DELETE',
     body: JSON.stringify(data),
+    headers: options?.headers
   })
 
   await checkOk(response)

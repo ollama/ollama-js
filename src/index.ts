@@ -105,7 +105,9 @@ export class Ollama extends OllamaBrowser {
     const digest = `sha256:${sha256sum}`
 
     try {
-      await utils.head(this.fetch, `${this.config.host}/api/blobs/${digest}`)
+      await utils.head(this.fetch, `${this.config.host}/api/blobs/${digest}`, {
+        headers: this.config.headers
+      })
     } catch (e) {
       if (e instanceof Error && e.message.includes('404')) {
         // Create a new readable stream for the fetch request
@@ -129,6 +131,7 @@ export class Ollama extends OllamaBrowser {
           this.fetch,
           `${this.config.host}/api/blobs/${digest}`,
           readableStream,
+          { headers: this.config.headers },
         )
       } else {
         throw e

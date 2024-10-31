@@ -4,7 +4,7 @@ export interface Config {
   host: string
   fetch?: Fetch
   proxy?: boolean
-  headers?: Headers
+  headers?: Record<string, string>
 }
 
 // request types
