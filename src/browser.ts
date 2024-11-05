@@ -73,7 +73,7 @@ export class Ollama {
     if (request.stream) {
       const abortController = new AbortController()
       const response = await post(this.fetch, host, request, {
-        signal: abortController.signal,
+        signal: request.abortController?.signal ?? abortController.signal,
         headers: this.config.headers
       })
 
@@ -83,7 +83,7 @@ export class Ollama {
 
       const itr = parseJSON<T | ErrorResponse>(response.body)
       const abortableAsyncIterator = new AbortableAsyncIterator(
-        abortController,
+        request.abortController ?? abortController,
         itr,
         () => {
           const i = this.ongoingStreamedRequests.indexOf(abortableAsyncIterator)
@@ -96,7 +96,8 @@ export class Ollama {
       return abortableAsyncIterator
     }
     const response = await utils.post(this.fetch, host, request, {
-      headers: this.config.headers
+      headers: this.config.headers,
+      signal: request.abortController?.signal,
     })
     return await response.json()
   }

@@ -44,7 +44,11 @@ export interface Options {
   stop: string[]
 }
 
-export interface GenerateRequest {
+interface AbortableRequest {
+  abortController?: AbortController
+}
+
+export interface GenerateRequest extends AbortableRequest{
   model: string
   prompt: string
   suffix?: string
@@ -95,7 +99,7 @@ export interface Tool {
   };
 }
 
-export interface ChatRequest {
+export interface ChatRequest extends AbortableRequest {
   model: string
   messages?: Message[]
   stream?: boolean
@@ -106,19 +110,19 @@ export interface ChatRequest {
   options?: Partial<Options>
 }
 
-export interface PullRequest {
+export interface PullRequest extends AbortableRequest {
   model: string
   insecure?: boolean
   stream?: boolean
 }
 
-export interface PushRequest {
+export interface PushRequest extends AbortableRequest {
   model: string
   insecure?: boolean
   stream?: boolean
 }
 
-export interface CreateRequest {
+export interface CreateRequest extends AbortableRequest {
   model: string
   path?: string
   modelfile?: string
@@ -126,23 +130,23 @@ export interface CreateRequest {
   stream?: boolean
 }
 
-export interface DeleteRequest {
+export interface DeleteRequest extends AbortableRequest {
   model: string
 }
 
-export interface CopyRequest {
+export interface CopyRequest extends AbortableRequest {
   source: string
   destination: string
 }
 
-export interface ShowRequest {
+export interface ShowRequest extends AbortableRequest {
   model: string
   system?: string
   template?: string
   options?: Partial<Options>
 }
 
-export interface EmbedRequest {
+export interface EmbedRequest extends AbortableRequest {
   model: string
   input: string | string[]
   truncate?: boolean
@@ -151,7 +155,7 @@ export interface EmbedRequest {
   options?: Partial<Options>
 }
 
-export interface EmbeddingsRequest {
+export interface EmbeddingsRequest extends AbortableRequest {
   model: string
   prompt: string
   keep_alive?: string | number
