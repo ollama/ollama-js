@@ -204,8 +204,10 @@ ollama.ps()
 ollama.abort()
 ```
 
-This method will abort all streamed generations currently running.
-All asynchronous threads listening to streams (typically the ```for await (const part of response)```) will throw an ```AbortError``` exception
+This method will abort **all** streamed generations currently running with the client instance.
+If there is a need to manage streams with timeouts, it is recommended to have one Ollama client per stream.
+
+All asynchronous threads listening to streams (typically the ```for await (const part of response)```) will throw an ```AbortError``` exception. See [examples/abort/abort-all-requests.ts](examples/abort/abort-all-requests.ts) for an example.
 
 ## Custom client
 
