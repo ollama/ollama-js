@@ -4,12 +4,12 @@ import { Ollama } from 'ollama'
 const client1 = new Ollama()
 const client2 = new Ollama()
 
-// Set a timeout to abort just the first request after 1 second
+// Set a timeout to abort just the first request after 5 seconds
 setTimeout(() => {
   console.log('\nAborting dragons story...\n')
   // abort the first client
   client1.abort()
-}, 1000) // 1000 milliseconds = 1 second
+}, 5000) // 5000 milliseconds = 5 seconds
 
 // Start multiple concurrent streaming requests with different clients
 Promise.all([

@@ -1,10 +1,10 @@
 import ollama from 'ollama'
 
-// Set a timeout to abort all requests after 1 second
+// Set a timeout to abort all requests after 5 seconds
 setTimeout(() => {
   console.log('\nAborting all requests...\n')
   ollama.abort()
-}, 1000) // 1000 milliseconds = 1 second
+}, 5000) // 5000 milliseconds = 5 seconds
 
 // Start multiple concurrent streaming requests
 Promise.all([
