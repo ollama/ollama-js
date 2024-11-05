@@ -29,7 +29,7 @@ bun install
 bun run index.ts
 ```
 
-### react
+### react-js
 ```
 bun install
 bun start
