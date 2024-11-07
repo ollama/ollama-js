@@ -235,10 +235,12 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @returns {Promise<StatusResponse>} - The response object.
    */
   async delete(request: DeleteRequest): Promise<StatusResponse> {
-    await utils.del(this.fetch, `${this.config.host}/api/delete`, {
-      name: request.model,
-      headers: this.config.headers
-    })
+    await utils.del(
+      this.fetch,
+      `${this.config.host}/api/delete`,
+      { name: request.model },
+      { headers: this.config.headers }
+    )
     return { status: 'success' }
   }
 

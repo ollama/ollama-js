@@ -113,7 +113,7 @@ const fetchWithHeaders = async (
 ): Promise<Response> => {
   const defaultHeaders = {
     'Content-Type': 'application/json',
-    Accept: 'application/json',
+    Accept: 'application/json', 
     'User-Agent': `ollama-js/${version} (${getPlatform()})`,
   } as HeadersInit
 
@@ -211,6 +211,7 @@ export const del = async (
   const response = await fetchWithHeaders(fetch, host, {
     method: 'DELETE',
     body: JSON.stringify(data),
+    headers: options?.headers
   })
 
   await checkOk(response)
