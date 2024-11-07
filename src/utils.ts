@@ -115,15 +115,20 @@ const fetchWithHeaders = async (
     'Content-Type': 'application/json',
     Accept: 'application/json',
     'User-Agent': `ollama-js/${version} (${getPlatform()})`,
-  }
+  } as HeadersInit
 
   if (!options.headers) {
     options.headers = {}
   }
 
+  // Filter out default headers from custom headers
+  const customHeaders = Object.fromEntries(
+    Object.entries(options.headers).filter(([key]) => !Object.keys(defaultHeaders).some(defaultKey => defaultKey.toLowerCase() === key.toLowerCase()))
+  )
+
   options.headers = {
     ...defaultHeaders,
-    ...options.headers,
+    ...customHeaders
   }
 
   return fetch(url, options)
@@ -135,8 +140,10 @@ const fetchWithHeaders = async (
  * @param host {string} - The host to fetch
  * @returns {Promise<Response>} - The fetch response
  */
-export const get = async (fetch: Fetch, host: string): Promise<Response> => {
-  const response = await fetchWithHeaders(fetch, host)
+export const get = async (fetch: Fetch, host: string, options?: { headers?: HeadersInit }): Promise<Response> => {
+  const response = await fetchWithHeaders(fetch, host, {
+    headers: options?.headers
+  })
 
   await checkOk(response)
 
@@ -169,7 +176,7 @@ export const post = async (
   fetch: Fetch,
   host: string,
   data?: Record<string, unknown> | BodyInit,
-  options?: { signal?: AbortSignal, headers?: Headers },
+  options?: { signal?: AbortSignal, headers?: HeadersInit },
 ): Promise<Response> => {
   const isRecord = (input: any): input is Record<string, unknown> => {
     return input !== null && typeof input === 'object' && !Array.isArray(input)
@@ -199,10 +206,12 @@ export const del = async (
   fetch: Fetch,
   host: string,
   data?: Record<string, unknown>,
+  options?: { headers?: HeadersInit },
 ): Promise<Response> => {
   const response = await fetchWithHeaders(fetch, host, {
     method: 'DELETE',
     body: JSON.stringify(data),
+    headers: options?.headers
   })
 
   await checkOk(response)

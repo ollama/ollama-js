@@ -1,5 +1,5 @@
 import * as utils from './utils.js'
-import { AbortableAsyncIterator, parseJSON, post } from './utils.js'
+import { AbortableAsyncIterator, parseJSON } from './utils.js'
 import 'whatwg-fetch'
 
 import type {
@@ -34,15 +34,14 @@ export class Ollama {
   constructor(config?: Partial<Config>) {
     this.config = {
       host: '',
+      headers: config?.headers
     }
+
     if (!config?.proxy) {
       this.config.host = utils.formatHost(config?.host ?? 'http://127.0.0.1:11434')
     }
 
-    this.fetch = fetch
-    if (config?.fetch != null) {
-      this.fetch = config.fetch
-    }
+    this.fetch = config?.fetch ?? fetch
   }
 
   // Abort any ongoing streamed requests to Ollama
@@ -72,7 +71,7 @@ export class Ollama {
     const host = `${this.config.host}/api/${endpoint}`
     if (request.stream) {
       const abortController = new AbortController()
-      const response = await post(this.fetch, host, request, {
+      const response = await utils.post(this.fetch, host, request, {
         signal: abortController.signal,
         headers: this.config.headers
       })
@@ -236,9 +235,12 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @returns {Promise<StatusResponse>} - The response object.
    */
   async delete(request: DeleteRequest): Promise<StatusResponse> {
-    await utils.del(this.fetch, `${this.config.host}/api/delete`, {
-      name: request.model,
-    })
+    await utils.del(
+      this.fetch,
+      `${this.config.host}/api/delete`,
+      { name: request.model },
+      { headers: this.config.headers }
+    )
     return { status: 'success' }
   }
 
@@ -249,7 +251,9 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @returns {Promise<StatusResponse>} - The response object.
    */
   async copy(request: CopyRequest): Promise<StatusResponse> {
-    await utils.post(this.fetch, `${this.config.host}/api/copy`, { ...request })
+    await utils.post(this.fetch, `${this.config.host}/api/copy`, { ...request }, {
+      headers: this.config.headers
+    })
     return { status: 'success' }
   }
 
@@ -259,7 +263,9 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @throws {Error} - If the response body is missing.
    */
   async list(): Promise<ListResponse> {
-    const response = await utils.get(this.fetch, `${this.config.host}/api/tags`)
+    const response = await utils.get(this.fetch, `${this.config.host}/api/tags`, {
+      headers: this.config.headers
+    })
     return (await response.json()) as ListResponse
   }
 
@@ -271,6 +277,8 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
   async show(request: ShowRequest): Promise<ShowResponse> {
     const response = await utils.post(this.fetch, `${this.config.host}/api/show`, {
       ...request,
+    }, {
+      headers: this.config.headers
     })
     return (await response.json()) as ShowResponse
   }
@@ -283,6 +291,8 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
     async embed(request: EmbedRequest): Promise<EmbedResponse> {
       const response = await utils.post(this.fetch, `${this.config.host}/api/embed`, {
         ...request,
+      }, {
+        headers: this.config.headers
       })
       return (await response.json()) as EmbedResponse
     }
@@ -295,6 +305,8 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
   async embeddings(request: EmbeddingsRequest): Promise<EmbeddingsResponse> {
     const response = await utils.post(this.fetch, `${this.config.host}/api/embeddings`, {
       ...request,
+    }, {
+      headers: this.config.headers
     })
     return (await response.json()) as EmbeddingsResponse
   }
@@ -305,7 +317,9 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @throws {Error} - If the response body is missing.
    */
   async ps(): Promise<ListResponse> {
-    const response = await utils.get(this.fetch, `${this.config.host}/api/ps`)
+    const response = await utils.get(this.fetch, `${this.config.host}/api/ps`, {
+      headers: this.config.headers
+    })
     return (await response.json()) as ListResponse
   }
 }
