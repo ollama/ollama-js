@@ -113,7 +113,7 @@ const fetchWithHeaders = async (
 ): Promise<Response> => {
   const defaultHeaders = {
     'Content-Type': 'application/json',
-    Accept: 'application/json', 
+    Accept: 'application/json',
     'User-Agent': `ollama-js/${version} (${getPlatform()})`,
   } as HeadersInit
 
