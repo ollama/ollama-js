@@ -34,7 +34,7 @@ export class Ollama {
   constructor(config?: Partial<Config>) {
     this.config = {
       host: '',
-      headers: config?.headers
+      headers: config?.headers,
     }
 
     if (!config?.proxy) {
@@ -65,7 +65,7 @@ export class Ollama {
    */
   protected async processStreamableRequest<T extends object>(
     endpoint: string,
-    request: { stream?: boolean } & Record<string, any>,
+    request: Record<string, unknown> & { stream?: boolean },
   ): Promise<T | AbortableAsyncIterator<T>> {
     request.stream = request.stream ?? false
     const host = `${this.config.host}/api/${endpoint}`
@@ -73,7 +73,7 @@ export class Ollama {
       const abortController = new AbortController()
       const response = await utils.post(this.fetch, host, request, {
         signal: abortController.signal,
-        headers: this.config.headers
+        headers: this.config.headers,
       })
 
       if (!response.body) {
@@ -95,30 +95,30 @@ export class Ollama {
       return abortableAsyncIterator
     }
     const response = await utils.post(this.fetch, host, request, {
-      headers: this.config.headers
+      headers: this.config.headers,
     })
     return await response.json()
   }
 
   /**
- * Encodes an image to base64 if it is a Uint8Array.
- * @param image {Uint8Array | string} - The image to encode.
- * @returns {Promise<string>} - The base64 encoded image.
- */
-async encodeImage(image: Uint8Array | string): Promise<string> {
-  if (typeof image !== 'string') {
-    // image is Uint8Array, convert it to base64
-    const uint8Array = new Uint8Array(image);
-    let byteString = '';
-    const len = uint8Array.byteLength;
-    for (let i = 0; i < len; i++) {
-      byteString += String.fromCharCode(uint8Array[i]);
+   * Encodes an image to base64 if it is a Uint8Array.
+   * @param image {Uint8Array | string} - The image to encode.
+   * @returns {Promise<string>} - The base64 encoded image.
+   */
+  async encodeImage(image: Uint8Array | string): Promise<string> {
+    if (typeof image !== 'string') {
+      // image is Uint8Array, convert it to base64
+      const uint8Array = new Uint8Array(image)
+      let byteString = ''
+      const len = uint8Array.byteLength
+      for (let i = 0; i < len; i++) {
+        byteString += String.fromCharCode(uint8Array[i])
+      }
+      return btoa(byteString)
     }
-    return btoa(byteString);
+    // the string may be base64 encoded
+    return image
   }
-  // the string may be base64 encoded
-  return image;
-}
 
   generate(
     request: GenerateRequest & { stream: true },
@@ -136,7 +136,10 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
     if (request.images) {
       request.images = await Promise.all(request.images.map(this.encodeImage.bind(this)))
     }
-    return this.processStreamableRequest<GenerateResponse>('generate', request)
+    return this.processStreamableRequest<GenerateResponse>(
+      'generate',
+      request as unknown as Record<string, unknown> & { stream: boolean },
+    )
   }
 
   chat(
@@ -163,7 +166,10 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
         }
       }
     }
-    return this.processStreamableRequest<ChatResponse>('chat', request)
+    return this.processStreamableRequest<ChatResponse>(
+      'chat',
+      request as unknown as Record<string, unknown> & { stream?: boolean },
+    )
   }
 
   create(
@@ -239,7 +245,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
       this.fetch,
       `${this.config.host}/api/delete`,
       { name: request.model },
-      { headers: this.config.headers }
+      { headers: this.config.headers },
     )
     return { status: 'success' }
   }
@@ -251,9 +257,14 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @returns {Promise<StatusResponse>} - The response object.
    */
   async copy(request: CopyRequest): Promise<StatusResponse> {
-    await utils.post(this.fetch, `${this.config.host}/api/copy`, { ...request }, {
-      headers: this.config.headers
-    })
+    await utils.post(
+      this.fetch,
+      `${this.config.host}/api/copy`,
+      { ...request },
+      {
+        headers: this.config.headers,
+      },
+    )
     return { status: 'success' }
   }
 
@@ -264,7 +275,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    */
   async list(): Promise<ListResponse> {
     const response = await utils.get(this.fetch, `${this.config.host}/api/tags`, {
-      headers: this.config.headers
+      headers: this.config.headers,
     })
     return (await response.json()) as ListResponse
   }
@@ -275,11 +286,16 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @returns {Promise<ShowResponse>} - The response object.
    */
   async show(request: ShowRequest): Promise<ShowResponse> {
-    const response = await utils.post(this.fetch, `${this.config.host}/api/show`, {
-      ...request,
-    }, {
-      headers: this.config.headers
-    })
+    const response = await utils.post(
+      this.fetch,
+      `${this.config.host}/api/show`,
+      {
+        ...request,
+      },
+      {
+        headers: this.config.headers,
+      },
+    )
     return (await response.json()) as ShowResponse
   }
 
@@ -288,14 +304,19 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @param request {EmbedRequest} - The request object.
    * @returns {Promise<EmbedResponse>} - The response object.
    */
-    async embed(request: EmbedRequest): Promise<EmbedResponse> {
-      const response = await utils.post(this.fetch, `${this.config.host}/api/embed`, {
+  async embed(request: EmbedRequest): Promise<EmbedResponse> {
+    const response = await utils.post(
+      this.fetch,
+      `${this.config.host}/api/embed`,
+      {
         ...request,
-      }, {
-        headers: this.config.headers
-      })
-      return (await response.json()) as EmbedResponse
-    }
+      },
+      {
+        headers: this.config.headers,
+      },
+    )
+    return (await response.json()) as EmbedResponse
+  }
 
   /**
    * Embeds a text prompt into a vector.
@@ -303,11 +324,16 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @returns {Promise<EmbeddingsResponse>} - The response object.
    */
   async embeddings(request: EmbeddingsRequest): Promise<EmbeddingsResponse> {
-    const response = await utils.post(this.fetch, `${this.config.host}/api/embeddings`, {
-      ...request,
-    }, {
-      headers: this.config.headers
-    })
+    const response = await utils.post(
+      this.fetch,
+      `${this.config.host}/api/embeddings`,
+      {
+        ...request,
+      },
+      {
+        headers: this.config.headers,
+      },
+    )
     return (await response.json()) as EmbeddingsResponse
   }
 
@@ -318,7 +344,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    */
   async ps(): Promise<ListResponse> {
     const response = await utils.get(this.fetch, `${this.config.host}/api/ps`, {
-      headers: this.config.headers
+      headers: this.config.headers,
     })
     return (await response.json()) as ListResponse
   }

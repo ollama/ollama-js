@@ -10,7 +10,6 @@ yarn.lock
 .eslintrc.cjs
 .eslintignore
 .prettierrc.json
-jest.config.cjs
 tsconfig.json
 test
 examples

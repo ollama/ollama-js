@@ -21,7 +21,9 @@ console.log(response.message.content)
 ```
 
 ### Browser Usage
+
 To use the library without node, import the browser module.
+
 ```javascript
 import ollama from 'ollama/browser'
 ```
@@ -34,7 +36,11 @@ Response streaming can be enabled by setting `stream: true`, modifying function 
 import ollama from 'ollama'
 
 const message = { role: 'user', content: 'Why is the sky blue?' }
-const response = await ollama.chat({ model: 'llama3.1', messages: [message], stream: true })
+const response = await ollama.chat({
+  model: 'llama3.1',
+  messages: [message],
+  stream: true,
+})
 for await (const part of response) {
   process.stdout.write(part.message.content)
 }
@@ -207,7 +213,7 @@ ollama.abort()
 This method will abort **all** streamed generations currently running with the client instance.
 If there is a need to manage streams with timeouts, it is recommended to have one Ollama client per stream.
 
-All asynchronous threads listening to streams (typically the ```for await (const part of response)```) will throw an ```AbortError``` exception. See [examples/abort/abort-all-requests.ts](examples/abort/abort-all-requests.ts) for an example.
+All asynchronous threads listening to streams (typically the `for await (const part of response)`) will throw an `AbortError` exception. See [examples/abort/abort-all-requests.ts](examples/abort/abort-all-requests.ts) for an example.
 
 ## Custom client
 

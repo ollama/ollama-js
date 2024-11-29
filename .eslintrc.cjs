@@ -2,9 +2,7 @@ module.exports = {
   env: {
     commonjs: true,
     es2021: true,
-    node: true,
-    jest: true,
-  },
+    node: true,  },
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 'latest',

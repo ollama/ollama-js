@@ -6,9 +6,12 @@ import { dirname, join, resolve } from 'path'
 import { createHash } from 'crypto'
 import { homedir } from 'os'
 import { Ollama as OllamaBrowser } from './browser.js'
-
+import * as _sharp from 'sharp'
 import type { CreateRequest, ProgressResponse } from './interfaces.js'
 
+const sharp = _sharp.default
+
+const IMAGE_EXTENSIONS_TO_CONVERT = ['webp', 'avif', 'gif', 'svg', 'tiff']
 export class Ollama extends OllamaBrowser {
   async encodeImage(image: Uint8Array | Buffer | string): Promise<string> {
     if (typeof image !== 'string') {
@@ -19,6 +22,11 @@ export class Ollama extends OllamaBrowser {
       if (fs.existsSync(image)) {
         // this is a filepath, read the file and convert it to base64
         const fileBuffer = await promises.readFile(resolve(image))
+        const imageExtension = image.split('.').pop()?.toLowerCase()
+        if (imageExtension && IMAGE_EXTENSIONS_TO_CONVERT.includes(imageExtension)) {
+          const convertedImage = await sharp(fileBuffer).jpeg().toBuffer()
+          return Buffer.from(convertedImage).toString('base64')
+        }
         return Buffer.from(fileBuffer).toString('base64')
       }
     } catch {

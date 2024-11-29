@@ -27,7 +27,11 @@ export class AbortableAsyncIterator<T extends object> {
   private readonly itr: AsyncGenerator<T | ErrorResponse>
   private readonly doneCallback: () => void
 
-  constructor(abortController: AbortController, itr: AsyncGenerator<T | ErrorResponse>, doneCallback: () => void) {
+  constructor(
+    abortController: AbortController,
+    itr: AsyncGenerator<T | ErrorResponse>,
+    doneCallback: () => void,
+  ) {
     this.abortController = abortController
     this.itr = itr
     this.doneCallback = doneCallback
@@ -45,7 +49,10 @@ export class AbortableAsyncIterator<T extends object> {
       yield message
       // message will be done in the case of chat and generate
       // message will be success in the case of a progress response (pull, push, create)
-      if ((message as any).done || (message as any).status === 'success') {
+      if (
+        (message as { done: boolean }).done ||
+        (message as { status: string }).status === 'success'
+      ) {
         this.doneCallback()
         return
       }
@@ -123,12 +130,17 @@ const fetchWithHeaders = async (
 
   // Filter out default headers from custom headers
   const customHeaders = Object.fromEntries(
-    Object.entries(options.headers).filter(([key]) => !Object.keys(defaultHeaders).some(defaultKey => defaultKey.toLowerCase() === key.toLowerCase()))
+    Object.entries(options.headers).filter(
+      ([key]) =>
+        !Object.keys(defaultHeaders).some(
+          (defaultKey) => defaultKey.toLowerCase() === key.toLowerCase(),
+        ),
+    ),
   )
 
   options.headers = {
     ...defaultHeaders,
-    ...customHeaders
+    ...customHeaders,
   }
 
   return fetch(url, options)
@@ -140,9 +152,13 @@ const fetchWithHeaders = async (
  * @param host {string} - The host to fetch
  * @returns {Promise<Response>} - The fetch response
  */
-export const get = async (fetch: Fetch, host: string, options?: { headers?: HeadersInit }): Promise<Response> => {
+export const get = async (
+  fetch: Fetch,
+  host: string,
+  options?: { headers?: HeadersInit },
+): Promise<Response> => {
   const response = await fetchWithHeaders(fetch, host, {
-    headers: options?.headers
+    headers: options?.headers,
   })
 
   await checkOk(response)
@@ -168,17 +184,20 @@ export const head = async (fetch: Fetch, host: string): Promise<Response> => {
  * A wrapper around the post method that adds default headers.
  * @param fetch {Fetch} - The fetch function to use
  * @param host {string} - The host to fetch
- * @param data {Record<string, unknown> | BodyInit} - The data to send
+ * @param data {Record<string, unknown> | BodyInit | ReadableStream} - The data to send
  * @param options {{ signal: AbortSignal }} - The fetch options
  * @returns {Promise<Response>} - The fetch response
  */
 export const post = async (
   fetch: Fetch,
   host: string,
-  data?: Record<string, unknown> | BodyInit,
-  options?: { signal?: AbortSignal, headers?: HeadersInit },
+  data?:
+    | (Record<string, unknown> & { stream?: boolean })
+    | BodyInit
+    | ReadableStream<unknown>,
+  options?: { signal?: AbortSignal; headers?: HeadersInit },
 ): Promise<Response> => {
-  const isRecord = (input: any): input is Record<string, unknown> => {
+  const isRecord = (input: unknown): input is Record<string, unknown> => {
     return input !== null && typeof input === 'object' && !Array.isArray(input)
   }
 
@@ -186,9 +205,9 @@ export const post = async (
 
   const response = await fetchWithHeaders(fetch, host, {
     method: 'POST',
-    body: formattedData,
+    body: formattedData as BodyInit,
     signal: options?.signal,
-    headers: options?.headers
+    headers: options?.headers,
   })
 
   await checkOk(response)
@@ -211,7 +230,7 @@ export const del = async (
   const response = await fetchWithHeaders(fetch, host, {
     method: 'DELETE',
     body: JSON.stringify(data),
-    headers: options?.headers
+    headers: options?.headers,
   })
 
   await checkOk(response)
