@@ -8,8 +8,8 @@ function getFlightTimes(args: { [key: string]: any }) {
     const arrival = args.arrival;
 
     const flights = {
-        "NYC-LAX": { departure: "08:00 AM", arrival: "11:30 AM", duration: "5h 30m" },
-        "LAX-NYC": { departure: "02:00 PM", arrival: "10:30 PM", duration: "5h 30m" },
+        "LGA-LAX": { departure: "08:00 AM", arrival: "11:30 AM", duration: "5h 30m" },
+        "LAX-LGA": { departure: "02:00 PM", arrival: "10:30 PM", duration: "5h 30m" },
         "LHR-JFK": { departure: "10:00 AM", arrival: "01:00 PM", duration: "8h 00m" },
         "JFK-LHR": { departure: "09:00 PM", arrival: "09:00 AM", duration: "7h 00m" },
         "CDG-DXB": { departure: "11:00 AM", arrival: "08:00 PM", duration: "6h 00m" },
@@ -22,7 +22,7 @@ function getFlightTimes(args: { [key: string]: any }) {
 
 async function run(model: string) {
     // Initialize conversation with a user query
-    let messages = [{ role: 'user', content: 'What is the flight time from New York (NYC) to Los Angeles (LAX)?' }];
+    let messages = [{ role: 'user', content: 'What is the flight time from New York (LGA) to Los Angeles (LAX)?' }];
 
     // First API call: Send the query and function description to the model
     const response = await ollama.chat({
