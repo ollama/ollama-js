@@ -99,7 +99,7 @@ export interface ChatRequest {
   model: string
   messages?: Message[]
   stream?: boolean
-  format?: string
+  format?: string | object
   keep_alive?: string | number
   tools?: Tool[]
 
