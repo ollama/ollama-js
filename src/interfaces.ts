@@ -53,7 +53,7 @@ export interface GenerateRequest {
   context?: number[]
   stream?: boolean
   raw?: boolean
-  format?: string
+  format?: string | object
   images?: Uint8Array[] | string[]
   keep_alive?: string | number
 
