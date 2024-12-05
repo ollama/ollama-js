@@ -1,27 +1,48 @@
-import { Ollama } from '../../src/index.js';
+import ollama from 'ollama';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-const ollama = new Ollama();
+/*
+    Ollama structured outputs capabilities
+    It parses the response from the model into a structured JSON object using Zod
+*/
 
 // Define the schema for friend info
 const FriendInfoSchema = z.object({
-    name: z.string(),
-    age: z.number().int(),
-    is_available: z.boolean()
+    name: z.string().describe('The name of the friend'),
+    age: z.number().int().describe('The age of the friend'),
+    is_available: z.boolean().describe('Whether the friend is available')
 });
 
 // Define the schema for friend list
 const FriendListSchema = z.object({
-    friends: z.array(FriendInfoSchema)
+    friends: z.array(FriendInfoSchema).describe('An array of friends')
 });
 
-async function run() {
+async function run(model: string) {
     // Convert the Zod schema to JSON Schema format
     const jsonSchema = zodToJsonSchema(FriendListSchema);
 
-    // Can use manually defined schema directly
-    // const schema = { 'type': 'object', 'properties': { 'friends': { 'type': 'array', 'items': { 'type': 'object', 'properties': { 'name': { 'type': 'string' }, 'age': { 'type': 'integer' }, 'is_available': { 'type': 'boolean' } }, 'required': ['name', 'age', 'is_available'] } } }, 'required': ['friends'] }
+    /* Can use manually defined schema directly
+    const schema = { 
+        'type': 'object', 
+        'properties': { 
+            'friends': { 
+                'type': 'array', 
+                'items': { 
+                    'type': 'object', 
+                    'properties': { 
+                        'name': { 'type': 'string' }, 
+                        'age': { 'type': 'integer' }, 
+                        'is_available': { 'type': 'boolean' } 
+                    }, 
+                    'required': ['name', 'age', 'is_available'] 
+                } 
+            } 
+        }, 
+        'required': ['friends'] 
+    }
+    */
 
     const messages = [{
         role: 'user',
@@ -29,7 +50,7 @@ async function run() {
     }];
 
     const response = await ollama.chat({
-        model: 'llama3.1:8b',
+        model: model,
         messages: messages,
         format: jsonSchema, // or format: schema
         options: {
@@ -47,4 +68,4 @@ async function run() {
     }
 }
 
-run().catch(console.error);
+run('llama3.1:8b').catch(console.error);

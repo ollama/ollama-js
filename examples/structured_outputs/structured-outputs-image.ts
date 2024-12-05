@@ -1,31 +1,36 @@
-import { Ollama } from '../../src/index.js';
+import ollama from 'ollama';
+
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { createInterface } from 'readline';
 
-const ollama = new Ollama();
+/*
+    Ollama vision capabilities with structured outputs
+    It takes an image file as input and returns a structured JSON description of the image contents
+    including detected objects, scene analysis, colors, and any text found in the image
+*/
 
 // Define the schema for image objects
 const ObjectSchema = z.object({
-    name: z.string(),
-    confidence: z.number(),
-    attributes: z.record(z.any()).optional()
+    name: z.string().describe('The name of the object'),
+    confidence: z.number().min(0).max(1).describe('The confidence score of the object detection'),
+    attributes: z.record(z.any()).optional().describe('Additional attributes of the object')
 });
 
-// Define the schema for image description
+// Schema for individual objects detected in the image
 const ImageDescriptionSchema = z.object({
-    summary: z.string(),
-    objects: z.array(ObjectSchema),
-    scene: z.string(),
-    colors: z.array(z.string()),
-    time_of_day: z.enum(['Morning', 'Afternoon', 'Evening', 'Night']),
-    setting: z.enum(['Indoor', 'Outdoor', 'Unknown']),
-    text_content: z.string().optional()
+    summary: z.string().describe('A concise summary of the image'),
+    objects: z.array(ObjectSchema).describe('An array of objects detected in the image'),
+    scene: z.string().describe('The scene of the image'),
+    colors: z.array(z.string()).describe('An array of colors detected in the image'),
+    time_of_day: z.enum(['Morning', 'Afternoon', 'Evening', 'Night']).describe('The time of day the image was taken'),
+    setting: z.enum(['Indoor', 'Outdoor', 'Unknown']).describe('The setting of the image'),
+    text_content: z.string().describe('Any text detected in the image')
 });
 
-async function run() {
+async function run(model: string) {
     // Create readline interface for user input
     const rl = createInterface({
         input: process.stdin,
@@ -54,7 +59,7 @@ async function run() {
         }];
 
         const response = await ollama.chat({
-            model: 'llama3.2-vision',
+            model: model,
             messages: messages,
             format: jsonSchema,
             options: {
@@ -75,4 +80,4 @@ async function run() {
     }
 }
 
-run().catch(console.error);
+run('llama3.2-vision').catch(console.error);

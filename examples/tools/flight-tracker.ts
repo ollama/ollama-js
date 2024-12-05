@@ -1,7 +1,5 @@
-// import ollama from 'ollama';
-import { Ollama } from '../../src/index.js';
+import ollama from 'ollama';
 
-const ollama = new Ollama();
 
 // Simulates an API call to get flight times
 // In a real application, this would fetch data from a live database or API
