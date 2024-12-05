@@ -70,6 +70,7 @@ async function run(model: string) {
         for (const tool of response.message.tool_calls) {
             const functionToCall = availableFunctions[tool.function.name];
             const functionResponse = functionToCall(tool.function.arguments);
+            console.log('functionResponse', functionResponse)
             // Add function response to the conversation
             messages.push({
                 role: 'tool',
