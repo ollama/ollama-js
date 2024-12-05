@@ -53,7 +53,7 @@ export interface GenerateRequest {
   context?: number[]
   stream?: boolean
   raw?: boolean
-  format?: string
+  format?: string | object
   images?: Uint8Array[] | string[]
   keep_alive?: string | number
 
@@ -99,7 +99,7 @@ export interface ChatRequest {
   model: string
   messages?: Message[]
   stream?: boolean
-  format?: string
+  format?: string | object
   keep_alive?: string | number
   tools?: Tool[]
 
