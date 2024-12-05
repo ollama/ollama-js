@@ -60,9 +60,8 @@ async function run(model: string) {
 
     // Parse and validate the response
     try {
-        console.log('\n', response.message.content, '\n');
         const friendsResponse = FriendListSchema.parse(JSON.parse(response.message.content));
-        console.log('\n', friendsResponse, '\n');
+        console.log(friendsResponse);
     } catch (error) {
         console.error("Generated invalid response:", error);
     }

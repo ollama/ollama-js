@@ -70,7 +70,7 @@ async function run(model: string) {
         // Parse and validate the response
         try {
             const imageAnalysis = ImageDescriptionSchema.parse(JSON.parse(response.message.content));
-            console.log('\nImage Analysis:', imageAnalysis, '\n');
+            console.log('Image Analysis:', imageAnalysis);
         } catch (error) {
             console.error("Generated invalid response:", error);
         }
