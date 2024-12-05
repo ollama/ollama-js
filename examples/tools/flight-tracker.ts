@@ -1,4 +1,7 @@
-import ollama from 'ollama';
+// import ollama from 'ollama';
+import { Ollama } from '../../src/index.js';
+
+const ollama = new Ollama();
 
 // Simulates an API call to get flight times
 // In a real application, this would fetch data from a live database or API
@@ -70,6 +73,7 @@ async function run(model: string) {
         for (const tool of response.message.tool_calls) {
             const functionToCall = availableFunctions[tool.function.name];
             const functionResponse = functionToCall(tool.function.arguments);
+            console.log('functionResponse', functionResponse)
             // Add function response to the conversation
             messages.push({
                 role: 'tool',
