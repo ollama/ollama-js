@@ -1,6 +1,4 @@
-import { Ollama } from '../../src/index.js';
-
-const ollama = new Ollama();
+import ollama from 'ollama';
 
 // Add two numbers function
 function addTwoNumbers(args: { a: number, b: number }): number {

@@ -1,6 +1,5 @@
 import ollama from 'ollama';
 
-
 // Simulates an API call to get flight times
 // In a real application, this would fetch data from a live database or API
 function getFlightTimes(args: { [key: string]: any }) {
