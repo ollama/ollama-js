@@ -12,7 +12,7 @@ import { createInterface } from 'readline';
     including detected objects, scene analysis, colors, and any text found in the image
 */
 
-// Define the schema for image objects
+// Schema for individual objects detected in the image
 const ObjectSchema = z.object({
     name: z.string().describe('The name of the object'),
     confidence: z.number().min(0).max(1).describe('The confidence score of the object detection'),
