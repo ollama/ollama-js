@@ -12,7 +12,7 @@ import type { CreateRequest, ProgressResponse } from './interfaces.js'
 
 const sharp = _sharp.default
 
-const IMAGE_EXTENSIONS_TO_CONVERT = ['webp', 'avif', 'gif', 'svg', 'tiff']
+const IMAGE_EXTENSIONS_TO_CONVERT = ['webp', 'avif', 'gif', 'svg', 'tiff', 'tif']
 export class Ollama extends OllamaBrowser {
   async encodeImage(image: Uint8Array | Buffer | string): Promise<string> {
     if (typeof image !== 'string') {
