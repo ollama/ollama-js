@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import { formatHost } from '../src/utils'
 
 describe('formatHost Function Tests', () => {
@@ -57,7 +58,7 @@ describe('formatHost Function Tests', () => {
     expect(formatHost('example.com:56789/')).toBe('http://example.com:56789')
   })
 
-  it('should handle traling slash with only a port', () => {
+  it('should handle trailing slash with only a port', () => {
     expect(formatHost(':56789/')).toBe('http://127.0.0.1:56789')
   })
 })
