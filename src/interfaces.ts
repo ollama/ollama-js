@@ -61,7 +61,7 @@ export interface GenerateRequest {
 }
 
 export interface Message {
-  role: string
+  role: 'system' | 'user' | 'assistant' | 'tool'
   content: string
   images?: Uint8Array[] | string[]
   tool_calls?: ToolCall[]
