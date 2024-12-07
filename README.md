@@ -66,7 +66,7 @@ ollama.chat(request)
 
   - `model` `<string>` The name of the model to use for the chat.
   - `messages` `<Message[]>`: Array of message objects representing the chat history.
-    - `role` `<string>`: The role of the message sender ('user', 'system', or 'assistant').
+    - `role` `<string>`: The role of the message sender ('user', 'system', 'assistant' or 'tool').
     - `content` `<string>`: The content of the message.
     - `images` `<Uint8Array[] | string[]>`: (Optional) Images to be included in the message, either as Uint8Array or base64 encoded strings.
   - `format` `<string>`: (Optional) Set the expected format of the response (`json`).
