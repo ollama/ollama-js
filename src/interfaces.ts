@@ -69,30 +69,30 @@ export interface Message {
 
 export interface ToolCall {
   function: {
-    name: string;
+    name: string
     arguments: {
-      [key: string]: any;
-    };
-  };
+      [key: string]: any
+    }
+  }
 }
 
 export interface Tool {
-  type: string;
+  type: string
   function: {
-    name: string;
-    description: string;
+    name: string
+    description: string
     parameters: {
-      type: string;
-      required: string[];
+      type: string
+      required: string[]
       properties: {
         [key: string]: {
-          type: string;
-          description: string;
-          enum?: string[];
-        };
-      };
-    };
-  };
+          type: string
+          description: string
+          enum?: string[]
+        }
+      }
+    }
+  }
 }
 
 export interface ChatRequest {

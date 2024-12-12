@@ -27,7 +27,11 @@ export class AbortableAsyncIterator<T extends object> {
   private readonly itr: AsyncGenerator<T | ErrorResponse>
   private readonly doneCallback: () => void
 
-  constructor(abortController: AbortController, itr: AsyncGenerator<T | ErrorResponse>, doneCallback: () => void) {
+  constructor(
+    abortController: AbortController,
+    itr: AsyncGenerator<T | ErrorResponse>,
+    doneCallback: () => void,
+  ) {
     this.abortController = abortController
     this.itr = itr
     this.doneCallback = doneCallback
@@ -123,12 +127,17 @@ const fetchWithHeaders = async (
 
   // Filter out default headers from custom headers
   const customHeaders = Object.fromEntries(
-    Object.entries(options.headers).filter(([key]) => !Object.keys(defaultHeaders).some(defaultKey => defaultKey.toLowerCase() === key.toLowerCase()))
+    Object.entries(options.headers).filter(
+      ([key]) =>
+        !Object.keys(defaultHeaders).some(
+          (defaultKey) => defaultKey.toLowerCase() === key.toLowerCase(),
+        ),
+    ),
   )
 
   options.headers = {
     ...defaultHeaders,
-    ...customHeaders
+    ...customHeaders,
   }
 
   return fetch(url, options)
@@ -140,9 +149,13 @@ const fetchWithHeaders = async (
  * @param host {string} - The host to fetch
  * @returns {Promise<Response>} - The fetch response
  */
-export const get = async (fetch: Fetch, host: string, options?: { headers?: HeadersInit }): Promise<Response> => {
+export const get = async (
+  fetch: Fetch,
+  host: string,
+  options?: { headers?: HeadersInit },
+): Promise<Response> => {
   const response = await fetchWithHeaders(fetch, host, {
-    headers: options?.headers
+    headers: options?.headers,
   })
 
   await checkOk(response)
@@ -176,7 +189,7 @@ export const post = async (
   fetch: Fetch,
   host: string,
   data?: Record<string, unknown> | BodyInit,
-  options?: { signal?: AbortSignal, headers?: HeadersInit },
+  options?: { signal?: AbortSignal; headers?: HeadersInit },
 ): Promise<Response> => {
   const isRecord = (input: any): input is Record<string, unknown> => {
     return input !== null && typeof input === 'object' && !Array.isArray(input)
@@ -188,7 +201,7 @@ export const post = async (
     method: 'POST',
     body: formattedData,
     signal: options?.signal,
-    headers: options?.headers
+    headers: options?.headers,
   })
 
   await checkOk(response)
@@ -211,7 +224,7 @@ export const del = async (
   const response = await fetchWithHeaders(fetch, host, {
     method: 'DELETE',
     body: JSON.stringify(data),
-    headers: options?.headers
+    headers: options?.headers,
   })
 
   await checkOk(response)
