@@ -20,6 +20,6 @@ jobs:
       - run: npm test -- --coverage --coverageDirectory=coverage/results-${{ matrix.node-version }}
       - uses: actions/upload-artifact@v3
         with:
-          name: jest-results-${{ matrix.node-version }}
+          name: vitest-results-${{ matrix.node-version }}
           path: coverage/results-${{ matrix.node-version }}/*.xml
         if: ${{ always() }}
