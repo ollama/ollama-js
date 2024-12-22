@@ -100,7 +100,7 @@ export class Ollama {
     return await response.json()
   }
 
-  /**
+/**
  * Encodes an image to base64 if it is a Uint8Array.
  * @param image {Uint8Array | string} - The image to encode.
  * @returns {Promise<string>} - The base64 encoded image.
