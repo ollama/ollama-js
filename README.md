@@ -71,7 +71,7 @@ ollama.chat(request)
     - `images` `<Uint8Array[] | string[]>`: (Optional) Images to be included in the message, either as Uint8Array or base64 encoded strings.
   - `format` `<string>`: (Optional) Set the expected format of the response (`json`).
   - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
-  - `keep_alive` `<string | number>`: (Optional) How long to keep the model loaded.
+  - `keep_alive` `<string | number>`: (Optional) How long to keep the model loaded. A number (seconds) or a string with a duration unit suffix ("300ms", "1.5h", "2h45m", etc.)
   - `tools` `<Tool[]>`: (Optional) A list of tool calls the model may make.
   - `options` `<Options>`: (Optional) Options to configure the runtime.
 
@@ -93,7 +93,7 @@ ollama.generate(request)
   - `images` `<Uint8Array[] | string[]>`: (Optional) Images to be included, either as Uint8Array or base64 encoded strings.
   - `format` `<string>`: (Optional) Set the expected format of the response (`json`).
   - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
-  - `keep_alive` `<string | number>`: (Optional) How long to keep the model loaded.
+  - `keep_alive` `<string | number>`: (Optional) How long to keep the model loaded. A number (seconds) or a string with a duration unit suffix ("300ms", "1.5h", "2h45m", etc.)
   - `options` `<Options>`: (Optional) Options to configure the runtime.
 - Returns: `<GenerateResponse>`
 
@@ -186,7 +186,7 @@ ollama.embed(request)
   - `model` `<string>` The name of the model used to generate the embeddings.
   - `input` `<string> | <string[]>`: The input used to generate the embeddings.
   - `truncate` `<boolean>`: (Optional) Truncate the input to fit the maximum context length supported by the model.
-  - `keep_alive` `<string | number>`: (Optional) How long to keep the model loaded.
+  - `keep_alive` `<string | number>`: (Optional) How long to keep the model loaded. A number (seconds) or a string with a duration unit suffix ("300ms", "1.5h", "2h45m", etc.)
   - `options` `<Options>`: (Optional) Options to configure the runtime.
 - Returns: `<EmbedResponse>`
 
