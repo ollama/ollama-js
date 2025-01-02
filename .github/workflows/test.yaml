@@ -18,9 +18,9 @@ jobs:
       - run: npm ci
       - run: npm i -D @vitest/coverage-v8
       - run: npm run lint
-      - run: npm test -- --coverage --dir=coverage/results-${{ matrix.node-version }}
+      - run: npm test -- --coverage
       - uses: actions/upload-artifact@v3
         with:
           name: vitest-results-${{ matrix.node-version }}
-          path: coverage/results-${{ matrix.node-version }}/*.xml
+          path: coverage/*
         if: ${{ always() }}
