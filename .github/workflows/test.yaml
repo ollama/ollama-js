@@ -17,7 +17,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
-      - run: npm test -- --coverage --coverageDirectory=coverage/results-${{ matrix.node-version }}
+      - run: npm test -- --coverage --dir=coverage/results-${{ matrix.node-version }}
       - uses: actions/upload-artifact@v3
         with:
           name: vitest-results-${{ matrix.node-version }}
