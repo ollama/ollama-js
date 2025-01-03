@@ -173,3 +173,5 @@ export default new Ollama()
 
 // export all types from the main entry point so that packages importing types dont need to specify paths
 export * from './interfaces.js'
+
+export type { AbortableAsyncIterator }
