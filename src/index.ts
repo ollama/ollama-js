@@ -2,12 +2,13 @@ import * as utils from './utils.js'
 import { AbortableAsyncIterator } from './utils.js'
 
 import fs, { createReadStream, promises } from 'fs'
-import { dirname, join, resolve } from 'path'
+import { join, resolve } from 'path'
 import { createHash } from 'crypto'
 import { homedir } from 'os'
 import { Ollama as OllamaBrowser } from './browser.js'
 
 import type { CreateRequest, ProgressResponse } from './interfaces.js'
+import { a } from 'vitest/dist/chunks/suite.B2jumIFP.js'
 
 export class Ollama extends OllamaBrowser {
   async encodeImage(image: Uint8Array | Buffer | string): Promise<string> {
@@ -35,26 +36,104 @@ export class Ollama extends OllamaBrowser {
    * @private @internal
    */
   private async parseModelfile(
+    model: string,
     modelfile: string,
-    mfDir: string = process.cwd(),
-  ): Promise<string> {
-    const out: string[] = []
-    const lines = modelfile.split('\n')
+    baseDir: string = process.cwd(),
+  ): Promise<CreateRequest> {
+    const lines = modelfile.split('\n');
+    const request: CreateRequest = {
+      model,
+      files: {},
+      adapters: {},
+      parameters: {},
+    };
+  
+    let multilineBuffer = '';
+    let currentCommand = '';
+  
     for (const line of lines) {
-      const [command, args] = line.split(' ', 2)
-      if (['FROM', 'ADAPTER'].includes(command.toUpperCase())) {
-        const path = this.resolvePath(args.trim(), mfDir)
-        if (await this.fileExists(path)) {
-          out.push(`${command} @${await this.createBlob(path)}`)
+      const [command, ...rest] = line.split(' ');
+      let lineArgs = rest.join(' ').trim();
+  
+      // Handle multiline arguments
+      if (lineArgs.startsWith('"""')) {
+        if (lineArgs.endsWith('"""') && lineArgs.length > 6) {
+          // Single-line block
+          multilineBuffer = lineArgs.slice(3, -3);
         } else {
-          out.push(`${command} ${args}`)
+          // Start multiline block
+          multilineBuffer = lineArgs.slice(3);
+          currentCommand = command.toUpperCase();
+          continue;
         }
-      } else {
-        out.push(line)
+      } else if (multilineBuffer) {
+        // Accumulate multiline content
+        if (lineArgs.endsWith('"""')) {
+          multilineBuffer += '\n' + lineArgs.slice(0, -3);
+          lineArgs = multilineBuffer;
+          multilineBuffer = '';
+        } else {
+          multilineBuffer += '\n' + lineArgs;
+          continue;
+        }
       }
+  
+      const args = multilineBuffer || lineArgs.replace(/^"(.*)"$/, '$1');
+  
+      // Handle commands
+      switch ((currentCommand || command).toUpperCase()) {
+        case 'FROM': {
+          const path = this.resolvePath(args, baseDir);
+          if (await this.fileExists(path)) {
+            request.files = {
+              ...request.files,
+              [args]: await this.createBlob(path),
+            };
+          } else {
+            request.from = args;
+          }
+          break;
+        }
+        case 'ADAPTER': {
+          const path = this.resolvePath(args, baseDir);
+          if (await this.fileExists(path)) {
+            request.adapters = {
+              ...request.adapters,
+              [args]: await this.createBlob(path),
+            };
+          }
+          break;
+        }
+        case 'TEMPLATE':
+          request.template = args;
+          break;
+        case 'SYSTEM':
+          request.system = args;
+          break;
+        case 'MESSAGE': {
+          const [role, content] = args.split(': ', 2);
+          request.messages = request.messages || [];
+          request.messages.push({ role, content });
+          break;
+        }
+        case 'LICENSE':
+          request.license = request.license || [];
+          request.license.push(args);
+          break;
+          default: {
+            if (!request.parameters) {
+              request.parameters = {}
+            }
+              request.parameters[command.toLowerCase()] = args
+            }
+          }
+  
+      currentCommand = '';
+      multilineBuffer = '';
     }
-    return out.join('\n')
-  }
+  
+    return request;
+  }  
 
   /**
    * Resolve the path to an absolute path.
@@ -146,19 +225,20 @@ export class Ollama extends OllamaBrowser {
   async create(
     request: CreateRequest,
   ): Promise<ProgressResponse | AbortableAsyncIterator<ProgressResponse>> {
-    let modelfileContent = ''
-    if (request.path) {
-      modelfileContent = await promises.readFile(request.path, { encoding: 'utf8' })
-      modelfileContent = await this.parseModelfile(
-        modelfileContent,
-        dirname(request.path),
-      )
-    } else if (request.modelfile) {
-      modelfileContent = await this.parseModelfile(request.modelfile)
-    } else {
-      throw new Error('Must provide either path or modelfile to create a model')
-    }
-    request.modelfile = modelfileContent
+    // let modelfileContent = ''
+    // if (request.path) {
+    //   modelfileContent = await promises.readFile(request.path, { encoding: 'utf8' })
+    //   modelfileContent = await this.parseModelfile(
+    //     request.model,
+    //     modelfileContent,
+    //     dirname(request.path),
+    //   )
+    // } else if (request.modelfile) {
+    //   modelfileContent = await this.parseModelfile(request.model, request.modelfile)
+    // } else {
+    //   throw new Error('Must provide either path or modelfile to create a model')
+    // }
+    // request.modelfile = modelfileContent
 
     // check stream here so that typescript knows which overload to use
     if (request.stream) {

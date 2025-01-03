@@ -120,10 +120,25 @@ export interface PushRequest {
 
 export interface CreateRequest {
   model: string
-  path?: string
-  modelfile?: string
-  quantize?: string
   stream?: boolean
+  quantize?: string
+  from?: string
+  files?: Record<string, string>
+  adapters?: Record<string, string>
+  template?: string
+  license?: string[] // TODO: double check this
+  system?: string
+  parameters?: Record<string, unknown>
+  messages?: Message[]
+
+  /** @deprecated Use model instead */
+  name?: string
+  /** @deprecated Set with direct request options instead */
+  path?: string
+  /** @deprecated Set with other request options instead */
+  modelfile?: string
+  /** @deprecated Use quantize instead */
+  quantization?: string
 }
 
 export interface DeleteRequest {

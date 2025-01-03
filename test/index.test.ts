@@ -1,3 +1,4 @@
+import { Ollama } from '../src/index'
 import { describe, it, expect } from 'vitest'
 import { formatHost } from '../src/utils'
 
@@ -60,5 +61,43 @@ describe('formatHost Function Tests', () => {
 
   it('should handle trailing slash with only a port', () => {
     expect(formatHost(':56789/')).toBe('http://127.0.0.1:56789')
+  })
+})
+
+describe('parseModelfile Function Tests', () => {
+  it('should correctly parse modelfile commands', async () => {
+    const ollama = new Ollama()
+    const modelfile = `FROM llama2
+ADAPTER ./path/to/adapter
+TEMPLATE "You are a helpful assistant."
+SYSTEM "Respond concisely"
+MESSAGE assistant: Hello
+MESSAGE user: Hi
+LICENSE """Apache License
+Version 2.0, January 2004"""
+parameter1 value1
+parameter2 value2
+parameter3 3`
+
+    const result = await ollama['parseModelfile']('mymodel', modelfile)
+
+    expect(result).toEqual({
+      model: 'mymodel',
+      from: 'llama2',
+      template: 'You are a helpful assistant.',
+      system: 'Respond concisely',
+      messages: [
+        { role: 'assistant', content: 'Hello' },
+        { role: 'user', content: 'Hi' }
+      ],
+      license: ['Apache License\n2.0, January 2004'],
+      parameters: {
+        parameter1: 'value1',
+        parameter2: 'value2',
+        parameter3: 3
+      },
+      files: {},
+      adapters: {}
+    })
   })
 })
