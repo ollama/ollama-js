@@ -126,17 +126,13 @@ export interface CreateRequest {
   files?: Record<string, string>
   adapters?: Record<string, string>
   template?: string
-  license?: string[] // TODO: double check this
+  license?: string | string[]
   system?: string
   parameters?: Record<string, unknown>
   messages?: Message[]
 
   /** @deprecated Use model instead */
   name?: string
-  /** @deprecated Set with direct request options instead */
-  path?: string
-  /** @deprecated Set with other request options instead */
-  modelfile?: string
   /** @deprecated Use quantize instead */
   quantization?: string
 }
