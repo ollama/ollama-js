@@ -4,11 +4,11 @@ import { AbortableAsyncIterator } from './utils.js'
 import fs, { createReadStream, promises } from 'fs'
 import { join, resolve, basename } from 'path'
 import { createHash } from 'crypto'
-import { homedir } from 'os'
 import glob from 'glob'
 import { Ollama as OllamaBrowser } from './browser.js'
-
 import type { CreateRequest, ProgressResponse } from './interfaces.js'
+import { stat } from 'fs/promises';
+import { pipeline } from 'stream/promises';
 
 export class Ollama extends OllamaBrowser {
   async encodeImage(image: Uint8Array | Buffer | string): Promise<string> {
@@ -44,55 +44,75 @@ export class Ollama extends OllamaBrowser {
     }
   }
 
-  private async createBlob(path: string): Promise<string> {
-    if (typeof ReadableStream === 'undefined') {
-      // Not all fetch implementations support streaming
-      // TODO: support non-streaming uploads
-      throw new Error('Streaming uploads are not supported in this environment.')
-    }
-
-
-    const hash = createHash('sha256')
-    const stream = createReadStream(path)
-    for await (const chunk of stream) {
-      hash.update(chunk)
-    }
-    const digest = `sha256:${hash.digest('hex')}`
-
+  async createBlob(path: string) {
     try {
-      await utils.head(this.fetch, `${this.config.host}/api/blobs/${digest}`)
-    } catch (e) {
-      if (e instanceof Error && e.message.includes('404')) {
-        const fileStream = createReadStream(path)
-        // Create a new readable stream for the fetch request
-        const readableStream = new ReadableStream({
-          start(controller) {
-            fileStream.on('data', (chunk) => {
-              controller.enqueue(chunk) // Enqueue the chunk directly
-            })
+        console.log(`[DEBUG] Starting blob creation for file: ${path}`);
+        
+        // Get file stats
+        const fileStats = await stat(path);
+        console.log(`[DEBUG] File size: ${fileStats.size} bytes`);
 
-            fileStream.on('end', () => {
-              controller.close() // Close the stream when the file ends
-            })
+        // First pass: calculate hash
+        const hash = createHash('sha256');
+        const hashStream = fs.createReadStream(path);
+        
+        for await (const chunk of hashStream) {
+            hash.update(chunk);
+        }
+        
+        const digest = `sha256:${hash.digest('hex')}`;
+        console.log(`[DEBUG] Digest calculated: ${digest}`);
+        console.log(`[DEBUG] Starting upload...`);
 
-            fileStream.on('error', (err) => {
-              controller.error(err) // Propagate errors to the stream
-            })
-          },
-        })
+        // Second pass: upload file
+        const uploadStream = fs.createReadStream(path);
+        let bytesUploaded = 0;
 
-        await utils.post(
-          this.fetch,
-          `${this.config.host}/api/blobs/${digest}`,
-          readableStream,
-        )
-      } else {
-        throw e
-      }
+        // Convert Node.js ReadStream to Web ReadableStream
+        const webStream = new ReadableStream({
+          async start(controller) {
+              uploadStream.on('data', (chunk) => {
+                  bytesUploaded += chunk.length;
+                  const percentage = Math.round((bytesUploaded / fileStats.size) * 100);
+                  console.log(percentage);
+                  controller.enqueue(chunk);
+              });
+
+              uploadStream.on('end', () => {
+                  controller.close();
+              });
+
+              uploadStream.on('error', (error) => {
+                  controller.error(error);
+              });
+          }
+      });
+
+        const response = await fetch(`http://127.0.0.1:11435/api/blobs/${digest}`, {
+            method: 'POST',
+            // In Node.js, we can directly pass the readable stream as the body
+            body: webStream,
+            headers: {
+                'Content-Type': 'application/octet-stream',
+                'Accept': 'application/json',
+                'Content-Length': fileStats.size.toString(),
+                'User-Agent': `node-client/1.0`
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.text();
+            throw new Error(`Upload failed: ${errorData}`);
+        }
+
+        console.log(`[DEBUG] Upload completed successfully`);
+        return { digest, size: fileStats.size };
+
+    } catch (error) {
+        console.error('[ERROR] Operation failed:', error);
+        throw error;
     }
-
-    return digest
-  }
+}
   
   async findModelFiles(path: string): Promise<string[]> {
     const files: string[] = []
@@ -161,10 +181,11 @@ export class Ollama extends OllamaBrowser {
         files = [from]
       }
   
-      for (const file of files) {
-        const digest = await this.createBlob(file)
-        fileMap[basename(file)] = digest
-      }
+    console.log(files)
+    for (const file of files) {
+      await this.createBlob(file)
+      // fileMap[basename(file)] = digest
+    }
   
     return fileMap
   }
