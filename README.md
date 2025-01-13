@@ -136,7 +136,7 @@ ollama.create(request)
   - `system` `<string>`: (Optional) The system prompt for the model.
   - `parameters` `<Record<string, unknown>>`: (Optional) Additional model parameters as key-value pairs
   - `messages` `<Message[]>`: (Optional) Initial conversation messages for the model.
-  - `adapters` `<Record<string, string>>`: (Optional) A key-value map of adapter configurations
+  - `adapters` `<Record<string, string>>`: (Optional) A key-value map of LoRA adapter configurations
 - Returns: `<ProgressResponse>`
 
 ### delete
