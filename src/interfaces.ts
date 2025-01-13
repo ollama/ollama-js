@@ -120,15 +120,15 @@ export interface PushRequest {
 
 export interface CreateRequest {
   model: string
+  from?: string
   stream?: boolean
   quantize?: string
-  from?: string
-  adapters?: Record<string, string>
   template?: string
   license?: string | string[]
   system?: string
   parameters?: Record<string, unknown>
   messages?: Message[]
+  adapters?: Record<string, string>
 }
 
 export interface DeleteRequest {

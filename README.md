@@ -130,14 +130,17 @@ ollama.create(request)
 - `request` `<Object>`: The request object containing create parameters.
   - `model` `<string>` The name of the model to create.
   - `from` `<string>`: The base model to derive from.
-  - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned
+  - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
+  - `quantize` `<string>`: Quanization precision level (`q8_0`, `q4_K_M`, etc.).
   - `template` `<string>`: (Optional) The prompt template to use with the model.
-  - `license` `<string|string[]>`: (Optional) The license(s) associated with the model
+  - `license` `<string|string[]>`: (Optional) The license(s) associated with the model.
   - `system` `<string>`: (Optional) The system prompt for the model.
-  - `parameters` `<Record<string, unknown>>`: (Optional) Additional model parameters as key-value pairs
-  - `messages` `<Message[]>`: (Optional) Initial conversation messages for the model.
-  - `adapters` `<Record<string, string>>`: (Optional) A key-value map of LoRA adapter configurations
+  - `parameters` `<Record<string, unknown>>`: (Optional) Additional model parameters as key-value pairs.
+  - `messages` `<Message[]>`: (Optional) Initial chat messages for the model.
+  - `adapters` `<Record<string, string>>`: (Optional) A key-value map of LoRA adapter configurations.
 - Returns: `<ProgressResponse>`
+
+Note: The `files` parameter is not currently supported in `ollama-js`.
 
 ### delete
 
