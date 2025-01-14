@@ -1,11 +1,26 @@
 {
   "compilerOptions": {
+<<<<<<< HEAD
     "noImplicitAny": false,
     "noImplicitThis": true,
     "strictNullChecks": true,
+=======
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+>>>>>>> e97ea55 (approved-by: farre <farre@cascade.ai>raper project)
     "esModuleInterop": true,
     "declaration": true,
     "declarationMap": true,
+<<<<<<< HEAD
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
@@ -18,6 +33,16 @@
       "es2018.asyncgenerator",
       "dom"
     ]
+=======
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "types": ["node", "vitest/globals"],
+    "lib": ["ESNext", "DOM"],
+    "typeRoots": ["./node_modules/@types", "./tests"]
+>>>>>>> e97ea55 (approved-by: farre <farre@cascade.ai>raper project)
   },
 
   "ts-node": {

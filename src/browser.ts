@@ -1,5 +1,7 @@
 import * as utils from './utils.js'
-import { AbortableAsyncIterator, parseJSON } from './utils.js'
+import { parseJSON } from './utils.js'
+import { EmbedResponse } from './interfaces.js'
+import { AbortableAsyncIterator, ErrorType, StreamableRequest } from './types.js'
 import 'whatwg-fetch'
 
 import type {
@@ -10,9 +12,12 @@ import type {
   CreateRequest,
   DeleteRequest,
   EmbedRequest,
+<<<<<<< HEAD
   EmbedResponse,
   EmbeddingsRequest,
   EmbeddingsResponse,
+=======
+>>>>>>> e97ea55 (approved-by: farre <farre@cascade.ai>raper project)
   ErrorResponse,
   Fetch,
   GenerateRequest,
@@ -24,24 +29,136 @@ import type {
   ShowRequest,
   ShowResponse,
   StatusResponse,
+<<<<<<< HEAD
 } from './interfaces.js'
 
 export class Ollama {
   protected readonly config: Config
   protected readonly fetch: Fetch
   protected readonly ongoingStreamedRequests: AbortableAsyncIterator<object>[] = []
+=======
+  ResponseType,
+} from './interfaces.js'
+
+interface OllamaConfig extends Config {
+  host: string;
+  headers?: Record<string, string>;
+  proxy?: boolean;
+  fetch?: Fetch;
+}
+
+export class Ollama {
+  protected readonly config: OllamaConfig;
+  protected readonly fetch: Fetch;
+  protected readonly ongoingStreamedRequests: AbortableAsyncIterator<ResponseType>[] = [];
+>>>>>>> e97ea55 (approved-by: farre <farre@cascade.ai>raper project)
 
   constructor(config?: Partial<Config>) {
     this.config = {
       host: '',
+<<<<<<< HEAD
       headers: config?.headers
     }
+=======
+      headers: config?.headers,
+      proxy: config?.proxy
+    };
+>>>>>>> e97ea55 (approved-by: farre <farre@cascade.ai>raper project)
 
     if (!config?.proxy) {
-      this.config.host = utils.formatHost(config?.host ?? 'http://127.0.0.1:11434')
+      this.config.host = utils.formatHost(config?.host ?? 'http://127.0.0.1:11434');
     }
 
-    this.fetch = config?.fetch ?? fetch
+    this.fetch = config?.fetch ?? (typeof window !== 'undefined' ? window.fetch.bind(window) : fetch);
+  }
+
+  protected async makeRequest<T extends ResponseType>(
+    endpoint: string,
+    body: any,
+    options: StreamableRequest<T> = {}
+  ): Promise<T | AbortableAsyncIterator<T>> {
+    const abortController = new AbortController();
+    if (options.abortSignal) {
+      options.abortSignal.addEventListener('abort', () => abortController.abort());
+    }
+
+    const response = await this.fetch(`${this.config.host}${endpoint}`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json',
+        ...this.config.headers
+      },
+      signal: abortController.signal
+    });
+
+    if (!response.ok) {
+      const error = await response.json() as ErrorResponse;
+      throw new utils.BaseError(error.error, { type: ErrorType.VALIDATION });
+    }
+
+    if (options.stream) {
+      const iterator = this.createStreamIterator<T>(response, abortController);
+      this.ongoingStreamedRequests.push(iterator);
+      return iterator;
+    }
+
+    return parseJSON<T>(await response.text());
+  }
+
+  protected createStreamIterator<T>(
+    response: Response,
+    abortController: AbortController
+  ): AbortableAsyncIterator<T> {
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    const iterator: AbortableAsyncIterator<T> = {
+      async next(): Promise<IteratorResult<T>> {
+        if (!reader) {
+          return { done: true, value: undefined };
+        }
+
+        try {
+          const { done, value } = await reader.read();
+          if (done) {
+            return { done: true, value: undefined };
+          }
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.trim()) {
+              const parsed = parseJSON<T>(line);
+              return { done: false, value: parsed };
+            }
+          }
+
+          return iterator.next();
+        } catch (error) {
+          if (error instanceof utils.BaseError) {
+            throw error;
+          }
+          throw new utils.BaseError(error.message, { type: ErrorType.NETWORK });
+        }
+      },
+      async return(): Promise<IteratorResult<T>> {
+        await reader?.cancel();
+        return { done: true, value: undefined };
+      },
+      async throw(error?: any): Promise<IteratorResult<T>> {
+        await reader?.cancel();
+        throw error;
+      },
+      abort(): void {
+        abortController.abort();
+      }
+    };
+
+    return iterator;
   }
 
   // Abort any ongoing streamed requests to Ollama
@@ -52,6 +169,7 @@ export class Ollama {
     this.ongoingStreamedRequests.length = 0
   }
 
+<<<<<<< HEAD
   /**
    * Processes a request to the Ollama server. If the request is streamable, it will return a
    * AbortableAsyncIterator that yields the response messages. Otherwise, it will return the response
@@ -98,6 +216,13 @@ export class Ollama {
       headers: this.config.headers
     })
     return await response.json()
+=======
+  protected handleError(error: any): never {
+    if (error?.type === ErrorType.VALIDATION) {
+      throw error;
+    }
+    throw new Error(error?.message || 'Unknown error occurred');
+>>>>>>> e97ea55 (approved-by: farre <farre@cascade.ai>raper project)
   }
 
 /**
@@ -136,7 +261,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
     if (request.images) {
       request.images = await Promise.all(request.images.map(this.encodeImage.bind(this)))
     }
-    return this.processStreamableRequest<GenerateResponse>('generate', request)
+    return this.makeRequest<GenerateResponse>('generate', request, { stream: request.stream })
   }
 
   chat(
@@ -163,7 +288,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
         }
       }
     }
-    return this.processStreamableRequest<ChatResponse>('chat', request)
+    return this.makeRequest<ChatResponse>('chat', request, { stream: request.stream })
   }
 
   create(
@@ -178,9 +303,26 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
   async create(
     request: CreateRequest
   ): Promise<ProgressResponse | AbortableAsyncIterator<ProgressResponse>> {
+<<<<<<< HEAD
     return this.processStreamableRequest<ProgressResponse>('create', {
       ...request
     })
+=======
+    if (!request.model) {
+      throw new Error('Model name is required')
+    }
+
+    if (!request.modelfile) {
+      throw new Error('Modelfile is required')
+    }
+
+    return this.makeRequest<ProgressResponse>('create', {
+      name: request.model,
+      stream: request.stream,
+      modelfile: request.modelfile,
+      quantize: request.quantize,
+    }, { stream: request.stream })
+>>>>>>> e97ea55 (approved-by: farre <farre@cascade.ai>raper project)
   }
 
   pull(
@@ -197,11 +339,19 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
   async pull(
     request: PullRequest,
   ): Promise<ProgressResponse | AbortableAsyncIterator<ProgressResponse>> {
+<<<<<<< HEAD
     return this.processStreamableRequest<ProgressResponse>('pull', {
+=======
+    if (!request.model) {
+      throw new Error('Model name is required')
+    }
+
+    return this.makeRequest<ProgressResponse>('pull', {
+>>>>>>> e97ea55 (approved-by: farre <farre@cascade.ai>raper project)
       name: request.model,
       stream: request.stream,
       insecure: request.insecure,
-    })
+    }, { stream: request.stream })
   }
 
   push(
@@ -218,11 +368,19 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
   async push(
     request: PushRequest,
   ): Promise<ProgressResponse | AbortableAsyncIterator<ProgressResponse>> {
+<<<<<<< HEAD
     return this.processStreamableRequest<ProgressResponse>('push', {
+=======
+    if (!request.model) {
+      throw new Error('Model name is required')
+    }
+
+    return this.makeRequest<ProgressResponse>('push', {
+>>>>>>> e97ea55 (approved-by: farre <farre@cascade.ai>raper project)
       name: request.model,
       stream: request.stream,
       insecure: request.insecure,
-    })
+    }, { stream: request.stream })
   }
 
   /**
@@ -285,6 +443,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @param request {EmbedRequest} - The request object.
    * @returns {Promise<EmbedResponse>} - The response object.
    */
+<<<<<<< HEAD
     async embed(request: EmbedRequest): Promise<EmbedResponse> {
       const response = await utils.post(this.fetch, `${this.config.host}/api/embed`, {
         ...request,
@@ -300,12 +459,33 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @returns {Promise<EmbeddingsResponse>} - The response object.
    */
   async embeddings(request: EmbeddingsRequest): Promise<EmbeddingsResponse> {
+=======
+  async embeddings(request: EmbedRequest): Promise<EmbedResponse> {
+    if (!request.model) {
+      throw new Error('Model name is required')
+    }
+
+    if (!request.prompt) {
+      throw new Error('Prompt is required')
+    }
+
+>>>>>>> e97ea55 (approved-by: farre <farre@cascade.ai>raper project)
     const response = await utils.post(this.fetch, `${this.config.host}/api/embeddings`, {
       ...request,
     }, {
       headers: this.config.headers
     })
+<<<<<<< HEAD
     return (await response.json()) as EmbeddingsResponse
+=======
+
+    if (!response.ok) {
+      const error = await response.json() as ErrorResponse
+      throw new Error(error.error ?? 'Unknown error')
+    }
+
+    return (await response.json()) as EmbedResponse
+>>>>>>> e97ea55 (approved-by: farre <farre@cascade.ai>raper project)
   }
 
   /**

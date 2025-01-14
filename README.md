@@ -217,6 +217,149 @@ If there is a need to manage streams with timeouts, it is recommended to have on
 
 All asynchronous threads listening to streams (typically the ```for await (const part of response)```) will throw an ```AbortError``` exception. See [examples/abort/abort-all-requests.ts](examples/abort/abort-all-requests.ts) for an example.
 
+<<<<<<< HEAD
+=======
+## Project Structure
+
+```
+ollama-js/
+├── src/                    # Source code
+│   ├── browser.ts         # Browser-specific implementation
+│   ├── errors.ts          # Error definitions and handling
+│   ├── index.ts           # Main entry point
+│   ├── interfaces.ts      # TypeScript interfaces
+│   ├── metrics.ts         # Performance metrics tracking
+│   ├── reporting.ts       # Metrics reporting
+│   ├── storage.ts         # Data persistence
+│   ├── utils.ts           # Utility functions
+│   ├── version.ts         # Version management
+│   └── visualization.ts   # Data visualization
+│
+├── tests/                 # Test files
+│   ├── setup.ts          # Test setup and configuration
+│   ├── *.test.ts         # Unit tests
+│   └── *.stress.test.ts  # Performance/stress tests
+│
+├── examples/             # Usage examples
+├── docs/                # Documentation
+├── dist/               # Compiled output
+└── scripts/           # Build and maintenance scripts
+```
+
+### Key Components
+
+- **Core Components**
+  - `browser.ts`: Browser-specific implementations and adapters
+  - `index.ts`: Main entry point and API surface
+  - `interfaces.ts`: TypeScript type definitions
+
+- **Performance Monitoring**
+  - `metrics.ts`: Performance metric collection and analysis
+  - `reporting.ts`: Metric reporting and formatting
+  - `visualization.ts`: Data visualization utilities
+
+- **Data Management**
+  - `storage.ts`: Data persistence and caching
+  - `utils.ts`: Common utilities and helpers
+
+- **Error Handling**
+  - `errors.ts`: Error types and handling utilities
+
+- **Version Control**
+  - `version.ts`: Version management and compatibility
+
+### Test Organization
+
+- **Unit Tests**: `*.test.ts` files testing individual components
+- **Integration Tests**: `compatibility.test.ts` for cross-component testing
+- **Performance Tests**: `*.stress.test.ts` for performance validation
+- **Test Setup**: `setup.ts` containing test configuration and mocks
+
+## Performance Monitoring
+
+The library includes built-in performance monitoring capabilities to help you track and optimize your Ollama API usage.
+
+### Basic Usage
+
+```javascript
+import { PerformanceMonitor } from 'ollama'
+
+// Get the monitor instance
+const monitor = PerformanceMonitor.getInstance()
+
+// Start monitoring an operation
+const operationId = monitor.startOperation('my-operation')
+
+// Record metrics
+monitor.recordLatency(operationId, 100) // in milliseconds
+monitor.recordMemoryUsage(operationId, 1024 * 1024) // in bytes
+monitor.recordRequestSize(operationId, 512) // in bytes
+monitor.recordResponseSize(operationId, 1024) // in bytes
+
+// End operation and get report
+const report = monitor.endOperation(operationId)
+console.log(report)
+```
+
+### Using the Decorator
+
+```javascript
+import { monitored } from 'ollama'
+
+class MyService {
+  @monitored
+  async processRequest(data) {
+    // Your code here
+    return result
+  }
+}
+```
+
+### Visualization
+
+```javascript
+import { ChartGenerator } from 'ollama'
+
+// Generate time series chart for latency
+const chart = ChartGenerator.generateTimeSeriesChart(reports, 'latency', {
+  width: 80,
+  height: 20,
+  title: 'API Latency Over Time'
+})
+console.log(chart)
+```
+
+### Storage and Analysis
+
+```javascript
+import { MetricStorage } from 'ollama'
+
+const storage = MetricStorage.getInstance()
+
+// Query reports
+const reports = storage.queryReports({
+  startTime: Date.now() - 24 * 60 * 60 * 1000, // Last 24 hours
+  category: 'api-calls'
+})
+
+// Get aggregated metrics
+const metrics = storage.getAggregatedMetrics({
+  category: 'api-calls',
+  tags: ['production']
+})
+```
+
+### Error Handling
+
+The monitoring system includes comprehensive error handling:
+- Automatic warning recording for operations
+- Memory usage threshold monitoring
+- Data point limits to prevent memory leaks
+- Persistence error handling with fallback mechanisms
+
+For more details, see the [API Reference](#api-reference).
+
+>>>>>>> e97ea55 (approved-by: farre <farre@cascade.ai>raper project)
 ## Custom client
 
 A custom client can be created with the following fields:

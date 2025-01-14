@@ -196,8 +196,8 @@ export interface ChatResponse {
 }
 
 export interface EmbedResponse {
-  model: string
-  embeddings: number[][]
+  embedding: number[];
+  created_at: string;
 }
 
 export interface EmbeddingsResponse {
