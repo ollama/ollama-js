@@ -1,5 +1,6 @@
 import { version } from './version.js'
 import type { ErrorResponse, Fetch } from './interfaces.js'
+import { defaulPort, defaultHost } from './defaultHost.js'
 
 /**
  * An error class for response errors.
@@ -268,7 +269,7 @@ export const parseJSON = async function* <T = unknown>(
  */
 export const formatHost = (host: string): string => {
   if (!host) {
-    return 'http://127.0.0.1:11434'
+    return defaultHost
   }
 
   let isExplicitProtocol = host.includes('://')
@@ -288,7 +289,7 @@ export const formatHost = (host: string): string => {
   let port = url.port
   if (!port) {
     if (!isExplicitProtocol) {
-      port = '11434'
+      port = defaulPort
     } else {
       // Assign default ports based on the protocol
       port = url.protocol === 'https:' ? '443' : '80'
