@@ -40,18 +40,6 @@ for await (const part of response) {
 }
 ```
 
-## Create
-
-```javascript
-import ollama from 'ollama'
-
-const modelfile = `
-FROM llama3.1
-SYSTEM "You are mario from super mario bros."
-`
-await ollama.create({ model: 'example', modelfile: modelfile })
-```
-
 ## API
 
 The Ollama JavaScript library's API is designed around the [Ollama REST API](https://github.com/jmorganca/ollama/blob/main/docs/api.md)
