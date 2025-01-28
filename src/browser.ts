@@ -25,6 +25,7 @@ import type {
   ShowResponse,
   StatusResponse,
 } from './interfaces.js'
+import { defaultHost } from './constant.js'
 
 export class Ollama {
   protected readonly config: Config
@@ -38,7 +39,7 @@ export class Ollama {
     }
 
     if (!config?.proxy) {
-      this.config.host = utils.formatHost(config?.host ?? 'http://127.0.0.1:11434')
+      this.config.host = utils.formatHost(config?.host ?? defaultHost)
     }
 
     this.fetch = config?.fetch ?? fetch
