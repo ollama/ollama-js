@@ -1,6 +1,6 @@
 import { version } from './version.js'
 import type { ErrorResponse, Fetch } from './interfaces.js'
-import { defaulPort, defaultHost } from './defaultHost.js'
+import { defaultPort, defaultHost } from './constant.js'
 
 /**
  * An error class for response errors.
@@ -289,7 +289,7 @@ export const formatHost = (host: string): string => {
   let port = url.port
   if (!port) {
     if (!isExplicitProtocol) {
-      port = defaulPort
+      port = defaultPort
     } else {
       // Assign default ports based on the protocol
       port = url.protocol === 'https:' ? '443' : '80'

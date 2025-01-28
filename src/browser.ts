@@ -25,7 +25,7 @@ import type {
   ShowResponse,
   StatusResponse,
 } from './interfaces.js'
-import { defaultHost } from './defaultHost.js'
+import { defaultHost } from './constant.js'
 
 export class Ollama {
   protected readonly config: Config
