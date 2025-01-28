@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { formatHost } from '../src/utils'
-import { defaultHost } from '../src/defaultHost'
+import { defaultHost } from '../src/constant'
 
 describe('formatHost Function Tests', () => {
   it('should return default URL for empty string', () => {
