@@ -16,7 +16,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: npm
       - run: npm ci
-      - run: npm i -D @vitest/coverage-v8
+      - run: npm i -D @vitest/coverage-v8@^2.1.6
       - run: npm run lint
       - run: npm test -- --coverage
       - uses: actions/upload-artifact@v3
