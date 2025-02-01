@@ -1,7 +1,7 @@
 import { AbortableAsyncIterator } from './utils.js'
 
-import fs, { promises } from 'fs'
-import { resolve } from 'path'
+import fs, { promises } from 'node:fs'
+import { resolve } from 'node:path'
 import { Ollama as OllamaBrowser } from './browser.js'
 
 import type { CreateRequest, ProgressResponse } from './interfaces.js'
