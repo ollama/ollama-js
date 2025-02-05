@@ -101,6 +101,30 @@ function getPlatform(): string {
 }
 
 /**
+ * Normalizes headers into a plain object format.
+ * This function handles various types of HeaderInit objects such as Headers, arrays of key-value pairs,
+ * and plain objects, converting them all into an object structure.
+ *
+ * @param {HeadersInit|undefined} headers - The headers to normalize. Can be one of the following:
+ *   - A `Headers` object from the Fetch API.
+ *   - A plain object with key-value pairs representing headers.
+ *   - An array of key-value pairs representing headers.
+ * @returns {Record<string,string>} - A plain object representing the normalized headers.
+ */
+function normalizeHeaders(headers?: HeadersInit | undefined): Record<string,string> {
+  if (headers instanceof Headers) {
+      // If headers are an instance of Headers, convert it to an object
+      return Object.fromEntries(headers.entries());
+  } else if (Array.isArray(headers)) {
+      // If headers are in array format, convert them to an object
+      return Object.fromEntries(headers);
+  } else {
+      // Otherwise assume it's already a plain object
+      return headers || {};
+  }
+}
+
+/**
  * A wrapper around fetch that adds default headers.
  * @param fetch {Fetch} - The fetch function to use
  * @param url {string} - The URL to fetch
@@ -118,10 +142,9 @@ const fetchWithHeaders = async (
     'User-Agent': `ollama-js/${version} (${getPlatform()})`,
   } as HeadersInit
 
-  if (!options.headers) {
-    options.headers = {}
-  }
-
+  // Normalizes headers into a plain object format.
+  options.headers = normalizeHeaders(options.headers);
+  
   // Filter out default headers from custom headers
   const customHeaders = Object.fromEntries(
     Object.entries(options.headers).filter(([key]) => !Object.keys(defaultHeaders).some(defaultKey => defaultKey.toLowerCase() === key.toLowerCase()))
