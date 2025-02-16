@@ -93,7 +93,11 @@ const checkOk = async (response: Response): Promise<void> => {
  */
 function getPlatform(): string {
   if (typeof window !== 'undefined' && window.navigator) {
-    return `${window.navigator.platform.toLowerCase()} Browser/${navigator.userAgent};`
+    const platform = window.navigator.platform || window.navigator.userAgentData?.platform;
+    if (!platform) {
+      return '';
+    }
+    return `${platform.toLowerCase()} Browser/${navigator.userAgent};`
   } else if (typeof process !== 'undefined') {
     return `${process.arch} ${process.platform} Node.js/${process.version}`
   }
