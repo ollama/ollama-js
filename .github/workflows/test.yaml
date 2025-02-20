@@ -4,7 +4,7 @@ on:
   pull_request:
 
 jobs:
-  test:
+  build:
     strategy:
       matrix:
         node-version: ['16', '18', '20']
@@ -16,11 +16,23 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: npm
       - run: npm ci
+      - run: npm run build
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
       - run: npm i -D @vitest/coverage-v8@^2.1.6
       - run: npm run lint
       - run: npm test -- --coverage
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          name: vitest-results-${{ matrix.node-version }}
+          name: vitest-results
           path: coverage/*
         if: ${{ always() }}
