@@ -114,7 +114,11 @@ function getPlatform(): string {
 function normalizeHeaders(headers?: HeadersInit | undefined): Record<string,string> {
   if (headers instanceof Headers) {
       // If headers are an instance of Headers, convert it to an object
-      return Object.fromEntries(headers.entries());
+      const obj: Record<string, string> = {};
+        headers.forEach((value, key) => {
+          obj[key] = value;
+        });
+        return obj;
   } else if (Array.isArray(headers)) {
       // If headers are in array format, convert them to an object
       return Object.fromEntries(headers);
