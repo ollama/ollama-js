@@ -28,7 +28,7 @@
   "homepage": "https://github.com/ollama/ollama-js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ollama/ollama-js.git"
+    "url": "git+https://github.com/ollama/ollama-js.git"
   },
   "author": "Saul Boyd",
   "license": "MIT",
