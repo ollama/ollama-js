@@ -93,9 +93,15 @@ const checkOk = async (response: Response): Promise<void> => {
  */
 function getPlatform(): string {
   if (typeof window !== 'undefined' && window.navigator) {
-const platform = 
-      window.navigator.platform || window.navigator.userAgentData?.platform || 'unknown'
-    return `${platform.toLowerCase()} Browser/${navigator.userAgent};`
+    // Need type assertion here since TypeScript doesn't know about userAgentData
+    const nav = navigator as any
+    if ('userAgentData' in nav && nav.userAgentData?.platform) {
+      return `${nav.userAgentData.platform.toLowerCase()} Browser/${navigator.userAgent};`
+    }
+    if (navigator.platform) {
+      return `${navigator.platform.toLowerCase()} Browser/${navigator.userAgent};`
+    }
+    return `unknown Browser/${navigator.userAgent};`
   } else if (typeof process !== 'undefined') {
     return `${process.arch} ${process.platform} Node.js/${process.version}`
   }
