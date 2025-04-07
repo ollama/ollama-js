@@ -198,6 +198,9 @@ export interface ChatResponse {
 export interface EmbedResponse {
   model: string
   embeddings: number[][]
+  total_duration: number
+  load_duration: number
+  prompt_eval_count: number
 }
 
 export interface EmbeddingsResponse {
