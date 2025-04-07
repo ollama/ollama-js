@@ -88,7 +88,7 @@ export interface Tool {
         [key: string]: {
           type: string;
           description: string;
-          enum?: string[];
+          enum?: any[];
         };
       };
     };
