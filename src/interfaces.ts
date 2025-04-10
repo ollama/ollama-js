@@ -79,15 +79,19 @@ export interface ToolCall {
 export interface Tool {
   type: string;
   function: {
-    name: string;
-    description: string;
-    parameters: {
-      type: string;
-      required: string[];
-      properties: {
+    name?: string;
+    description?: string;
+    type?: string;
+    parameters?: {
+      type?: string;
+      $defs?: any;
+      items?: any;
+      required?: string[];
+      properties?: {
         [key: string]: {
-          type: string | string[];
-          description: string;
+          type?: string | string[];
+          items?: any;
+          description?: string;
           enum?: any[];
         };
       };
