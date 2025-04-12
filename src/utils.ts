@@ -1,6 +1,6 @@
-import { version } from './version.js'
+import { defaultHost, defaultPort } from './constant.js'
 import type { ErrorResponse, Fetch } from './interfaces.js'
-import { defaultPort, defaultHost } from './constant.js'
+import { version } from './version.js'
 
 /**
  * An error class for response errors.
@@ -331,7 +331,17 @@ export const formatHost = (host: string): string => {
     }
   }
 
-  let formattedHost = `${url.protocol}//${url.hostname}:${port}${url.pathname}`
+  // Build basic auth part if present
+  let auth = '';
+  if (url.username) {
+    auth = url.username;
+    if (url.password) {
+      auth += `:${url.password}`;
+    }
+    auth += '@';
+  }
+
+  let formattedHost = `${url.protocol}//${auth}${url.hostname}:${port}${url.pathname}`;
   // remove trailing slashes
   if (formattedHost.endsWith('/')) {
     formattedHost = formattedHost.slice(0, -1)
