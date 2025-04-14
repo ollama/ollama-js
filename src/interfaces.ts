@@ -168,6 +168,13 @@ export interface EmbeddingsRequest {
   options?: Partial<Options>
 }
 
+export interface RerankRequest {
+  model: string
+  query: string
+  documents: string[]
+  top_n?: number
+}
+
 // response types
 
 export interface GenerateResponse {
@@ -209,6 +216,17 @@ export interface EmbedResponse {
 
 export interface EmbeddingsResponse {
   embedding: number[]
+}
+
+export interface RerankResponse {
+  model: string
+  results: {
+    document: string
+    relevance_score: number
+  }[]
+  total_duration: number
+  load_duration: number
+  prompt_eval_count: number
 }
 
 export interface ProgressResponse {
