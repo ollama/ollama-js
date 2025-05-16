@@ -1,6 +1,7 @@
 import { defaultHost, defaultPort } from './constant.js'
 import type { ErrorResponse, Fetch } from './interfaces.js'
 import { version } from './version.js'
+import { Agent } from 'undici';
 
 /**
  * An error class for response errors.
@@ -167,6 +168,12 @@ const fetchWithHeaders = async (
     ...customHeaders
   }
 
+  const { timeout } = options;
+  options['dispatcher'] = new Agent({
+    connectTimeout: timeout,
+    headersTimeout: timeout,
+  });
+
   return fetch(url, options)
 }
 
@@ -176,9 +183,9 @@ const fetchWithHeaders = async (
  * @param host {string} - The host to fetch
  * @returns {Promise<Response>} - The fetch response
  */
-export const get = async (fetch: Fetch, host: string, options?: { headers?: HeadersInit }): Promise<Response> => {
+export const get = async (fetch: Fetch, host: string, options?: { headers?: HeadersInit, timeout?: number }): Promise<Response> => {
   const response = await fetchWithHeaders(fetch, host, {
-    headers: options?.headers
+    ...options
   })
 
   await checkOk(response)
@@ -212,7 +219,7 @@ export const post = async (
   fetch: Fetch,
   host: string,
   data?: Record<string, unknown> | BodyInit,
-  options?: { signal?: AbortSignal, headers?: HeadersInit },
+  options?: { signal?: AbortSignal, headers?: HeadersInit, timeout?: number },
 ): Promise<Response> => {
   const isRecord = (input: any): input is Record<string, unknown> => {
     return input !== null && typeof input === 'object' && !Array.isArray(input)
@@ -223,8 +230,7 @@ export const post = async (
   const response = await fetchWithHeaders(fetch, host, {
     method: 'POST',
     body: formattedData,
-    signal: options?.signal,
-    headers: options?.headers
+    ...options,
   })
 
   await checkOk(response)
@@ -242,12 +248,12 @@ export const del = async (
   fetch: Fetch,
   host: string,
   data?: Record<string, unknown>,
-  options?: { headers?: HeadersInit },
+  options?: { headers?: HeadersInit, timeout?: number },
 ): Promise<Response> => {
   const response = await fetchWithHeaders(fetch, host, {
     method: 'DELETE',
     body: JSON.stringify(data),
-    headers: options?.headers
+    ...options,
   })
 
   await checkOk(response)
