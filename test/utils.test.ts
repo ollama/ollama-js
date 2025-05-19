@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { get } from '../src/utils'
+import { Agent } from 'undici';
 
 describe('get Function Header Tests', () => {
   const mockFetch = vi.fn();
@@ -20,7 +21,8 @@ describe('get Function Header Tests', () => {
     await get(mockFetch, 'http://example.com');
     
     expect(mockFetch).toHaveBeenCalledWith('http://example.com', {
-      headers: expect.objectContaining(defaultHeaders)
+      headers: expect.objectContaining(defaultHeaders),
+      dispatcher: expect.any(new Agent())
     });
   });
 
