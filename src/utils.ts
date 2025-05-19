@@ -147,7 +147,7 @@ function normalizeHeaders(headers?: HeadersInit | undefined): Record<string,stri
 const fetchWithHeaders = async (
   fetch: Fetch,
   url: string,
-  options: RequestInit = {},
+  options: RequestInit & { timeout?: number } = {},
 ): Promise<Response> => {
   const defaultHeaders = {
     'Content-Type': 'application/json',
