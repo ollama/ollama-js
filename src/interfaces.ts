@@ -247,7 +247,8 @@ export interface ShowResponse {
   details: ModelDetails
   messages: Message[]
   modified_at: Date
-  model_info: Map<string, any>
+  model_info: Map<string, any>,
+  capabilities: string[],
   projector_info?: Map<string, any>
 }
 
