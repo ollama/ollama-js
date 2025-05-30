@@ -59,6 +59,7 @@ ollama.chat(request)
     - `images` `<Uint8Array[] | string[]>`: (Optional) Images to be included in the message, either as Uint8Array or base64 encoded strings.
   - `format` `<string>`: (Optional) Set the expected format of the response (`json`).
   - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
+  - `think` `<boolean>`: (Optional) When true, the model will think about the response before responding. Requires thinking support from the model.
   - `keep_alive` `<string | number>`: (Optional) How long to keep the model loaded. A number (seconds) or a string with a duration unit suffix ("300ms", "1.5h", "2h45m", etc.)
   - `tools` `<Tool[]>`: (Optional) A list of tool calls the model may make.
   - `options` `<Options>`: (Optional) Options to configure the runtime.
@@ -81,6 +82,7 @@ ollama.generate(request)
   - `images` `<Uint8Array[] | string[]>`: (Optional) Images to be included, either as Uint8Array or base64 encoded strings.
   - `format` `<string>`: (Optional) Set the expected format of the response (`json`).
   - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
+  - `think` `<boolean>`: (Optional) When true, the model will think about the response before responding. Requires thinking support from the model.
   - `keep_alive` `<string | number>`: (Optional) How long to keep the model loaded. A number (seconds) or a string with a duration unit suffix ("300ms", "1.5h", "2h45m", etc.)
   - `options` `<Options>`: (Optional) Options to configure the runtime.
 - Returns: `<GenerateResponse>`

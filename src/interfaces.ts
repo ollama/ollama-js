@@ -56,6 +56,7 @@ export interface GenerateRequest {
   format?: string | object
   images?: Uint8Array[] | string[]
   keep_alive?: string | number // a number (seconds) or a string with a duration unit suffix ("300ms", "1.5h", "2h45m", etc)
+  think?: boolean
 
   options?: Partial<Options>
 }
@@ -63,6 +64,7 @@ export interface GenerateRequest {
 export interface Message {
   role: string
   content: string
+  thinking?: string
   images?: Uint8Array[] | string[]
   tool_calls?: ToolCall[]
 }
@@ -106,6 +108,7 @@ export interface ChatRequest {
   format?: string | object
   keep_alive?: string | number // a number (seconds) or a string with a duration unit suffix ("300ms", "1.5h", "2h45m", etc)
   tools?: Tool[]
+  think?: boolean
 
   options?: Partial<Options>
 }
@@ -174,6 +177,7 @@ export interface GenerateResponse {
   model: string
   created_at: Date
   response: string
+  thinking?: string
   done: boolean
   done_reason: string
   context: number[]
