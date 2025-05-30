@@ -1,6 +1,5 @@
 import * as utils from './utils.js'
 import { AbortableAsyncIterator, parseJSON } from './utils.js'
-import 'whatwg-fetch'
 
 import type {
   ChatRequest,
@@ -30,6 +29,7 @@ import { defaultHost } from './constant.js'
 export class Ollama {
   protected readonly config: Config
   protected readonly fetch: Fetch
+  protected readonly timeout = 60000 * 10;
   protected readonly ongoingStreamedRequests: AbortableAsyncIterator<object>[] = []
 
   constructor(config?: Partial<Config>) {
@@ -43,6 +43,8 @@ export class Ollama {
     }
 
     this.fetch = config?.fetch ?? fetch
+
+    if (config?.timeout) this.timeout = config.timeout
   }
 
   // Abort any ongoing streamed requests to Ollama
@@ -74,7 +76,8 @@ export class Ollama {
       const abortController = new AbortController()
       const response = await utils.post(this.fetch, host, request, {
         signal: abortController.signal,
-        headers: this.config.headers
+        headers: this.config.headers,
+        timeout: this.timeout,
       })
 
       if (!response.body) {
@@ -96,7 +99,8 @@ export class Ollama {
       return abortableAsyncIterator
     }
     const response = await utils.post(this.fetch, host, request, {
-      headers: this.config.headers
+      headers: this.config.headers,
+      timeout: this.timeout,
     })
     return await response.json()
   }
@@ -237,7 +241,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
       this.fetch,
       `${this.config.host}/api/delete`,
       { name: request.model },
-      { headers: this.config.headers }
+      { headers: this.config.headers, timeout: this.timeout }
     )
     return { status: 'success' }
   }
@@ -250,7 +254,8 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    */
   async copy(request: CopyRequest): Promise<StatusResponse> {
     await utils.post(this.fetch, `${this.config.host}/api/copy`, { ...request }, {
-      headers: this.config.headers
+      headers: this.config.headers,
+      timeout: this.timeout,
     })
     return { status: 'success' }
   }
@@ -262,7 +267,8 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    */
   async list(): Promise<ListResponse> {
     const response = await utils.get(this.fetch, `${this.config.host}/api/tags`, {
-      headers: this.config.headers
+      headers: this.config.headers,
+      timeout: this.timeout,
     })
     return (await response.json()) as ListResponse
   }
@@ -276,7 +282,8 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
     const response = await utils.post(this.fetch, `${this.config.host}/api/show`, {
       ...request,
     }, {
-      headers: this.config.headers
+      headers: this.config.headers,
+      timeout: this.timeout,
     })
     return (await response.json()) as ShowResponse
   }
@@ -290,7 +297,8 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
       const response = await utils.post(this.fetch, `${this.config.host}/api/embed`, {
         ...request,
       }, {
-        headers: this.config.headers
+        headers: this.config.headers,
+        timeout: this.timeout,
       })
       return (await response.json()) as EmbedResponse
     }
@@ -304,7 +312,8 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
     const response = await utils.post(this.fetch, `${this.config.host}/api/embeddings`, {
       ...request,
     }, {
-      headers: this.config.headers
+      headers: this.config.headers,
+      timeout: this.timeout,
     })
     return (await response.json()) as EmbeddingsResponse
   }
@@ -316,7 +325,8 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    */
   async ps(): Promise<ListResponse> {
     const response = await utils.get(this.fetch, `${this.config.host}/api/ps`, {
-      headers: this.config.headers
+      headers: this.config.headers,
+      timeout: this.timeout,
     })
     return (await response.json()) as ListResponse
   }
