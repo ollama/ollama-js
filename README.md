@@ -21,7 +21,9 @@ console.log(response.message.content)
 ```
 
 ### Browser Usage
+
 To use the library without node, import the browser module.
+
 ```javascript
 import ollama from 'ollama/browser'
 ```
@@ -34,7 +36,11 @@ Response streaming can be enabled by setting `stream: true`, modifying function 
 import ollama from 'ollama'
 
 const message = { role: 'user', content: 'Why is the sky blue?' }
-const response = await ollama.chat({ model: 'llama3.1', messages: [message], stream: true })
+const response = await ollama.chat({
+  model: 'llama3.1',
+  messages: [message],
+  stream: true,
+})
 for await (const part of response) {
   process.stdout.write(part.message.content)
 }
@@ -205,7 +211,7 @@ ollama.abort()
 This method will abort **all** streamed generations currently running with the client instance.
 If there is a need to manage streams with timeouts, it is recommended to have one Ollama client per stream.
 
-All asynchronous threads listening to streams (typically the ```for await (const part of response)```) will throw an ```AbortError``` exception. See [examples/abort/abort-all-requests.ts](examples/abort/abort-all-requests.ts) for an example.
+All asynchronous threads listening to streams (typically the `for await (const part of response)`) will throw an `AbortError` exception. See [examples/abort/abort-all-requests.ts](examples/abort/abort-all-requests.ts) for an example.
 
 ## Custom client
 
@@ -213,6 +219,7 @@ A custom client can be created with the following fields:
 
 - `host` `<string>`: (Optional) The Ollama host address. Default: `"http://127.0.0.1:11434"`.
 - `fetch` `<Object>`: (Optional) The fetch library used to make requests to the Ollama host.
+- `headers` `<Object>`: (Optional) Custom headers to include with every request.
 
 ```javascript
 import { Ollama } from 'ollama'
@@ -221,6 +228,23 @@ const ollama = new Ollama({ host: 'http://127.0.0.1:11434' })
 const response = await ollama.chat({
   model: 'llama3.1',
   messages: [{ role: 'user', content: 'Why is the sky blue?' }],
+})
+```
+
+## Custom Headers
+
+You can set custom headers that will be included with every request:
+
+```javascript
+import { Ollama } from 'ollama'
+
+const ollama = new Ollama({
+  host: 'http://127.0.0.1:11434',
+  headers: {
+    Authorization: 'Bearer <api key>',
+    'X-Custom-Header': 'custom-value',
+    'User-Agent': 'MyApp/1.0',
+  },
 })
 ```
 
