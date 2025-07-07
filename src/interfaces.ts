@@ -67,6 +67,7 @@ export interface Message {
   thinking?: string
   images?: Uint8Array[] | string[]
   tool_calls?: ToolCall[]
+  tool_name?: string
 }
 
 export interface ToolCall {

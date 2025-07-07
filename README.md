@@ -63,6 +63,7 @@ ollama.chat(request)
     - `role` `<string>`: The role of the message sender ('user', 'system', or 'assistant').
     - `content` `<string>`: The content of the message.
     - `images` `<Uint8Array[] | string[]>`: (Optional) Images to be included in the message, either as Uint8Array or base64 encoded strings.
+    - `tool_name` `<string>`: (Optional) Add the name of the tool that was executed to inform the model of the result 
   - `format` `<string>`: (Optional) Set the expected format of the response (`json`).
   - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
   - `think` `<boolean>`: (Optional) When true, the model will think about the response before responding. Requires thinking support from the model.
