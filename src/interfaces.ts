@@ -232,6 +232,7 @@ export interface ModelResponse {
   details: ModelDetails
   expires_at: Date
   size_vram: number
+  capabilities: string[]
 }
 
 export interface ModelDetails {
