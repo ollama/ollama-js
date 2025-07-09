@@ -4,7 +4,8 @@ export interface Config {
   host: string
   fetch?: Fetch
   proxy?: boolean
-  headers?: HeadersInit
+  headers?: HeadersInit,
+  timeout?: number
 }
 
 // request types
