@@ -1,4 +1,4 @@
-import ollama from 'ollama';
+import ollama, { Ollama } from 'ollama';
 
 // Mock weather functions
 function getTemperature(args: { city: string }): string {
