@@ -56,7 +56,7 @@ export interface GenerateRequest {
   format?: string | object
   images?: Uint8Array[] | string[]
   keep_alive?: string | number // a number (seconds) or a string with a duration unit suffix ("300ms", "1.5h", "2h45m", etc)
-  think?: boolean
+  think?: boolean | 'high' | 'medium' | 'low'
 
   options?: Partial<Options>
 }
@@ -109,7 +109,7 @@ export interface ChatRequest {
   format?: string | object
   keep_alive?: string | number // a number (seconds) or a string with a duration unit suffix ("300ms", "1.5h", "2h45m", etc)
   tools?: Tool[]
-  think?: boolean
+  think?: boolean | 'high' | 'medium' | 'low'
 
   options?: Partial<Options>
 }
