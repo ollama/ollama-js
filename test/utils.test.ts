@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { get } from '../src/utils'
+import { Agent } from 'undici';
 
 describe('get Function Header Tests', () => {
   const mockFetch = vi.fn();
@@ -20,7 +21,8 @@ describe('get Function Header Tests', () => {
     await get(mockFetch, 'http://example.com');
     
     expect(mockFetch).toHaveBeenCalledWith('http://example.com', {
-      headers: expect.objectContaining(defaultHeaders)
+      headers: expect.objectContaining(defaultHeaders),
+      dispatcher: expect.any(Agent),
     });
   });
 
@@ -37,7 +39,8 @@ describe('get Function Header Tests', () => {
         ...defaultHeaders,
         'authorization': 'Bearer token',
         'x-custom': 'value'
-      })
+      }),
+      dispatcher: expect.any(Agent),
     });
   });
 
@@ -54,7 +57,8 @@ describe('get Function Header Tests', () => {
         ...defaultHeaders,
         'Authorization': 'Bearer token',
         'X-Custom': 'value'
-      })
+      }),
+      dispatcher: expect.any(Agent),
     });
   });
 
@@ -68,7 +72,8 @@ describe('get Function Header Tests', () => {
     expect(mockFetch).toHaveBeenCalledWith('http://example.com', {
       headers: expect.objectContaining({
         'User-Agent': expect.stringMatching(/ollama-js\/.*/)
-      })
+      }),
+      dispatcher: expect.any(Agent),
     });
   });
 
@@ -76,7 +81,8 @@ describe('get Function Header Tests', () => {
     await get(mockFetch, 'http://example.com', { headers: {} });
 
     expect(mockFetch).toHaveBeenCalledWith('http://example.com', {
-      headers: expect.objectContaining(defaultHeaders)
+      headers: expect.objectContaining(defaultHeaders),
+      dispatcher: expect.any(Agent),
     });
   });
 });
