@@ -160,6 +160,7 @@ export interface EmbedRequest {
   input: string | string[]
   truncate?: boolean
   keep_alive?: string | number // a number (seconds) or a string with a duration unit suffix ("300ms", "1.5h", "2h45m", etc)
+  dimensions?: number
 
   options?: Partial<Options>
 }
