@@ -299,3 +299,32 @@ export interface SearchResponse {
   success: boolean
   errors?: string[]
 }
+
+// Crawl types - commented out removed fields
+export interface CrawlRequest {
+  urls: string[]
+  // text?: boolean
+  // extras?: Record<string, any>
+  // livecrawl?: string
+}
+
+export interface CrawlMetadata {
+  published_date?: string
+  author?: string
+  status?: string
+  source?: string
+  // extras?: Record<string, any>
+}
+
+export interface CrawlResult {
+  title: string
+  url: string
+  content: SearchContent
+  metadata: CrawlMetadata
+}
+
+export interface CrawlResponse {
+  results: Record<string, CrawlResult[]>
+  success: boolean
+  errors?: string[]
+}

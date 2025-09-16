@@ -26,6 +26,8 @@ import type {
   StatusResponse,
   SearchRequest,
   SearchResponse,
+  CrawlRequest,
+  CrawlResponse,
 } from './interfaces.js'
 import { defaultHost } from './constant.js'
 
@@ -346,6 +348,30 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
       headers: this.config.headers
     })
     return (await response.json()) as SearchResponse
+  }
+
+  /**
+   * Performs web crawl using the Ollama web crawl API
+   * @param request {CrawlRequest} - The crawl request containing URLs and options
+   * @returns {Promise<CrawlResponse>} - The crawl results
+   * @throws {Error} - If the request is invalid or the server returns an error
+   */
+  async crawl(request: CrawlRequest): Promise<CrawlResponse> {
+    if (!request.urls || request.urls.length === 0) {
+      throw new Error('At least one URL is required')
+    }
+
+    const crawlRequest = {
+      urls: request.urls,
+      text: true,
+      livecrawl: 'fallback'
+    }
+
+    const base = this.config.webSearchHost ?? this.config.host
+    const response = await utils.post(this.fetch, `${base}/api/tools/webcrawl`, crawlRequest, {
+      headers: this.config.headers
+    })
+    return (await response.json()) as CrawlResponse
   }
 }
 
