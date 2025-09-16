@@ -2,11 +2,12 @@ import ollama, { Ollama } from 'ollama'
 import type { Message } from 'ollama'
 
 async function main() {
-  const API_KEY = process.env.OLLAMA_API_KEY || ''
   const MODEL = process.env.OLLAMA_MODEL || 'gpt-oss'
 
+  if (!process.env.OLLAMA_API_KEY) throw new Error('Set OLLAMA_API_KEY to use websearch tools')
+
   const client = new Ollama({
-    headers: { Authorization: `Bearer ${API_KEY}` },
+    headers: { Authorization: `Bearer ${process.env.OLLAMA_API_KEY}` },
   })
 
   // Tool schemas
@@ -54,11 +55,9 @@ async function main() {
 
   const availableTools = {
     websearch: async (args: { queries: string[]; maxResults?: number }) => {
-      if (!API_KEY) throw new Error('Set OLLAMA_API_KEY to use websearch tool')
       return await client.search(args)
     },
     webcrawl: async (args: { urls: string[] }) => {
-      if (!API_KEY) throw new Error('Set OLLAMA_API_KEY to use webcrawl tool')
       return await client.crawl(args)
     },
   }
@@ -76,46 +75,8 @@ async function main() {
 
   console.log('----- Prompt:', messages.find((m) => m.role === 'user')?.content, '\n')
 
-  const response = await ollama.chat({
-    model: MODEL,
-    messages: messages,
-    tools: [websearchTool, webcrawlTool],
-    stream: true,
-    think: true,
-  })
-
-  for await (const chunk of response) {
-    if (chunk.message.thinking) {
-      process.stdout.write(chunk.message.thinking)
-    }
-    if (chunk.message.content) {
-      process.stdout.write(chunk.message.content)
-    }
-    if (chunk.message.tool_calls) {
-      for (const toolCall of chunk.message.tool_calls) {
-        const functionToCall = availableTools[toolCall.function.name]
-        if (functionToCall) {
-          const rawArgs = toolCall.function.arguments as any
-          const parsedArgs = typeof rawArgs === 'string' ? JSON.parse(rawArgs) : rawArgs
-          console.log('\nCalling function:', toolCall.function.name, 'with arguments:', parsedArgs)
-          const output = await functionToCall(parsedArgs)
-          console.log('> Function output:', JSON.stringify(output), '\n')
-
-          messages.push(chunk.message)
-          messages.push({
-            role: 'tool',
-            content: JSON.stringify(output),
-            tool_name: toolCall.function.name,
-          })
-        }
-      }
-    }
-  }
-
-  console.log('----- Sending result back to model \n')
-
-  if (messages.some((msg) => msg.role === 'tool')) {
-    const finalResponse = await ollama.chat({
+  while (true) {
+    const response = await ollama.chat({
       model: MODEL,
       messages: messages,
       tools: [websearchTool, webcrawlTool],
@@ -123,26 +84,41 @@ async function main() {
       think: true,
     })
 
-    let doneThinking = false
-    for await (const chunk of finalResponse) {
+    let hadToolCalls = false
+    for await (const chunk of response) {
       if (chunk.message.thinking) {
         process.stdout.write(chunk.message.thinking)
       }
       if (chunk.message.content) {
-        if (!doneThinking) {
-          console.log('\n----- Final result:')
-          doneThinking = true
-        }
         process.stdout.write(chunk.message.content)
       }
-      if (chunk.message.tool_calls) {
-        console.log('Model returned tool calls:')
-        console.log(chunk.message.tool_calls)
+      if (chunk.message.tool_calls && chunk.message.tool_calls.length > 0) {
+        hadToolCalls = true
+        for (const toolCall of chunk.message.tool_calls) {
+          const functionToCall = availableTools[toolCall.function.name]
+          if (functionToCall) {
+            const args = toolCall.function.arguments as any
+            console.log('\nCalling function:', toolCall.function.name, 'with arguments:', args)
+            const output = await functionToCall(args)
+            console.log('> Function output:', JSON.stringify(output), '\n')
+
+            messages.push(chunk.message)
+            messages.push({
+              role: 'tool',
+              content: JSON.stringify(output),
+              tool_name: toolCall.function.name,
+            })
+          }
+        }
       }
     }
-    process.stdout.write('\n')
-  } else {
-    console.log('No tool calls returned')
+
+    if (!hadToolCalls) {
+      process.stdout.write('\n')
+      break
+    }
+
+    console.log('----- Sending result back to model \n')
   }
 }
 
