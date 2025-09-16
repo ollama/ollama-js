@@ -24,6 +24,8 @@ import type {
   ShowRequest,
   ShowResponse,
   StatusResponse,
+  SearchRequest,
+  SearchResponse,
 } from './interfaces.js'
 import { defaultHost } from './constant.js'
 
@@ -35,7 +37,8 @@ export class Ollama {
   constructor(config?: Partial<Config>) {
     this.config = {
       host: '',
-      headers: config?.headers
+      headers: config?.headers,
+      webSearchHost: config?.webSearchHost
     }
 
     if (!config?.proxy) {
@@ -319,6 +322,30 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
       headers: this.config.headers
     })
     return (await response.json()) as ListResponse
+  }
+
+  /**
+   * Performs web search using the Ollama web search API
+   * @param request {SearchRequest} - The search request containing queries and options
+   * @returns {Promise<SearchResponse>} - The search results
+   * @throws {Error} - If the request is invalid or the server returns an error
+   */
+  async search(request: SearchRequest): Promise<SearchResponse> {
+    if (!request.queries || request.queries.length === 0) {
+      throw new Error('At least one query is required')
+    }
+
+    // Set defaults
+    const searchRequest = {
+      queries: request.queries,
+      max_results: Math.min(request.maxResults || 5, 10)
+    }
+
+    const base = this.config.webSearchHost ?? this.config.host
+    const response = await utils.post(this.fetch, `${base}/api/tools/websearch`, searchRequest, {
+      headers: this.config.headers
+    })
+    return (await response.json()) as SearchResponse
   }
 }
 

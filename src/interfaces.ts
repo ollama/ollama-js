@@ -5,6 +5,7 @@ export interface Config {
   fetch?: Fetch
   proxy?: boolean
   headers?: HeadersInit
+  webSearchHost?: string
 }
 
 // request types
@@ -268,4 +269,33 @@ export interface ErrorResponse {
 
 export interface StatusResponse {
   status: string
+}
+
+// Web Search types
+export interface SearchRequest {
+  queries: string[]
+  maxResults?: number
+}
+
+export interface SearchContent {
+  snippet?: string
+  full_text?: string
+}
+
+export interface SearchMetadata {
+  published_date?: string
+  author?: string
+}
+
+export interface SearchResult {
+  title: string
+  url: string
+  content: SearchContent
+  metadata: SearchMetadata
+}
+
+export interface SearchResponse {
+  results: Record<string, SearchResult[]>
+  success: boolean
+  errors?: string[]
 }
