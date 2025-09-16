@@ -39,8 +39,7 @@ export class Ollama {
   constructor(config?: Partial<Config>) {
     this.config = {
       host: '',
-      headers: config?.headers,
-      webSearchHost: config?.webSearchHost
+      headers: config?.headers
     }
 
     if (!config?.proxy) {

@@ -92,7 +92,6 @@ async function main() {
         finishedThinking = true
         process.stdout.write('\n\nResponse:\n========\n\n')
       }
-
       if (chunk.message.thinking) {
         thinking += chunk.message.thinking
         process.stdout.write(chunk.message.thinking)
@@ -116,6 +115,7 @@ async function main() {
             const args = toolCall.function.arguments as any
             console.log('\nCalling function:', toolCall.function.name, 'with arguments:', args)
             const output = await functionToCall(args)
+            console.log('Function output:', JSON.stringify(output).slice(0, 200), '\n')
             console.log('Function output:', JSON.stringify(output).slice(0, 200), '\n')
             
             messages.push(chunk.message)
