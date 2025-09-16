@@ -5,6 +5,7 @@ export interface Config {
   fetch?: Fetch
   proxy?: boolean
   headers?: HeadersInit
+  webSearchHost?: string
 }
 
 // request types
