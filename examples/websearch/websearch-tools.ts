@@ -1,8 +1,7 @@
-import ollama, { Ollama } from 'ollama'
+import ollama, { Ollama } from '../../src/browser'
 import type { Message } from 'ollama'
 
 async function main() {
-  const MODEL = process.env.OLLAMA_MODEL || 'gpt-oss'
 
   if (!process.env.OLLAMA_API_KEY) throw new Error('Set OLLAMA_API_KEY to use websearch tools')
 
@@ -64,10 +63,6 @@ async function main() {
 
   const messages: Message[] = [
     {
-      role: 'system',
-      content: 'Answer in natural language. Use tools if helpful. Do not output JSON unless explicitly asked.',
-    },
-    {
       role: 'user',
       content: 'What is Ollama?',
     },
@@ -77,7 +72,7 @@ async function main() {
 
   while (true) {
     const response = await ollama.chat({
-      model: MODEL,
+      model: 'gpt-oss',
       messages: messages,
       tools: [websearchTool, webcrawlTool],
       stream: true,
@@ -85,14 +80,34 @@ async function main() {
     })
 
     let hadToolCalls = false
+    let startedThinking = false
+    let finishedThinking = false
+    var content = ''
+    var thinking = ''
     for await (const chunk of response) {
+      if (chunk.message.thinking && !startedThinking) {
+        startedThinking = true
+        process.stdout.write('Thinking:\n========\n\n')
+      } else if (chunk.message.content && startedThinking && !finishedThinking) {
+        finishedThinking = true
+        process.stdout.write('\n\nResponse:\n========\n\n')
+      }
+
       if (chunk.message.thinking) {
+        thinking += chunk.message.thinking
         process.stdout.write(chunk.message.thinking)
       }
       if (chunk.message.content) {
+        content += chunk.message.content
         process.stdout.write(chunk.message.content)
       }
       if (chunk.message.tool_calls && chunk.message.tool_calls.length > 0) {
+        messages.push({
+          role: 'assistant',
+          content: content,
+          thinking: thinking,
+        })
+        
         hadToolCalls = true
         for (const toolCall of chunk.message.tool_calls) {
           const functionToCall = availableTools[toolCall.function.name]
@@ -100,9 +115,11 @@ async function main() {
             const args = toolCall.function.arguments as any
             console.log('\nCalling function:', toolCall.function.name, 'with arguments:', args)
             const output = await functionToCall(args)
-            console.log('> Function output:', JSON.stringify(output), '\n')
+            console.log('> Function output:', JSON.stringify(output).slice(0, 200), '\n')
 
+            // message history
             messages.push(chunk.message)
+            // tool result
             messages.push({
               role: 'tool',
               content: JSON.stringify(output),
