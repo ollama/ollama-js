@@ -1,4 +1,4 @@
-import ollama, { Ollama } from 'ollama'
+import ollama, { Ollama } from '../../src/browser'
 import type { Message } from 'ollama'
 
 async function main() {
@@ -101,6 +101,12 @@ async function main() {
         process.stdout.write(chunk.message.content)
       }
       if (chunk.message.tool_calls && chunk.message.tool_calls.length > 0) {
+        messages.push({
+          role: 'assistant',
+          content: content,
+          thinking: thinking,
+        })
+        
         hadToolCalls = true
         messages.push({
           role: 'assistant',
@@ -119,6 +125,7 @@ async function main() {
             console.log('Function output:', JSON.stringify(output).slice(0, 200), '\n')
             
             messages.push(chunk.message)
+            // tool result
             messages.push({
               role: 'tool',
               content: JSON.stringify(output),
