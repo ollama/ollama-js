@@ -1,4 +1,4 @@
-import ollama, { Ollama } from '../../src/browser'
+import ollama, { Ollama } from 'ollama'
 import type { Message } from 'ollama'
 
 async function main() {
