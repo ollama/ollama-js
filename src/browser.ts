@@ -337,14 +337,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
       throw new Error('At least one query is required')
     }
 
-    // Set defaults
-    const searchRequest = {
-      queries: request.queries,
-      max_results: Math.min(request.maxResults || 5, 10)
-    }
-
-    const base = this.config.webSearchHost ?? this.config.host
-    const response = await utils.post(this.fetch, `${base}/api/tools/websearch`, searchRequest, {
+    const response = await utils.post(this.fetch, `https://ollama.com/api/tools/websearch`, { ...request }, {
       headers: this.config.headers
     })
     return (await response.json()) as SearchResponse
@@ -361,14 +354,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
       throw new Error('At least one URL is required')
     }
 
-    const crawlRequest = {
-      urls: request.urls,
-      text: true,
-      livecrawl: 'fallback'
-    }
-
-    const base = this.config.webSearchHost ?? this.config.host
-    const response = await utils.post(this.fetch, `${base}/api/tools/webcrawl`, crawlRequest, {
+    const response = await utils.post(this.fetch, `https://ollama.com/api/tools/webcrawl`, { ...request }, {
       headers: this.config.headers
     })
     return (await response.json()) as CrawlResponse
