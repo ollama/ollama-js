@@ -1,6 +1,6 @@
 import ollama, { Ollama } from 'ollama'
 import type { Message } from 'ollama'
-import { BrowserSearch, BrowserOpen, BrowserFind } from './browser-tool-helpers'
+import { Browser } from './browser-tool-helpers'
 
 async function main() {
   if (!process.env.OLLAMA_API_KEY) {
@@ -13,15 +13,13 @@ async function main() {
       : undefined,
   })
 
-  const browserSearch = new BrowserSearch(undefined, client)
-  const browserOpen = new BrowserOpen(undefined, client)
-  const browserFind = new BrowserFind()
+  const browser = new Browser(undefined, client)
 
   // Tool schemas for the model
   const browserSearchTool = {
     type: 'function',
     function: {
-      name: 'browser_search',
+      name: 'browser.search',
       description: 'Search the web for information and display results',
       parameters: {
         type: 'object',
@@ -43,7 +41,7 @@ async function main() {
   const browserOpenTool = {
     type: 'function',
     function: {
-      name: 'browser_open',
+      name: 'browser.open',
       description: 'Open a link in the browser or display a page',
       parameters: {
         type: 'object',
@@ -72,7 +70,7 @@ async function main() {
   const browserFindTool = {
     type: 'function',
     function: {
-      name: 'browser_find',
+      name: 'browser.find',
       description: 'Find a text pattern within the current browser page',
       parameters: {
         type: 'object',
@@ -93,33 +91,21 @@ async function main() {
 
   // Available tool functions
   const availableTools = {
-    browser_search: async (args: { query: string; topn?: number }) => {
-      const result = await browserSearch.execute(args)
-
-      // Sync state across all browser tools
-      browserOpen.state.setData(result.state)
-      browserFind.state.setData(result.state)
+    'browser.search': async (args: { query: string; topn?: number }) => {
+      const result = await browser.search(args)
       return result.pageText
     },
-    browser_open: async (args: {
+    'browser.open': async (args: {
       id?: string | number
       cursor?: number
       loc?: number
       num_lines?: number
     }) => {
-      const result = await browserOpen.execute(args)
-
-      // Sync state across all browser tools
-      browserSearch.state.setData(result.state)
-      browserFind.state.setData(result.state)
+      const result = await browser.open(args)
       return result.pageText
     },
-    browser_find: async (args: { pattern: string; cursor?: number }) => {
-      const result = await browserFind.execute(args)
-
-      // Sync state across all browser tools
-      browserSearch.state.setData(result.state)
-      browserOpen.state.setData(result.state)
+    'browser.find': async (args: { pattern: string; cursor?: number }) => {
+      const result = await browser.find(args)
       return result.pageText
     },
   }
@@ -127,7 +113,7 @@ async function main() {
   const messages: Message[] = [
     {
       role: 'user',
-      content: 'What does Ollama do?',
+      content: 'Who is Nicole Pardal?',
     },
   ]
 

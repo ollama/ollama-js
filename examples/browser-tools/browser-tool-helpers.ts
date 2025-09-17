@@ -1,6 +1,5 @@
 import type { SearchRequest, SearchResponse, CrawlRequest, CrawlResponse } from 'ollama'
 
-// Local types used only by this example
 interface Page {
   url: string
   title: string
@@ -24,7 +23,6 @@ interface WebSearchResult {
   }
 }
 
-// Browser tool implementation
 
 // Default number of tokens to show when calling displayPage
 const DEFAULT_VIEW_TOKENS = 1024
@@ -86,9 +84,33 @@ export class BrowserState {
  */
 export class Browser {
   public state: BrowserState
+  private searchClient?: {
+    search: (request: SearchRequest) => Promise<SearchResponse>
+  }
+  private crawlClient?: {
+    crawl: (request: CrawlRequest) => Promise<CrawlResponse>
+  }
 
-  constructor(initialState?: BrowserStateData) {
+  constructor(
+    initialState?: BrowserStateData,
+    client?: {
+      search: (request: SearchRequest) => Promise<SearchResponse>
+      crawl: (request: CrawlRequest) => Promise<CrawlResponse>
+    },
+  ) {
     this.state = new BrowserState(initialState)
+    if (client) {
+      this.searchClient = client
+      this.crawlClient = client
+    }
+  }
+
+  setClients(client: {
+    search: (request: SearchRequest) => Promise<SearchResponse>
+    crawl: (request: CrawlRequest) => Promise<CrawlResponse>
+  }): void {
+    this.searchClient = client
+    this.crawlClient = client
   }
 
   getState(): BrowserStateData {
@@ -121,29 +143,25 @@ export class Browser {
     lines: string[],
   ): number {
     if (numLines <= 0) {
-      // Auto-calculate based on viewTokens
       const txt = this.joinLinesWithNumbers(lines.slice(loc))
       const data = this.state.getData()
 
-      // If text is very short, no need to truncate (at least 1 char per token)
       if (txt.length > data.viewTokens) {
-        // Simple heuristic: approximate token counting
-        // Typical token is ~4 characters, but can be up to 128 chars
+
         const maxCharsPerToken = 128
 
-        // upper bound for text to analyze
+
         const upperBound = Math.min((data.viewTokens + 1) * maxCharsPerToken, txt.length)
         const textToAnalyze = txt.substring(0, upperBound)
 
-        // Simple approximation: count tokens as ~4 chars each
-        // This is less accurate than tiktoken but more performant
+
         const approxTokens = textToAnalyze.length / 4
 
         if (approxTokens > data.viewTokens) {
-          // Find the character position at viewTokens
+
           const endIdx = Math.min(data.viewTokens * 4, txt.length)
 
-          // Count newlines up to that position to get line count
+
           numLines = (txt.substring(0, endIdx).match(/\n/g) || []).length + 1
         } else {
           numLines = totalLines
@@ -189,40 +207,40 @@ export class Browser {
     const links: Record<number, string> = {}
     let linkID = 0
 
-    // First, handle multi-line markdown links by joining them
+
     const multiLinePattern = /\[([^\]]+)\]\s*\n\s*\(([^)]+)\)/g
     text = text.replace(multiLinePattern, (match) => {
-      // Replace newlines with spaces in the match
+
       let cleaned = match.replace(/\n/g, ' ')
-      // Remove extra spaces
+
       cleaned = cleaned.replace(/\s+/g, ' ')
       return cleaned
     })
 
-    // Now process all markdown links (including the cleaned multi-line ones)
+
     const linkPattern = /\[([^\]]+)\]\(([^)]+)\)/g
 
     const processedText = text.replace(linkPattern, (match, linkText, linkURL) => {
       const cleanLinkText = linkText.trim()
       const cleanLinkURL = linkURL.trim()
 
-      // Extract domain from URL
+
       let domain = cleanLinkURL
       try {
         const url = new URL(cleanLinkURL)
         if (url.host) {
           domain = url.host
-          // Remove www. prefix if present
+
           domain = domain.replace(/^www\./, '')
         }
       } catch {
-        // If URL parsing fails, use the original URL
+
       }
 
-      // Create the formatted link
+
       const formatted = `【${linkID}†${cleanLinkText}†${domain}】`
 
-      // Store the link
+
       links[linkID] = cleanLinkURL
       linkID++
 
@@ -245,22 +263,22 @@ export class Browser {
 
     for (const line of lines) {
       if (line === '') {
-        // Preserve empty lines
+
         wrapped.push('')
       } else if (line.length <= width) {
         wrapped.push(line)
       } else {
-        // Word wrapping while preserving whitespace structure
+
         const words = line.split(/\s+/)
         if (words.length === 0) {
-          // Line with only whitespace
+
           wrapped.push(line)
           continue
         }
 
         let currentLine = ''
         for (const word of words) {
-          // Check if adding this word would exceed width
+
           let testLine = currentLine
           if (testLine !== '') {
             testLine += ' '
@@ -268,11 +286,11 @@ export class Browser {
           testLine += word
 
           if (testLine.length > width && currentLine !== '') {
-            // Current line would be too long, wrap it
+
             wrapped.push(currentLine)
             currentLine = word
           } else {
-            // Add word to current line
+
             if (currentLine !== '') {
               currentLine += ' '
             }
@@ -280,7 +298,7 @@ export class Browser {
           }
         }
 
-        // Add any remaining content
+
         if (currentLine !== '') {
           wrapped.push(currentLine)
         }
@@ -301,20 +319,20 @@ export class Browser {
   ): string {
     let totalLines = page.lines.length
 
-    // Ensure there is at least one line to display
+
     if (totalLines === 0) {
       page.lines = ['']
       totalLines = 1
     }
 
-    // Clamp loc into a valid range instead of throwing
+
     if (Number.isNaN(loc) || loc < 0) {
       loc = 0
     } else if (loc >= totalLines) {
       loc = Math.max(0, totalLines - 1)
     }
 
-    // get viewport end location
+
     const endLoc = this.getEndLoc(loc, numLines, totalLines, page.lines)
 
     let display = `[${cursor}] ${page.title}`
@@ -325,7 +343,6 @@ export class Browser {
     }
     display += `**viewing lines [${loc} - ${endLoc - 1}] of ${totalLines - 1}**\n\n`
 
-    // Content with line numbers
     let hadZeroLine = false
     for (let i = loc; i < endLoc; i++) {
       if (i === 0) {
@@ -361,8 +378,8 @@ export class Browser {
     let textBuilder = ''
     let linkIdx = 0
 
-    // Add the header lines to match format
-    textBuilder += '\n' // L0: empty
+
+    textBuilder += '\n' 
     textBuilder += 'URL: \n' // L1: URL: (empty for search)
     textBuilder += '# Search Results\n' // L2: # Search Results
     textBuilder += '\n' // L3: empty
@@ -383,19 +400,17 @@ export class Browser {
         const linkFormat = `* 【${linkIdx}†${result.title}†${domain}】`
         textBuilder += linkFormat
 
-        // Prefer snippet; fallback to truncated full_text
+
         const rawSnippet =
           result.content.snippet && result.content.snippet.trim()
             ? result.content.snippet.trim()
             : result.content.full_text || ''
 
-        // Truncate and lightly sanitize to avoid garbage blobs in previews
+
         const capped =
           rawSnippet.length > 400 ? rawSnippet.substring(0, 400) + '…' : rawSnippet
         const cleaned = capped
-          // collapse long digit runs (likely noise)
           .replace(/\d{40,}/g, (m) => m.substring(0, 40) + '…')
-          // collapse excessive whitespace
           .replace(/\s{3,}/g, ' ')
         textBuilder += cleaned
         textBuilder += '\n'
@@ -426,7 +441,7 @@ export class Browser {
 
     let textBuilder = ''
 
-    // Format the individual result page (only used when no full text is available)
+
     const linkFormat = `【${linkIdx}†${result.title}】`
     textBuilder += linkFormat
     textBuilder += '\n'
@@ -435,17 +450,13 @@ export class Browser {
     textBuilder += result.content.fullText.substring(0, numChars)
     textBuilder += '\n\n'
 
-    // Only store link and snippet if we won't be processing full text later
-    // (full text processing will handle all links consistently)
     if (!result.content.fullText) {
       page.links[linkIdx] = result.url
     }
 
     // Use full text if available, otherwise use snippet
     if (result.content.fullText) {
-      // Prepend the URL line to the full text
       page.text = `URL: ${result.url}\n${result.content.fullText}`
-      // Process markdown links in the full text
       const { processedText, links } = this.processMarkdownLinks(page.text)
       page.text = processedText
       page.links = links
@@ -478,25 +489,18 @@ export class Browser {
     // Process crawl results - the API returns results grouped by URL
     for (const [url, urlResults] of Object.entries(crawlResponse.results)) {
       if (urlResults.length > 0) {
-        // Get the first result for this URL
         const result = urlResults[0]
 
-        // Extract content
         if (result.content.full_text) {
           page.text = result.content.full_text
         }
 
-        // Extract title if available
         if (result.title) {
           page.title = result.title
         }
 
-        // Update URL to the actual URL from results
         page.url = url
 
-        // Note: previously extracted links from crawl extras; removed to avoid reliance on extras
-
-        // Only process the first URL's results
         break
       }
     }
@@ -509,12 +513,11 @@ export class Browser {
       page.text = `URL: ${page.url}\n${page.text}`
     }
 
-    // Process markdown links in the text
     const { processedText, links } = this.processMarkdownLinks(page.text)
     page.text = processedText
     page.links = links
 
-    // Wrap lines for display
+
     page.lines = this.wrapLines(page.text, 80)
 
     return page
@@ -539,7 +542,6 @@ export class Browser {
     const numShowLines = 4
     const patternLower = pattern.toLowerCase()
 
-    // Search through the page lines following the reference algorithm
     const resultChunks: string[] = []
     let lineIdx = 0
 
@@ -552,7 +554,6 @@ export class Browser {
         continue
       }
 
-      // Build snippet context
       const endLine = Math.min(lineIdx + numShowLines, page.lines.length)
 
       let snippetBuilder = ''
@@ -564,7 +565,6 @@ export class Browser {
       }
       const snippet = snippetBuilder
 
-      // Format the match
       const linkFormat = `【${matchIdx}†match at L${lineIdx}】`
       const resultChunk = `${linkFormat}\n${snippet}`
       resultChunks.push(resultChunk)
@@ -591,50 +591,15 @@ export class Browser {
     findPage.lines = this.wrapLines(findPage.text, 80)
     return findPage
   }
-}
-
-/**
- * BrowserSearch - Performs web searches and builds search result pages
- */
-export class BrowserSearch extends Browser {
-  private searchClient: {
-    search: (request: SearchRequest) => Promise<SearchResponse>
-  }
-
-  constructor(
-    initialState?: BrowserStateData,
-    searchClient?: { search: (request: SearchRequest) => Promise<SearchResponse> },
-  ) {
-    super(initialState)
-    this.searchClient = searchClient || {
-      search: async () => {
-        throw new Error('Search client not provided')
-      },
-    }
-  }
-
-  name(): string {
-    return 'browser.search'
-  }
-
-  description(): string {
-    return 'Search the web for information'
-  }
-
-  schema(): Record<string, any> {
-    return {
-      type: 'function',
-      function: {
-        name: 'browser.search',
-      },
-    }
-  }
-
-  async execute(args: {
+  
+  async search(args: {
     query: string
     topn?: number
   }): Promise<{ state: BrowserStateData; pageText: string }> {
     const { query, topn = 5 } = args
+    if (!this.searchClient) {
+      throw new Error('Search client not provided')
+    }
 
     const searchArgs: SearchRequest = {
       queries: [query],
@@ -643,12 +608,10 @@ export class BrowserSearch extends Browser {
 
     const result = await this.searchClient.search(searchArgs)
 
-    // Build main search results page that contains all search results
     const searchResultsPage = this.buildSearchResultsPageCollection(query, result)
     this.savePage(searchResultsPage)
     const cursor = this.getState().pageStack.length - 1
 
-    // Cache result for each page
     for (const queryResults of Object.values(result.results)) {
       for (let i = 0; i < queryResults.length; i++) {
         const searchResult = queryResults[i]
@@ -660,7 +623,6 @@ export class BrowserSearch extends Browser {
           },
         }
         const resultPage = this.buildSearchResultsPage(webSearchResult, i + 1)
-        // Save to global only, do not add to visited stack
         const data = this.getState()
         data.urlToPage[resultPage.url] = resultPage
         this.state.setData(data)
@@ -668,104 +630,57 @@ export class BrowserSearch extends Browser {
     }
 
     const pageText = this.displayPage(searchResultsPage, cursor, 0, -1)
-
     return { state: this.getState(), pageText: capToolContent(pageText) }
   }
-}
 
-/**
- * BrowserOpen - Opens web pages and displays them
- */
-export class BrowserOpen extends Browser {
-  private crawlClient: {
-    crawl: (request: CrawlRequest) => Promise<CrawlResponse>
-  }
-
-  constructor(
-    initialState?: BrowserStateData,
-    crawlClient?: { crawl: (request: CrawlRequest) => Promise<CrawlResponse> },
-  ) {
-    super(initialState)
-    this.crawlClient = crawlClient || {
-      crawl: async () => {
-        throw new Error('Crawl client not provided')
-      },
-    }
-  }
-
-  name(): string {
-    return 'browser.open'
-  }
-
-  description(): string {
-    return 'Open a link in the browser'
-  }
-
-  schema(): Record<string, any> {
-    return {
-      type: 'function',
-      function: {
-        name: 'browser.open',
-      },
-    }
-  }
-
-  async execute(args: {
+  async open(args: {
     id?: string | number
     cursor?: number
     loc?: number
     num_lines?: number
   }): Promise<{ state: BrowserStateData; pageText: string }> {
+    if (!this.crawlClient) {
+      throw new Error('Crawl client not provided')
+    }
+
     let { cursor = -1 } = args
     const loc = args.loc ?? 0
     const num_lines = args.num_lines ?? -1
 
-    // Get page from cursor
     let page: Page | undefined
     const state = this.getState()
 
     if (cursor >= 0) {
       if (cursor >= state.pageStack.length) {
-        // Clamp to last valid page instead of throwing
         cursor = Math.max(0, state.pageStack.length - 1)
       }
       page = this.getPageFromStack(state.pageStack[cursor])
     } else {
-      // Get last page
       if (state.pageStack.length !== 0) {
         const pageURL = state.pageStack[state.pageStack.length - 1]
         page = this.getPageFromStack(pageURL)
       }
     }
 
-    // Try to get id as string (URL) first
     if (typeof args.id === 'string') {
       const url = args.id
 
-      // Check if we already have this page cached
       if (state.urlToPage[url]) {
-        // Use cached page
         this.savePage(state.urlToPage[url])
-        // Always update cursor to point to the newly added page
         cursor = this.getState().pageStack.length - 1
         const pageText = this.displayPage(state.urlToPage[url], cursor, loc, num_lines)
         return { state: this.getState(), pageText: capToolContent(pageText) }
       }
 
-      // Page not in cache, need to crawl it
       const crawlResponse = await this.crawlClient.crawl({ urls: [url], latest: false })
-
       const newPage = this.buildPageFromCrawlResult(url, crawlResponse)
 
-      // Need to fall through if first search is directly an open command - no existing page
       this.savePage(newPage)
-      // Always update cursor to point to the newly added page
       cursor = this.getState().pageStack.length - 1
       const pageText = this.displayPage(newPage, cursor, loc, num_lines)
       return { state: this.getState(), pageText: capToolContent(pageText) }
     }
 
-    // Try to get id as integer (link ID from current page)
     if (typeof args.id === 'number') {
       if (!page) {
         throw new Error('No current page to resolve link from')
@@ -774,7 +689,6 @@ export class BrowserOpen extends Browser {
       const idInt = args.id
       const pageURL = page.links[idInt]
       if (!pageURL) {
-        // Gracefully handle missing link id by creating an informative page
         const errorPage: Page = {
           url: `invalid_link_${idInt}`,
           title: `No link with id ${idInt} on \`${page.title}\``,
@@ -800,27 +714,19 @@ export class BrowserOpen extends Browser {
         ].join('\n')
         errorPage.lines = this.wrapLines(errorPage.text, 80)
 
-        // Add the error page to history so the model can react without crashing
         this.savePage(errorPage)
         cursor = this.getState().pageStack.length - 1
         const pageText = this.displayPage(errorPage, cursor, 0, -1)
         return { state: this.getState(), pageText: capToolContent(pageText) }
       }
 
-      // Check if we have the linked page cached
       let newPage = state.urlToPage[pageURL]
       if (!newPage) {
-        const crawlResponse = await this.crawlClient.crawl({
-          urls: [pageURL],
-          latest: false,
-        })
-
+        const crawlResponse = await this.crawlClient.crawl({ urls: [pageURL] })
         newPage = this.buildPageFromCrawlResult(pageURL, crawlResponse)
       }
 
       this.savePage(newPage)
-
-      // Always update cursor to point to the newly added page
       cursor = this.getState().pageStack.length - 1
       const pageText = this.displayPage(newPage, cursor, loc, num_lines)
       return { state: this.getState(), pageText: capToolContent(pageText) }
@@ -838,69 +744,35 @@ export class BrowserOpen extends Browser {
     const pageText = this.displayPage(page, cursor, loc, num_lines)
     return { state: this.getState(), pageText: capToolContent(pageText) }
   }
-}
 
-/**
- * BrowserFind - Finds text patterns within browser pages
- */
-export class BrowserFind extends Browser {
-  constructor(initialState?: BrowserStateData) {
-    super(initialState)
-  }
-
-  name(): string {
-    return 'browser.find'
-  }
-
-  description(): string {
-    return 'Find a term in the browser'
-  }
-
-  schema(): Record<string, any> {
-    return {
-      type: 'function',
-      function: {
-        name: 'browser.find',
-      },
-    }
-  }
-
-  async execute(args: {
+  async find(args: {
     pattern: string
     cursor?: number
   }): Promise<{ state: BrowserStateData; pageText: string }> {
     const { pattern } = args
     let { cursor = -1 } = args
 
-    // Get the page to search in
     let page: Page
     const state = this.getState()
 
     if (cursor === -1) {
-      // Use current page
       if (state.pageStack.length === 0) {
         throw new Error('No pages to search in')
       }
       page = this.getPageFromStack(state.pageStack[state.pageStack.length - 1])
-      cursor = state.pageStack.length - 1 // Update cursor for display
+      cursor = state.pageStack.length - 1
     } else {
-      // Use specific cursor
       if (cursor < 0 || cursor >= state.pageStack.length) {
-        // Clamp to valid range instead of throwing
         cursor = Math.max(0, Math.min(cursor, state.pageStack.length - 1))
       }
       page = this.getPageFromStack(state.pageStack[cursor])
     }
 
-    // Create find results page
     const findPage = this.buildFindResultsPage(pattern, page)
-
-    // Add the find results page to state
     this.savePage(findPage)
     const newCursor = this.getState().pageStack.length - 1
 
     const pageText = this.displayPage(findPage, newCursor, 0, -1)
-
     return { state: this.getState(), pageText: capToolContent(pageText) }
   }
 }
