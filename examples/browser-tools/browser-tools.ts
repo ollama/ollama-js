@@ -5,10 +5,6 @@ import type {
   SearchResponse,
   CrawlRequest,
   CrawlResponse,
-  CrawlMetadata,
-  CrawlResult,
-  CrawlExtras,
-  CrawlLink,
 } from 'ollama'
 
 
@@ -486,20 +482,7 @@ export class Browser {
         // Update URL to the actual URL from results
         page.url = url
 
-        // Extract links if available from extras
-        // Note: requires CrawlExtras/CrawlLink in src/interfaces
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const anyResult: any = result as any
-        if (anyResult.extras?.links) {
-          for (let i = 0; i < anyResult.extras.links.length; i++) {
-            const link = anyResult.extras.links[i]
-            if (link.href) {
-              page.links[i] = link.href
-            } else if (link.url) {
-              page.links[i] = link.url
-            }
-          }
-        }
+        // Note: previously extracted links from crawl extras; removed to avoid reliance on extras
 
         // Only process the first URL's results
         break
