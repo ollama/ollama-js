@@ -5,11 +5,36 @@ import type {
   SearchResponse,
   CrawlRequest,
   CrawlResponse,
-  Page,
-  BrowserStateData,
-  WebSearchResult,
-} from '../../src/interfaces.js'
+  CrawlMetadata,
+  CrawlResult,
+  CrawlExtras,
+  CrawlLink,
+} from 'ollama'
 
+
+// Local types used only by this example
+interface Page {
+  url: string
+  title: string
+  text: string
+  lines: string[]
+  links: Record<number, string>
+  fetchedAt: Date
+}
+
+interface BrowserStateData {
+  pageStack: string[]
+  viewTokens: number
+  urlToPage: Record<string, Page>
+}
+
+interface WebSearchResult {
+  title: string
+  url: string
+  content: {
+    fullText: string
+  }
+}
 
 // Browser tool implementation 
 
@@ -462,9 +487,12 @@ export class Browser {
         page.url = url
 
         // Extract links if available from extras
-        if (result.extras?.links) {
-          for (let i = 0; i < result.extras.links.length; i++) {
-            const link = result.extras.links[i]
+        // Note: requires CrawlExtras/CrawlLink in src/interfaces
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const anyResult: any = result as any
+        if (anyResult.extras?.links) {
+          for (let i = 0; i < anyResult.extras.links.length; i++) {
+            const link = anyResult.extras.links[i]
             if (link.href) {
               page.links[i] = link.href
             } else if (link.url) {
@@ -752,10 +780,7 @@ export class BrowserOpen extends Browser {
       }
 
       // Page not in cache, need to crawl it
-      const crawlResponse = await this.crawlClient.crawl({
-        urls: [url],
-        latest: false,
-      })
+      const crawlResponse = await this.crawlClient.crawl({ urls: [url], latest: false })
 
       const newPage = this.buildPageFromCrawlResult(url, crawlResponse)
 
@@ -812,10 +837,7 @@ export class BrowserOpen extends Browser {
       // Check if we have the linked page cached
       let newPage = state.urlToPage[pageURL]
       if (!newPage) {
-        const crawlResponse = await this.crawlClient.crawl({
-          urls: [pageURL],
-          latest: false,
-        })
+        const crawlResponse = await this.crawlClient.crawl({ urls: [pageURL], latest: false })
 
         newPage = this.buildPageFromCrawlResult(pageURL, crawlResponse)
       }
