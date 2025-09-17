@@ -198,7 +198,15 @@ ollama.embed(request)
 ### search
 
 ```javascript
-ollama.search(request)
+import { Ollama } from 'ollama'
+
+const ollama = new Ollama({
+  headers: { Authorization: 'Bearer <api key>' },
+})
+```
+
+```javascript
+ollama.websearch(request)
 ```
 
 - `request` `<Object>`: The search request parameters.
@@ -206,19 +214,19 @@ ollama.search(request)
   - `max_results` `<number>`: (Optional) Maximum results per query (default 5, max 10).
 - Returns: `<SearchResponse>`
 
-Note: Web search requires an API key. Set an `Authorization` header with a bearer token on the client. See Custom Headers. See [examples/websearch/websearch-tools.ts](examples/websearch/websearch-tools.ts) for a usage example with tools.
+Note: Web search requires an Ollama API key. Get one from [Ollama](https://ollama.com). Set an `Authorization` header with a bearer token on the client. See Custom Headers. See [examples/websearch/websearch-tools.ts](examples/websearch/websearch-tools.ts) for a usage example with tools.
 
 ### crawl
 
 ```javascript
-ollama.crawl(request)
+ollama.webcrawl(request)
 ```
 
 - `request` `<Object>`: The crawl request parameters.
   - `urls` `<string[]>`: One or more URLs to crawl.
 - Returns: `<CrawlResponse>`
 
-Note: Web crawl requires an API key. Set an `Authorization` header with a bearer token on the client. See Custom Headers.
+Note: Web crawl requires an Ollama API key. Get one from [Ollama](https://ollama.com). Set an `Authorization` header with a bearer token on the client. See Custom Headers.
 
 ### ps
 
