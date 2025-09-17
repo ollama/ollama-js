@@ -195,6 +195,31 @@ ollama.embed(request)
   - `options` `<Options>`: (Optional) Options to configure the runtime.
 - Returns: `<EmbedResponse>`
 
+### search
+
+```javascript
+ollama.search(request)
+```
+
+- `request` `<Object>`: The search request parameters.
+  - `queries` `<string[]>`: One or more search queries.
+  - `max_results` `<number>`: (Optional) Maximum results per query (default 5, max 10).
+- Returns: `<SearchResponse>`
+
+Note: Web search requires an API key. Set an `Authorization` header with a bearer token on the client. See Custom Headers. See [examples/websearch/websearch-tools.ts](examples/websearch/websearch-tools.ts) for a usage example with tools.
+
+### crawl
+
+```javascript
+ollama.crawl(request)
+```
+
+- `request` `<Object>`: The crawl request parameters.
+  - `urls` `<string[]>`: One or more URLs to crawl.
+- Returns: `<CrawlResponse>`
+
+Note: Web crawl requires an API key. Set an `Authorization` header with a bearer token on the client. See Custom Headers.
+
 ### ps
 
 ```javascript
