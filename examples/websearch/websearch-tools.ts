@@ -54,10 +54,10 @@ async function main() {
 
   const availableTools = {
     websearch: async (args: { queries: string[]; max_results?: number }) => {
-      return await client.search(args)
+      return await client.websearch(args)
     },
     webcrawl: async (args: { urls: string[] }) => {
-      return await client.crawl(args)
+      return await client.webcrawl(args)
     },
   }
 
