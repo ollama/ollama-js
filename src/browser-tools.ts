@@ -8,8 +8,6 @@ import type {
   WebSearchResult,
 } from './interfaces.js'
 
-type PageType = 'initial_results' | 'webpage'
-
 // Default number of tokens to show when calling displayPage
 const DEFAULT_VIEW_TOKENS = 1024
 
@@ -17,9 +15,15 @@ const DEFAULT_VIEW_TOKENS = 1024
 const CAPPED_TOOL_CONTENT_LEN = 500
 
 function capToolContent(text: string): string {
-  if (!text) return text
-  if (text.length <= CAPPED_TOOL_CONTENT_LEN) return text
-  if (CAPPED_TOOL_CONTENT_LEN <= 1) return text.substring(0, CAPPED_TOOL_CONTENT_LEN)
+  if (!text) {
+    return text
+  }
+  if (text.length <= CAPPED_TOOL_CONTENT_LEN) {
+    return text
+  }
+  if (CAPPED_TOOL_CONTENT_LEN <= 1) {
+    return text.substring(0, CAPPED_TOOL_CONTENT_LEN)
+  }
   return text.substring(0, CAPPED_TOOL_CONTENT_LEN - 1) + '…'
 }
 
@@ -205,7 +209,7 @@ export class Browser {
   /**
    * Wraps text lines to a specified width
    */
-  protected wrapLines(text: string, width: number = 80): string[] {
+  protected wrapLines(text: string, width = 80): string[] {
     if (width <= 0) {
       width = 80
     }
@@ -705,7 +709,9 @@ export class BrowserOpen extends Browser {
     loc?: number;
     num_lines?: number;
   }): Promise<{ state: BrowserStateData; pageText: string }> {
-    let { cursor = -1, loc = 0, num_lines = -1 } = args
+    let { cursor = -1 } = args
+    const loc = args.loc ?? 0
+    const num_lines = args.num_lines ?? -1
 
     // Get page from cursor
     let page: Page | undefined
