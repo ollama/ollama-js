@@ -306,3 +306,27 @@ export interface CrawlResponse {
   success: boolean
   errors?: string[]
 }
+
+// Browser Tool types
+export interface Page {
+  url: string
+  title: string
+  text: string
+  lines: string[]
+  links: Record<number, string>
+  fetchedAt: Date
+}
+
+export interface BrowserStateData {
+  pageStack: string[]
+  viewTokens: number
+  urlToPage: Record<string, Page>
+}
+
+export interface WebSearchResult {
+  title: string
+  url: string
+  content: {
+    fullText: string
+  }
+}
