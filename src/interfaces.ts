@@ -273,15 +273,10 @@ export interface StatusResponse {
 // Web Search types
 export interface SearchRequest {
   queries: string[]
-  maxResults?: number
+  max_results?: number
 }
 
-export interface SearchContent {
-  snippet?: string
-  full_text?: string
-}
-
-export interface SearchMetadata {
+export interface Metadata {
   published_date?: string
   author?: string
 }
@@ -289,8 +284,8 @@ export interface SearchMetadata {
 export interface SearchResult {
   title: string
   url: string
-  content: SearchContent
-  metadata: SearchMetadata
+  content: string
+  metadata: Metadata
 }
 
 export interface SearchResponse {
@@ -307,19 +302,12 @@ export interface CrawlRequest {
   // livecrawl?: string
 }
 
-export interface CrawlMetadata {
-  published_date?: string
-  author?: string
-  status?: string
-  source?: string
-  // extras?: Record<string, any>
-}
-
 export interface CrawlResult {
   title: string
   url: string
-  content: SearchContent
-  metadata: CrawlMetadata
+  content: string
+  links: string[]
+  metadata: Metadata
 }
 
 export interface CrawlResponse {

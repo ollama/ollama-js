@@ -23,7 +23,7 @@ async function main() {
             items: { type: 'string' },
             description: 'An array of search queries.',
           },
-          maxResults: {
+          max_results: {
             type: 'number',
             description: 'The maximum number of results to return per query (default 5, max 10).',
           },
@@ -53,7 +53,7 @@ async function main() {
   }
 
   const availableTools = {
-    websearch: async (args: { queries: string[]; maxResults?: number }) => {
+    websearch: async (args: { queries: string[]; max_results?: number }) => {
       return await client.search(args)
     },
     webcrawl: async (args: { urls: string[] }) => {
