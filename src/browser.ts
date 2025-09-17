@@ -24,6 +24,10 @@ import type {
   ShowRequest,
   ShowResponse,
   StatusResponse,
+  SearchRequest,
+  SearchResponse,
+  CrawlRequest,
+  CrawlResponse,
 } from './interfaces.js'
 import { defaultHost } from './constant.js'
 
@@ -319,6 +323,40 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
       headers: this.config.headers
     })
     return (await response.json()) as ListResponse
+  }
+
+  /**
+   * Performs web search using the Ollama web search API
+   * @param request {SearchRequest} - The search request containing queries and options
+   * @returns {Promise<SearchResponse>} - The search results
+   * @throws {Error} - If the request is invalid or the server returns an error
+   */
+  async search(request: SearchRequest): Promise<SearchResponse> {
+    if (!request.queries || request.queries.length === 0) {
+      throw new Error('At least one query is required')
+    }
+
+    const response = await utils.post(this.fetch, `https://ollama.com/api/web_search`, { ...request }, {
+      headers: this.config.headers
+    })
+    return (await response.json()) as SearchResponse
+  }
+
+  /**
+   * Performs web crawl using the Ollama web crawl API
+   * @param request {CrawlRequest} - The crawl request containing URLs and options
+   * @returns {Promise<CrawlResponse>} - The crawl results
+   * @throws {Error} - If the request is invalid or the server returns an error
+   */
+  async crawl(request: CrawlRequest): Promise<CrawlResponse> {
+    if (!request.urls || request.urls.length === 0) {
+      throw new Error('At least one URL is required')
+    }
+
+    const response = await utils.post(this.fetch, `https://ollama.com/api/web_crawl`, { ...request }, {
+      headers: this.config.headers
+    })
+    return (await response.json()) as CrawlResponse
   }
 }
 

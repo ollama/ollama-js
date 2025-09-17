@@ -269,3 +269,40 @@ export interface ErrorResponse {
 export interface StatusResponse {
   status: string
 }
+
+// Web Search types
+export interface SearchRequest {
+  queries: string[]
+  max_results?: number
+}
+
+
+export interface SearchResult {
+  title: string
+  url: string
+  content: string
+}
+
+export interface SearchResponse {
+  results: Record<string, SearchResult[]>
+  success: boolean
+  errors?: string[]
+}
+
+// Crawl types - commented out removed fields
+export interface CrawlRequest {
+  urls: string[]
+}
+
+export interface CrawlResult {
+  title: string
+  url: string
+  content: string
+  links: string[]
+}
+
+export interface CrawlResponse {
+  results: Record<string, CrawlResult[]>
+  success: boolean
+  errors?: string[]
+}
