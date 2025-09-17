@@ -336,7 +336,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
       throw new Error('At least one query is required')
     }
 
-    const response = await utils.post(this.fetch, `https://ollama.com/api/tools/websearch`, { ...request }, {
+    const response = await utils.post(this.fetch, `https://ollama.com/api/web_search`, { ...request }, {
       headers: this.config.headers
     })
     return (await response.json()) as SearchResponse
@@ -353,7 +353,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
       throw new Error('At least one URL is required')
     }
 
-    const response = await utils.post(this.fetch, `https://ollama.com/api/tools/webcrawl`, { ...request }, {
+    const response = await utils.post(this.fetch, `https://ollama.com/api/web_crawl`, { ...request }, {
       headers: this.config.headers
     })
     return (await response.json()) as CrawlResponse

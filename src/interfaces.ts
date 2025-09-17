@@ -276,16 +276,11 @@ export interface SearchRequest {
   max_results?: number
 }
 
-export interface Metadata {
-  published_date?: string
-  author?: string
-}
 
 export interface SearchResult {
   title: string
   url: string
   content: string
-  metadata: Metadata
 }
 
 export interface SearchResponse {
@@ -297,9 +292,6 @@ export interface SearchResponse {
 // Crawl types - commented out removed fields
 export interface CrawlRequest {
   urls: string[]
-  // text?: boolean
-  // extras?: Record<string, any>
-  // livecrawl?: string
 }
 
 export interface CrawlResult {
@@ -307,7 +299,6 @@ export interface CrawlResult {
   url: string
   content: string
   links: string[]
-  metadata: Metadata
 }
 
 export interface CrawlResponse {
