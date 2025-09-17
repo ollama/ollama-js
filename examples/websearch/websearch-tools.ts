@@ -115,7 +115,7 @@ async function main() {
             const args = toolCall.function.arguments as any
             console.log('\nCalling function:', toolCall.function.name, 'with arguments:', args)
             const output = await functionToCall(args)
-            console.log('> Function output:', JSON.stringify(output).slice(0, 200), '\n')
+            console.log('Function output:', JSON.stringify(output).slice(0, 200), '\n')
 
             // message history
             messages.push(chunk.message)
