@@ -71,7 +71,7 @@ async function main() {
   console.log('----- Prompt:', messages.find((m) => m.role === 'user')?.content, '\n')
 
   while (true) {
-    const response = await ollama.chat({
+    const response = await client.chat({
       model: 'gpt-oss',
       messages: messages,
       tools: [websearchTool, webcrawlTool],
@@ -102,13 +102,14 @@ async function main() {
         process.stdout.write(chunk.message.content)
       }
       if (chunk.message.tool_calls && chunk.message.tool_calls.length > 0) {
+        hadToolCalls = true
         messages.push({
           role: 'assistant',
           content: content,
           thinking: thinking,
+          tool_calls: chunk.message.tool_calls,
         })
-        
-        hadToolCalls = true
+        // Execute tools and append tool results
         for (const toolCall of chunk.message.tool_calls) {
           const functionToCall = availableTools[toolCall.function.name]
           if (functionToCall) {
@@ -116,10 +117,8 @@ async function main() {
             console.log('\nCalling function:', toolCall.function.name, 'with arguments:', args)
             const output = await functionToCall(args)
             console.log('Function output:', JSON.stringify(output).slice(0, 200), '\n')
-
-            // message history
+            
             messages.push(chunk.message)
-            // tool result
             messages.push({
               role: 'tool',
               content: JSON.stringify(output),
