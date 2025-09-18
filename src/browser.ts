@@ -331,7 +331,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @returns {Promise<SearchResponse>} - The search results
    * @throws {Error} - If the request is invalid or the server returns an error
    */
-  async websearch(request: SearchRequest): Promise<SearchResponse> {
+  async webSearch(request: SearchRequest): Promise<SearchResponse> {
     if (!request.queries || request.queries.length === 0) {
       throw new Error('At least one query is required')
     }
@@ -348,7 +348,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @returns {Promise<CrawlResponse>} - The crawl results
    * @throws {Error} - If the request is invalid or the server returns an error
    */
-  async webcrawl(request: CrawlRequest): Promise<CrawlResponse> {
+  async webCrawl(request: CrawlRequest): Promise<CrawlResponse> {
     if (!request.urls || request.urls.length === 0) {
       throw new Error('At least one URL is required')
     }
