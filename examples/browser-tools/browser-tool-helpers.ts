@@ -401,10 +401,7 @@ export class Browser {
         textBuilder += linkFormat
 
 
-        const rawSnippet =
-          result.content.snippet && result.content.snippet.trim()
-            ? result.content.snippet.trim()
-            : result.content.full_text || ''
+        const rawSnippet = result.content || ''
 
 
         const capped =
@@ -491,8 +488,8 @@ export class Browser {
       if (urlResults.length > 0) {
         const result = urlResults[0]
 
-        if (result.content.full_text) {
-          page.text = result.content.full_text
+        if (result.content) {
+          page.text = result.content
         }
 
         if (result.title) {
@@ -601,10 +598,10 @@ export class Browser {
       throw new Error('Search client not provided')
     }
 
-    const searchArgs: SearchRequest = {
-      queries: [query],
-      maxResults: topn,
-    }
+  const searchArgs: SearchRequest = {
+    queries: [query],
+    max_results: topn,
+  }
 
     const result = await this.searchClient.search(searchArgs)
 
@@ -619,7 +616,7 @@ export class Browser {
           title: searchResult.title,
           url: searchResult.url,
           content: {
-            fullText: searchResult.content.full_text || '',
+            fullText: searchResult.content || '',
           },
         }
         const resultPage = this.buildSearchResultsPage(webSearchResult, i + 1)
@@ -672,7 +669,7 @@ export class Browser {
         return { state: this.getState(), pageText: capToolContent(pageText) }
       }
 
-      const crawlResponse = await this.crawlClient.crawl({ urls: [url], latest: false })
+      const crawlResponse = await this.crawlClient.crawl({ urls: [url] })
       const newPage = this.buildPageFromCrawlResult(url, crawlResponse)
 
       this.savePage(newPage)

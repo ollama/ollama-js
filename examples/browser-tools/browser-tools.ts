@@ -13,25 +13,22 @@ async function main() {
       : undefined,
   })
 
-  const browser = new Browser(undefined, client)
+  const browser = new Browser(undefined, {
+    search: (request) => (client as any).websearch(request),
+    crawl: (request) => (client as any).webcrawl(request),
+  })
 
   // Tool schemas for the model
   const browserSearchTool = {
     type: 'function',
     function: {
-      name: 'browser.search',
-      description: 'Search the web for information and display results',
+      name: 'websearch',
+      description: 'Performs a web search for the given query.',
       parameters: {
         type: 'object',
         properties: {
-          query: {
-            type: 'string',
-            description: 'The search query',
-          },
-          topn: {
-            type: 'number',
-            description: 'Number of top results to return (default: 5)',
-          },
+          query: { type: 'string', description: 'The search query string.' },
+          topn: { type: 'number', description: 'Max results to return (default 5).' },
         },
         required: ['query'],
       },
@@ -42,26 +39,17 @@ async function main() {
     type: 'function',
     function: {
       name: 'browser.open',
-      description: 'Open a link in the browser or display a page',
+      description: 'Open a search result or URL, or scroll the current page.',
       parameters: {
         type: 'object',
         properties: {
           id: {
-            type: ['string', 'number'],
-            description: 'URL to open (string) or Link ID from current page (number)',
+            description: 'Link id (number) from the results page, or a URL string to open',
+            anyOf: [{ type: 'number' }, { type: 'string' }],
           },
-          cursor: {
-            type: 'number',
-            description: 'Page cursor to use (default: current page)',
-          },
-          loc: {
-            type: 'number',
-            description: 'Line location to start viewing from (default: 0)',
-          },
-          num_lines: {
-            type: 'number',
-            description: 'Number of lines to display (default: auto based on tokens)',
-          },
+          cursor: { type: 'number', description: 'Page index in the stack to operate on' },
+          loc: { type: 'number', description: 'Start line to view from' },
+          num_lines: { type: 'number', description: 'Number of lines to display (-1 for auto)' },
         },
       },
     },
@@ -71,18 +59,12 @@ async function main() {
     type: 'function',
     function: {
       name: 'browser.find',
-      description: 'Find a text pattern within the current browser page',
+      description: 'Find a pattern within the currently open page.',
       parameters: {
         type: 'object',
         properties: {
-          pattern: {
-            type: 'string',
-            description: 'The text pattern to search for',
-          },
-          cursor: {
-            type: 'number',
-            description: 'Page cursor to search in (default: current page)',
-          },
+          pattern: { type: 'string', description: 'Text to search for in the page' },
+          cursor: { type: 'number', description: 'Page index in the stack to search' },
         },
         required: ['pattern'],
       },
@@ -91,7 +73,7 @@ async function main() {
 
   // Available tool functions
   const availableTools = {
-    'browser.search': async (args: { query: string; topn?: number }) => {
+    websearch: async (args: { query: string; topn?: number }) => {
       const result = await browser.search(args)
       return result.pageText
     },
