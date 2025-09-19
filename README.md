@@ -195,7 +195,7 @@ ollama.embed(request)
   - `options` `<Options>`: (Optional) Options to configure the runtime.
 - Returns: `<EmbedResponse>`
 
-### websearch
+### web search
 
 ```javascript
 import { Ollama } from 'ollama'
@@ -206,7 +206,7 @@ const ollama = new Ollama({
 ```
 
 ```javascript
-ollama.websearch(request)
+ollama.webSearch(request)
 ```
 
 - `request` `<Object>`: The search request parameters.
@@ -220,10 +220,10 @@ ollama.websearch(request)
 
 See [examples/websearch/websearch-tools.ts](examples/websearch/websearch-tools.ts) for a usage example with tools.
 
-### webcrawl
+### web crawl
 
 ```javascript
-ollama.webcrawl(request)
+ollama.webCrawl(request)
 ```
 
 - `request` `<Object>`: The crawl request parameters.
