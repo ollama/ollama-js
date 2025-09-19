@@ -14,8 +14,8 @@ async function main() {
   })
 
   const browser = new Browser(undefined, {
-    search: (request) => (client as any).websearch(request),
-    crawl: (request) => (client as any).webcrawl(request),
+    search: (request) => client.webSearch(request as any),
+    crawl: (request) => client.webCrawl(request as any),
   })
 
   // Tool schemas for the model
