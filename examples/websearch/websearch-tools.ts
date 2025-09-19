@@ -2,12 +2,8 @@ import ollama, { Ollama } from 'ollama'
 import type { Message } from 'ollama'
 
 async function main() {
-<<<<<<< HEAD
 
   if (!process.env.OLLAMA_API_KEY) throw new Error('Set OLLAMA_API_KEY to use web search tools')
-=======
-  if (!process.env.OLLAMA_API_KEY) throw new Error('Set OLLAMA_API_KEY to use websearch tools')
->>>>>>> cf5953e (resolved merge conflicts)
 
   const client = new Ollama({
     headers: { Authorization: `Bearer ${process.env.OLLAMA_API_KEY}` },
@@ -57,19 +53,11 @@ async function main() {
   }
 
   const availableTools = {
-<<<<<<< HEAD
     webSearch: async (args: { queries: string[]; max_results?: number }) => {
       return await client.webSearch(args)
     },
     webCrawl: async (args: { urls: string[] }) => {
       return await client.webCrawl(args)
-=======
-    websearch: async (args: { queries: string[]; max_results?: number }) => {
-      return await client.websearch(args)
-    },
-    webcrawl: async (args: { urls: string[] }) => {
-      return await client.webcrawl(args)
->>>>>>> cf5953e (resolved merge conflicts)
     },
   }
 
@@ -104,6 +92,7 @@ async function main() {
         finishedThinking = true
         process.stdout.write('\n\nResponse:\n========\n\n')
       }
+
       if (chunk.message.thinking) {
         thinking += chunk.message.thinking
         process.stdout.write(chunk.message.thinking)
@@ -120,25 +109,16 @@ async function main() {
           thinking: thinking,
           tool_calls: chunk.message.tool_calls,
         })
-<<<<<<< HEAD
         // Execute tools and append tool results
-=======
->>>>>>> cf5953e (resolved merge conflicts)
         for (const toolCall of chunk.message.tool_calls) {
           const functionToCall = availableTools[toolCall.function.name]
           if (functionToCall) {
             const args = toolCall.function.arguments as any
             console.log('\nCalling function:', toolCall.function.name, 'with arguments:', args)
             const output = await functionToCall(args)
-<<<<<<< HEAD
-            console.log('Function output:', JSON.stringify(output).slice(0, 200), '\n')
             console.log('Function output:', JSON.stringify(output).slice(0, 200), '\n')
             
-=======
-            console.log('Function output:', JSON.stringify(output).slice(0, 200), '\n')
->>>>>>> cf5953e (resolved merge conflicts)
             messages.push(chunk.message)
-            // tool result
             messages.push({
               role: 'tool',
               content: JSON.stringify(output),
