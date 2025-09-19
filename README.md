@@ -195,6 +195,45 @@ ollama.embed(request)
   - `options` `<Options>`: (Optional) Options to configure the runtime.
 - Returns: `<EmbedResponse>`
 
+### web search
+
+```javascript
+import { Ollama } from 'ollama'
+
+const ollama = new Ollama({
+  headers: { Authorization: 'Bearer <api key>' },
+})
+```
+
+```javascript
+ollama.webSearch(request)
+```
+
+- `request` `<Object>`: The search request parameters.
+  - `queries` `<string[]>`: One or more search queries.
+  - `max_results` `<number>`: (Optional) Maximum results per query
+- Returns: `<SearchResponse>`
+
+- Download Ollama's [JavaScript library](https://github.com/ollama/ollama-js)
+- [Sign up](https://ollama.com/signup) for an Ollama account
+- Create an API key by visiting https://ollama.com/settings/keys
+
+See [examples/websearch/websearch-tools.ts](examples/websearch/websearch-tools.ts) for a usage example with tools.
+
+### web crawl
+
+```javascript
+ollama.webCrawl(request)
+```
+
+- `request` `<Object>`: The crawl request parameters.
+  - `urls` `<string[]>`: One or more URLs to crawl.
+- Returns: `<CrawlResponse>`
+
+- Download Ollama's [JavaScript library](https://github.com/ollama/ollama-js)
+- [Sign up](https://ollama.com/signup) for an Ollama account
+- Create an API key by visiting https://ollama.com/settings/keys
+
 ### ps
 
 ```javascript
