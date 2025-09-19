@@ -3,17 +3,17 @@ import type { Message } from 'ollama'
 
 async function main() {
 
-  if (!process.env.OLLAMA_API_KEY) throw new Error('Set OLLAMA_API_KEY to use websearch tools')
+  if (!process.env.OLLAMA_API_KEY) throw new Error('Set OLLAMA_API_KEY to use web search tools')
 
   const client = new Ollama({
     headers: { Authorization: `Bearer ${process.env.OLLAMA_API_KEY}` },
   })
 
   // Tool schemas
-  const websearchTool = {
+  const webSearchTool = {
     type: 'function',
     function: {
-      name: 'websearch',
+      name: 'webSearch',
       description: 'Performs a web search for the given queries.',
       parameters: {
         type: 'object',
@@ -33,10 +33,10 @@ async function main() {
     },
   }
 
-  const webcrawlTool = {
+  const webCrawlTool = {
     type: 'function',
     function: {
-      name: 'webcrawl',
+      name: 'webCrawl',
       description: 'Performs a web crawl for the given URLs.',
       parameters: {
         type: 'object',
@@ -53,11 +53,11 @@ async function main() {
   }
 
   const availableTools = {
-    websearch: async (args: { queries: string[]; max_results?: number }) => {
-      return await client.websearch(args)
+    webSearch: async (args: { queries: string[]; max_results?: number }) => {
+      return await client.webSearch(args)
     },
-    webcrawl: async (args: { urls: string[] }) => {
-      return await client.webcrawl(args)
+    webCrawl: async (args: { urls: string[] }) => {
+      return await client.webCrawl(args)
     },
   }
 
@@ -74,7 +74,7 @@ async function main() {
     const response = await client.chat({
       model: 'gpt-oss',
       messages: messages,
-      tools: [websearchTool, webcrawlTool],
+      tools: [webSearchTool, webCrawlTool],
       stream: true,
       think: true,
     })
