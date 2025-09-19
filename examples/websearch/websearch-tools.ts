@@ -76,7 +76,7 @@ async function main() {
   const messages: Message[] = [
     {
       role: 'user',
-      content: 'Who is Nicole Pardal?',
+      content: 'What is Ollama?',
     },
   ]
 
