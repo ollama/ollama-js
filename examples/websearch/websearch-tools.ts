@@ -1,8 +1,12 @@
 import { Ollama, type Message, type SearchResponse, type FetchResponse } from 'ollama'
 
 async function main() {
+<<<<<<< HEAD
 
   if (!process.env.OLLAMA_API_KEY) throw new Error('Set OLLAMA_API_KEY to use web search tools')
+=======
+  if (!process.env.OLLAMA_API_KEY) throw new Error('Set OLLAMA_API_KEY to use websearch tools')
+>>>>>>> cf5953e (resolved merge conflicts)
 
   const client = new Ollama({
     headers: { Authorization: `Bearer ${process.env.OLLAMA_API_KEY}` },
@@ -57,7 +61,7 @@ async function main() {
   const messages: Message[] = [
     {
       role: 'user',
-      content: 'What is Ollama?',
+      content: 'Who is Nicole Pardal?',
     },
   ]
 
@@ -85,12 +89,6 @@ async function main() {
         process.stdout.write(chunk.message.content)
       }
       if (chunk.message.tool_calls && chunk.message.tool_calls.length > 0) {
-        messages.push({
-          role: 'assistant',
-          content: content,
-          thinking: thinking,
-        })
-        
         hadToolCalls = true
         messages.push({
           role: 'assistant',
@@ -98,7 +96,10 @@ async function main() {
           thinking: thinking,
           tool_calls: chunk.message.tool_calls,
         })
+<<<<<<< HEAD
         // Execute tools and append tool results
+=======
+>>>>>>> cf5953e (resolved merge conflicts)
         for (const toolCall of chunk.message.tool_calls) {
           const functionToCall = availableTools[toolCall.function.name]
           if (functionToCall) {
@@ -107,6 +108,9 @@ async function main() {
             const output = await functionToCall(args)
             console.log('Function result:', JSON.stringify(output).slice(0, 200), '\n')
             
+=======
+            console.log('Function output:', JSON.stringify(output).slice(0, 200), '\n')
+>>>>>>> cf5953e (resolved merge conflicts)
             messages.push(chunk.message)
             // tool result
             messages.push({
