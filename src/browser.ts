@@ -26,7 +26,7 @@ import type {
   StatusResponse,
   SearchRequest,
   SearchResponse,
-  CrawlRequest,
+  FetchRequest,
   CrawlResponse,
 } from './interfaces.js'
 import { defaultHost } from './constant.js'
@@ -344,16 +344,16 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
 
   /**
    * Performs web crawl using the Ollama web crawl API
-   * @param request {CrawlRequest} - The crawl request containing URLs and options
+   * @param request {FetchRequest} - The crawl request containing URLs and options
    * @returns {Promise<CrawlResponse>} - The crawl results
    * @throws {Error} - If the request is invalid or the server returns an error
    */
-  async webCrawl(request: CrawlRequest): Promise<CrawlResponse> {
+  async webCrawl(request: FetchRequest): Promise<CrawlResponse> {
     if (!request.urls || request.urls.length === 0) {
       throw new Error('At least one URL is required')
     }
 
-    const response = await utils.post(this.fetch, `https://ollama.com/api/web_crawl`, { ...request }, {
+    const response = await utils.post(this.fetch, `https://ollama.com/api/web_fetch`, { ...request }, {
       headers: this.config.headers
     })
     return (await response.json()) as CrawlResponse

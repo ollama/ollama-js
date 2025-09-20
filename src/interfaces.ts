@@ -290,19 +290,19 @@ export interface SearchResponse {
 }
 
 // Crawl types - commented out removed fields
-export interface CrawlRequest {
-  urls: string[]
+export interface FetchRequest {
+  PageURLs: string[]
 }
 
-export interface CrawlResult {
+export interface FetchResult {
   title: string
   url: string
   content: string
-  links: string[]
+  PageURLs: string[]
 }
 
 export interface CrawlResponse {
-  results: Record<string, CrawlResult[]>
+  results: Record<string, FetchResult[]>
   success: boolean
   errors?: string[]
 }
