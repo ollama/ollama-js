@@ -293,5 +293,11 @@ export interface FetchResponse {
   title: string
   url: string
   content: string
-  links: string[]
+  PageURLs: string[]
+}
+
+export interface CrawlResponse {
+  results: Record<string, FetchResult[]>
+  success: boolean
+  errors?: string[]
 }
