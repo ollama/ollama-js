@@ -295,7 +295,3 @@ export interface FetchResponse {
   content: string
   links: string[]
 }
-
-export interface FetchResponse {
-  result: FetchResult
-}
