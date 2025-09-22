@@ -348,7 +348,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @returns {Promise<FetchResponse>} - The fetch result
    * @throws {Error} - If the request is invalid or the server returns an error
    */
-  async webCrawl(request: FetchRequest): Promise<FetchResponse> {
+  async webFetch(request: FetchRequest): Promise<FetchResponse> {
     if (!request.url || request.url.length === 0) {
       throw new Error('URL is required')
     }

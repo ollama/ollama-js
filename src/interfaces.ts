@@ -289,13 +289,9 @@ export interface FetchRequest {
   url: string
 }
 
-export interface FetchResult {
+export interface FetchResponse {
   title: string
   url: string
   content: string
   links: string[]
-}
-
-export interface FetchResponse {
-  result: FetchResult
 }

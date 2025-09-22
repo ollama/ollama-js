@@ -28,10 +28,10 @@ async function main() {
     },
   }
 
-  const webCrawlTool = {
+  const webFetchTool = {
     type: 'function',
     function: {
-      name: 'webCrawl',
+      name: 'webFetch',
       description: 'Fetches a single page by URL.',
       parameters: {
         type: 'object',
@@ -48,8 +48,8 @@ async function main() {
 			const res = await client.webSearch(args)
 			return res as SearchResponse
 		},
-		webCrawl: async (args: { url: string }): Promise<FetchResponse> => {
-			const res = await client.webCrawl(args)
+		webFetch: async (args: { url: string }): Promise<FetchResponse> => {
+			const res = await client.webFetch(args)
 			return res as FetchResponse
 		},
 	}
@@ -67,7 +67,7 @@ async function main() {
 	const response = await client.chat({
       model: 'qwen3',
       messages: messages,
-      tools: [webSearchTool, webCrawlTool],
+      tools: [webSearchTool, webFetchTool],
       stream: true,
       think: true,
     })
