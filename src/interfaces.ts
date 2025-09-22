@@ -293,11 +293,9 @@ export interface FetchResponse {
   title: string
   url: string
   content: string
-  PageURLs: string[]
+  links: string[]
 }
 
-export interface CrawlResponse {
-  results: Record<string, FetchResult[]>
-  success: boolean
-  errors?: string[]
+export interface FetchResponse {
+  result: FetchResult
 }
