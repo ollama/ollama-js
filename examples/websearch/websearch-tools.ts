@@ -1,5 +1,4 @@
-import ollama, { Ollama } from 'ollama'
-import type { Message } from 'ollama'
+import { Ollama, type Message, type SearchResponse, type FetchResponse } from 'ollama'
 
 async function main() {
 
@@ -14,21 +13,17 @@ async function main() {
     type: 'function',
     function: {
       name: 'webSearch',
-      description: 'Performs a web search for the given queries.',
+      description: 'Performs a web search for the given query.',
       parameters: {
         type: 'object',
         properties: {
-          queries: {
-            type: 'array',
-            items: { type: 'string' },
-            description: 'An array of search queries.',
-          },
+          query: { type: 'string', description: 'Search query string.' },
           max_results: {
             type: 'number',
             description: 'The maximum number of results to return per query (default 5, max 10).',
           },
         },
-        required: ['queries'],
+        required: ['query'],
       },
     },
   }
@@ -37,29 +32,27 @@ async function main() {
     type: 'function',
     function: {
       name: 'webCrawl',
-      description: 'Performs a web crawl for the given URLs.',
+      description: 'Fetches a single page by URL.',
       parameters: {
         type: 'object',
         properties: {
-          urls: {
-            type: 'array',
-            items: { type: 'string' },
-            description: 'An array of URLs to crawl.',
-          },
+          url: { type: 'string', description: 'A single URL to fetch.' },
         },
-        required: ['urls'],
+        required: ['url'],
       },
     },
   }
 
-  const availableTools = {
-    webSearch: async (args: { queries: string[]; max_results?: number }) => {
-      return await client.webSearch(args)
-    },
-    webCrawl: async (args: { urls: string[] }) => {
-      return await client.webCrawl(args)
-    },
-  }
+	const availableTools = {
+		webSearch: async (args: { query: string; max_results?: number }): Promise<SearchResponse> => {
+			const res = await client.webSearch(args)
+			return res as SearchResponse
+		},
+		webCrawl: async (args: { url: string }): Promise<FetchResponse> => {
+			const res = await client.webCrawl(args)
+			return res as FetchResponse
+		},
+	}
 
   const messages: Message[] = [
     {
@@ -71,8 +64,8 @@ async function main() {
   console.log('----- Prompt:', messages.find((m) => m.role === 'user')?.content, '\n')
 
   while (true) {
-    const response = await client.chat({
-      model: 'gpt-oss',
+	const response = await client.chat({
+      model: 'qwen3',
       messages: messages,
       tools: [webSearchTool, webCrawlTool],
       stream: true,

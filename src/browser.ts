@@ -27,7 +27,7 @@ import type {
   SearchRequest,
   SearchResponse,
   FetchRequest,
-  CrawlResponse,
+  FetchResponse,
 } from './interfaces.js'
 import { defaultHost } from './constant.js'
 
@@ -327,13 +327,13 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
 
   /**
    * Performs web search using the Ollama web search API
-   * @param request {SearchRequest} - The search request containing queries and options
+   * @param request {SearchRequest} - The search request containing query and options
    * @returns {Promise<SearchResponse>} - The search results
    * @throws {Error} - If the request is invalid or the server returns an error
    */
   async webSearch(request: SearchRequest): Promise<SearchResponse> {
-    if (!request.queries || request.queries.length === 0) {
-      throw new Error('At least one query is required')
+    if (!request.query || request.query.length === 0) {
+      throw new Error('Query is required')
     }
 
     const response = await utils.post(this.fetch, `https://ollama.com/api/web_search`, { ...request }, {
@@ -343,20 +343,19 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
   }
 
   /**
-   * Performs web crawl using the Ollama web crawl API
-   * @param request {FetchRequest} - The crawl request containing URLs and options
-   * @returns {Promise<CrawlResponse>} - The crawl results
+   * Fetches a single page using the Ollama web fetch API
+   * @param request {FetchRequest} - The fetch request containing a URL
+   * @returns {Promise<FetchResponse>} - The fetch result
    * @throws {Error} - If the request is invalid or the server returns an error
    */
-  async webCrawl(request: FetchRequest): Promise<CrawlResponse> {
-    if (!request.urls || request.urls.length === 0) {
-      throw new Error('At least one URL is required')
+  async webCrawl(request: FetchRequest): Promise<FetchResponse> {
+    if (!request.url || request.url.length === 0) {
+      throw new Error('URL is required')
     }
-
     const response = await utils.post(this.fetch, `https://ollama.com/api/web_fetch`, { ...request }, {
       headers: this.config.headers
     })
-    return (await response.json()) as CrawlResponse
+    return (await response.json()) as FetchResponse
   }
 }
 
