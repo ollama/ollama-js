@@ -62,7 +62,7 @@ async function main() {
   ]
 
   console.log('----- Prompt:', messages.find((m) => m.role === 'user')?.content, '\n')
-
+  
   while (true) {
 	const response = await client.chat({
       model: 'qwen3',
@@ -73,22 +73,12 @@ async function main() {
     })
 
     let hadToolCalls = false
-    let startedThinking = false
-    let finishedThinking = false
     var content = ''
     var thinking = ''
     for await (const chunk of response) {
-      if (chunk.message.thinking && !startedThinking) {
-        startedThinking = true
-        process.stdout.write('Thinking:\n========\n\n')
-      } else if (chunk.message.content && startedThinking && !finishedThinking) {
-        finishedThinking = true
-        process.stdout.write('\n\nResponse:\n========\n\n')
-      }
 
       if (chunk.message.thinking) {
         thinking += chunk.message.thinking
-        process.stdout.write(chunk.message.thinking)
       }
       if (chunk.message.content) {
         content += chunk.message.content
@@ -109,7 +99,7 @@ async function main() {
             const args = toolCall.function.arguments as any
             console.log('\nCalling function:', toolCall.function.name, 'with arguments:', args)
             const output = await functionToCall(args)
-            console.log('Function output:', JSON.stringify(output).slice(0, 200), '\n')
+            console.log('Function result:', JSON.stringify(output).slice(0, 200), '\n')
             
             messages.push(chunk.message)
             messages.push({
@@ -127,7 +117,7 @@ async function main() {
       break
     }
 
-    console.log('----- Sending result back to model \n')
+    
   }
 }
 
