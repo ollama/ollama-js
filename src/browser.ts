@@ -355,16 +355,23 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
     // error handling for malformed inputs with URL parsing
     const endpoint = `https://ollama.com/api/web_fetch`
     let url = request.url.trim()
-    if (!/^https?:\/\//i.test(url)) url = `https://${url}`
+    if (!/^https?:\/\//i.test(url)) {
+      url = `https://${url}`
+    }
+    let parsed: URL | null = null
     try {
-      const u = new URL(url)
-      u.hash = ''
-      const hostSeg = `/${u.host}`
-      if (u.pathname.startsWith(hostSeg)) {
-        u.pathname = u.pathname.slice(hostSeg.length) || '/'
+      parsed = new URL(url)
+    } catch (e) {
+      parsed = null
+    }
+    if (parsed) {
+      parsed.hash = ''
+      const hostSeg = `/${parsed.host}`
+      if (parsed.pathname.startsWith(hostSeg)) {
+        parsed.pathname = parsed.pathname.slice(hostSeg.length) || '/'
       }
-      url = u.toString()
-    } catch {}
+      url = parsed.toString()
+    }
     const response = await utils.post(this.fetch, endpoint, { ...request, url }, { headers: this.config.headers })
     return (await response.json()) as FetchResponse
   }
