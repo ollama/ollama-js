@@ -1,12 +1,17 @@
-import { Ollama, type Message, type SearchResponse, type FetchResponse } from 'ollama'
+import {
+  Ollama,
+  type Message,
+  type WebSearchResponse,
+  type WebFetchResponse,
+} from 'ollama'
 
 async function main() {
-
-  if (!process.env.OLLAMA_API_KEY) throw new Error('Set OLLAMA_API_KEY to use web search tools')
-
-  const client = new Ollama({
-    headers: { Authorization: `Bearer ${process.env.OLLAMA_API_KEY}` },
-  })
+  // Set enviornment variable OLLAMA_API_KEY=<YOUR>.<KEY>
+  // or set the header manually
+  //   const client = new Ollama({
+  //     headers: { Authorization: `Bearer ${process.env.OLLAMA_API_KEY}` },
+  //   })
+  const client = new Ollama()
 
   // Tool schemas
   const webSearchTool = {
@@ -20,7 +25,7 @@ async function main() {
           query: { type: 'string', description: 'Search query string.' },
           max_results: {
             type: 'number',
-            description: 'The maximum number of results to return per query (default 5, max 10).',
+            description: 'The maximum number of results to return per query (default 3).',
           },
         },
         required: ['query'],
@@ -43,28 +48,32 @@ async function main() {
     },
   }
 
-	const availableTools = {
-		webSearch: async (args: { query: string; max_results?: number }): Promise<SearchResponse> => {
-			const res = await client.webSearch(args)
-			return res as SearchResponse
-		},
-		webFetch: async (args: { url: string }): Promise<FetchResponse> => {
-			const res = await client.webFetch(args)
-			return res as FetchResponse
-		},
-	}
+  const availableTools = {
+    webSearch: async (args: {
+      query: string
+      max_results?: number
+    }): Promise<WebSearchResponse> => {
+      const res = await client.webSearch(args)
+      return res as WebSearchResponse
+    },
+    webFetch: async (args: { url: string }): Promise<WebFetchResponse> => {
+      const res = await client.webFetch(args)
+      return res as WebFetchResponse
+    },
+  }
+
+  const query = 'What is Ollama?'
+  console.log('Prompt:', query, '\n')
 
   const messages: Message[] = [
     {
       role: 'user',
-      content: 'What is Ollama?',
+      content: query,
     },
   ]
 
-  console.log('----- Prompt:', messages.find((m) => m.role === 'user')?.content, '\n')
-  
   while (true) {
-	const response = await client.chat({
+    const response = await client.chat({
       model: 'qwen3',
       messages: messages,
       tools: [webSearchTool, webFetchTool],
@@ -76,7 +85,6 @@ async function main() {
     var content = ''
     var thinking = ''
     for await (const chunk of response) {
-
       if (chunk.message.thinking) {
         thinking += chunk.message.thinking
       }
@@ -97,14 +105,19 @@ async function main() {
           const functionToCall = availableTools[toolCall.function.name]
           if (functionToCall) {
             const args = toolCall.function.arguments as any
-            console.log('\nCalling function:', toolCall.function.name, 'with arguments:', args)
+            console.log(
+              '\nCalling function:',
+              toolCall.function.name,
+              'with arguments:',
+              args,
+            )
             const output = await functionToCall(args)
             console.log('Function result:', JSON.stringify(output).slice(0, 200), '\n')
-            
+
             messages.push(chunk.message)
             messages.push({
               role: 'tool',
-              content: JSON.stringify(output),
+              content: JSON.stringify(output).slice(0, 2000 * 4), // cap at ~2000 tokens
               tool_name: toolCall.function.name,
             })
           }
@@ -116,8 +129,6 @@ async function main() {
       process.stdout.write('\n')
       break
     }
-
-    
   }
 }
 

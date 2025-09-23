@@ -135,6 +135,13 @@ function normalizeHeaders(headers?: HeadersInit | undefined): Record<string,stri
       return headers || {};
   }
 }
+  /**
+   * Returns true when running in a Node.js environment.
+   */
+  export function isNodeRuntime(): boolean {
+    // window is undefined in Node; process.versions.node exists in Node
+    return typeof window === 'undefined' && typeof process !== 'undefined' && !!(process as any).versions?.node
+  }
 
 /**
  * A wrapper around fetch that adds default headers.
@@ -157,9 +164,37 @@ const fetchWithHeaders = async (
   // Normalizes headers into a plain object format.
   options.headers = normalizeHeaders(options.headers);
   
+  // Inject Authorization from environment if not already provided (Node only) and only for ollama.com
+  try {
+    const hasAuth = Object.keys(options.headers).some((k) => k.toLowerCase() === 'authorization')
+    const isNode = isNodeRuntime()
+
+    let isOllamaCloud = false
+    try {
+      const hostname = new URL(url).hostname
+      isOllamaCloud = hostname === 'ollama.com' || hostname.endsWith('.ollama.com')
+    } catch {
+      isOllamaCloud = false
+    }
+
+    let apiKey: string | undefined
+    if (isNode && typeof process.env === 'object') {
+      apiKey = (process.env as any)['OLLAMA_API_KEY']
+    }
+
+    if (!hasAuth && apiKey && isOllamaCloud) {
+      options.headers['authorization'] = `Bearer ${apiKey}`
+    }
+  } catch {
+    // ignore if environment access is not available (e.g., browser)
+  }
+
   // Filter out default headers from custom headers
   const customHeaders = Object.fromEntries(
-    Object.entries(options.headers).filter(([key]) => !Object.keys(defaultHeaders).some(defaultKey => defaultKey.toLowerCase() === key.toLowerCase()))
+    Object.entries(options.headers)
+      // drop values explicitly set to null/undefined (mirror python's `if v is not None`)
+      .filter(([key]) => !Object.keys(defaultHeaders).some(defaultKey => defaultKey.toLowerCase() === key.toLowerCase()))
+      .filter(([_, value]) => value !== null && value !== undefined)
   )
 
   options.headers = {
