@@ -1,4 +1,4 @@
-import type { SearchRequest, SearchResponse, CrawlRequest, CrawlResponse } from 'ollama'
+import type { SearchRequest, SearchResponse, FetchRequest, FetchResponse } from 'ollama'
 
 interface Page {
   url: string
@@ -16,8 +16,8 @@ interface BrowserStateData {
 }
 
 interface WebSearchResult {
-  title: string
-  url: string
+  title?: string
+  url?: string
   content: {
     fullText: string
   }
@@ -87,30 +87,30 @@ export class Browser {
   private searchClient?: {
     search: (request: SearchRequest) => Promise<SearchResponse>
   }
-  private crawlClient?: {
-    crawl: (request: CrawlRequest) => Promise<CrawlResponse>
+  private fetchClient?: {
+    fetch: (request: FetchRequest) => Promise<FetchResponse>
   }
 
   constructor(
     initialState?: BrowserStateData,
     client?: {
       search: (request: SearchRequest) => Promise<SearchResponse>
-      crawl: (request: CrawlRequest) => Promise<CrawlResponse>
+      fetch: (request: FetchRequest) => Promise<FetchResponse>
     },
   ) {
     this.state = new BrowserState(initialState)
     if (client) {
       this.searchClient = client
-      this.crawlClient = client
+      this.fetchClient = client
     }
   }
 
   setClients(client: {
     search: (request: SearchRequest) => Promise<SearchResponse>
-    crawl: (request: CrawlRequest) => Promise<CrawlResponse>
+    fetch: (request: FetchRequest) => Promise<FetchResponse>
   }): void {
     this.searchClient = client
-    this.crawlClient = client
+    this.fetchClient = client
   }
 
   getState(): BrowserStateData {
@@ -384,37 +384,34 @@ export class Browser {
     textBuilder += '# Search Results\n' // L2: # Search Results
     textBuilder += '\n' // L3: empty
 
-    for (const queryResults of Object.values(results.results)) {
-      for (const result of queryResults) {
-        let domain = result.url
-        try {
-          const url = new URL(result.url)
-          if (url.host) {
-            domain = url.host
-            domain = domain.replace(/^www\./, '')
-          }
-        } catch {
-          // If URL parsing fails, use original URL
+    for (const result of results.results as any[]) {
+      // Derive domain from URL if available
+      let domain = result.url || ''
+      try {
+        const url = new URL(domain)
+        if (url.host) {
+          domain = url.host.replace(/^www\./, '')
         }
-
-        const linkFormat = `* 【${linkIdx}†${result.title}†${domain}】`
-        textBuilder += linkFormat
-
-
-        const rawSnippet = result.content || ''
-
-
-        const capped =
-          rawSnippet.length > 400 ? rawSnippet.substring(0, 400) + '…' : rawSnippet
-        const cleaned = capped
-          .replace(/\d{40,}/g, (m) => m.substring(0, 40) + '…')
-          .replace(/\s{3,}/g, ' ')
-        textBuilder += cleaned
-        textBuilder += '\n'
-
-        page.links[linkIdx] = result.url
-        linkIdx++
+      } catch {
+        // leave domain as-is if parsing fails
       }
+
+      const title = result.title || `Result ${linkIdx}`
+      const linkFormat = `* 【${linkIdx}†${title}†${domain}】`
+      textBuilder += linkFormat
+
+      const rawSnippet = result.content || ''
+      const capped = rawSnippet.length > 400 ? rawSnippet.substring(0, 400) + '…' : rawSnippet
+      const cleaned = capped
+        .replace(/\d{40,}/g, (m) => m.substring(0, 40) + '…')
+        .replace(/\s{3,}/g, ' ')
+      textBuilder += cleaned
+      textBuilder += '\n'
+
+      if (result.url) {
+        page.links[linkIdx] = result.url
+      }
+      linkIdx++
     }
 
     page.text = textBuilder
@@ -428,8 +425,8 @@ export class Browser {
    */
   protected buildSearchResultsPage(result: WebSearchResult, linkIdx: number): Page {
     const page: Page = {
-      url: result.url,
-      title: result.title,
+      url: result.url || `result_${linkIdx}`,
+      title: result.title || `Result ${linkIdx}`,
       text: '',
       lines: [],
       links: {},
@@ -439,21 +436,20 @@ export class Browser {
     let textBuilder = ''
 
 
-    const linkFormat = `【${linkIdx}†${result.title}】`
+    const linkFormat = `【${linkIdx}†${result.title || `Result ${linkIdx}`}】`
     textBuilder += linkFormat
     textBuilder += '\n'
-    textBuilder += `URL: ${result.url}\n`
+    textBuilder += `URL: ${result.url || ''}\n`
     const numChars = Math.min(result.content.fullText.length, 300)
     textBuilder += result.content.fullText.substring(0, numChars)
     textBuilder += '\n\n'
 
-    if (!result.content.fullText) {
+    if (!result.content.fullText && result.url) {
       page.links[linkIdx] = result.url
     }
 
-    // Use full text if available, otherwise use snippet
     if (result.content.fullText) {
-      page.text = `URL: ${result.url}\n${result.content.fullText}`
+      page.text = `URL: ${result.url || ''}\n${result.content.fullText}`
       const { processedText, links } = this.processMarkdownLinks(page.text)
       page.text = processedText
       page.links = links
@@ -467,11 +463,11 @@ export class Browser {
   }
 
   /**
-   * Creates a Page from crawl API results
+   * Creates a Page from fetch API results
    */
-  protected buildPageFromCrawlResult(
+  protected buildPageFromFetchResult(
     requestedURL: string,
-    crawlResponse: CrawlResponse,
+    fetchResponse: FetchResponse,
   ): Page {
     // Initialize page with defaults
     const page: Page = {
@@ -483,30 +479,19 @@ export class Browser {
       fetchedAt: new Date(),
     }
 
-    // Process crawl results - the API returns results grouped by URL
-    for (const [url, urlResults] of Object.entries(crawlResponse.results)) {
-      if (urlResults.length > 0) {
-        const result = urlResults[0]
-
-        if (result.content) {
-          page.text = result.content
-        }
-
-        if (result.title) {
-          page.title = result.title
-        }
-
-        page.url = url
-
-        break
-      }
+    if (fetchResponse.content) {
+      page.text = fetchResponse.content
+    }
+    if (fetchResponse.title) {
+      page.title = fetchResponse.title
+    }
+    if (fetchResponse.url) {
+      page.url = fetchResponse.url
     }
 
-    // If no text was extracted, set a default message
     if (!page.text) {
       page.text = 'No content could be extracted from this page.'
     } else {
-      // Prepend the URL line to match Python implementation
       page.text = `URL: ${page.url}\n${page.text}`
     }
 
@@ -574,7 +559,7 @@ export class Browser {
       lineIdx += numShowLines
     }
 
-    // Build final display text
+
     if (resultChunks.length > 0) {
       textBuilder = resultChunks.join('\n\n')
     }
@@ -599,7 +584,7 @@ export class Browser {
     }
 
   const searchArgs: SearchRequest = {
-    queries: [query],
+    query,
     max_results: topn,
   }
 
@@ -609,21 +594,19 @@ export class Browser {
     this.savePage(searchResultsPage)
     const cursor = this.getState().pageStack.length - 1
 
-    for (const queryResults of Object.values(result.results)) {
-      for (let i = 0; i < queryResults.length; i++) {
-        const searchResult = queryResults[i]
-        const webSearchResult: WebSearchResult = {
-          title: searchResult.title,
-          url: searchResult.url,
-          content: {
-            fullText: searchResult.content || '',
-          },
-        }
-        const resultPage = this.buildSearchResultsPage(webSearchResult, i + 1)
-        const data = this.getState()
-        data.urlToPage[resultPage.url] = resultPage
-        this.state.setData(data)
+    for (let i = 0; i < result.results.length; i++) {
+      const searchResult = result.results[i] as any
+      const webSearchResult: WebSearchResult = {
+        title: searchResult.title || 'Search Result',
+        url: searchResult.url || `result_${i}`,
+        content: {
+          fullText: searchResult.content || '',
+        },
       }
+      const resultPage = this.buildSearchResultsPage(webSearchResult, i + 1)
+      const data = this.getState()
+      data.urlToPage[resultPage.url] = resultPage
+      this.state.setData(data)
     }
 
     const pageText = this.displayPage(searchResultsPage, cursor, 0, -1)
@@ -636,8 +619,8 @@ export class Browser {
     loc?: number
     num_lines?: number
   }): Promise<{ state: BrowserStateData; pageText: string }> {
-    if (!this.crawlClient) {
-      throw new Error('Crawl client not provided')
+    if (!this.fetchClient) {
+      throw new Error('fetch client not provided')
     }
 
     let { cursor = -1 } = args
@@ -669,8 +652,9 @@ export class Browser {
         return { state: this.getState(), pageText: capToolContent(pageText) }
       }
 
-      const crawlResponse = await this.crawlClient.crawl({ urls: [url] })
-      const newPage = this.buildPageFromCrawlResult(url, crawlResponse)
+      console.log('[browser_open] fetching URL:', url)
+      const fetchResponse = await this.fetchClient.fetch({ url })
+      const newPage = this.buildPageFromFetchResult(url, fetchResponse)
 
       this.savePage(newPage)
       cursor = this.getState().pageStack.length - 1
@@ -719,8 +703,9 @@ export class Browser {
 
       let newPage = state.urlToPage[pageURL]
       if (!newPage) {
-        const crawlResponse = await this.crawlClient.crawl({ urls: [pageURL] })
-        newPage = this.buildPageFromCrawlResult(pageURL, crawlResponse)
+        console.log('[browser_open] fetching URL from link id:', pageURL)
+        const fetchResponse = await this.fetchClient.fetch({ url: pageURL })
+        newPage = this.buildPageFromFetchResult(pageURL, fetchResponse)
       }
 
       this.savePage(newPage)

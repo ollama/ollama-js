@@ -15,7 +15,7 @@ async function main() {
 
   const browser = new Browser(undefined, {
     search: (request) => client.webSearch(request as any),
-    crawl: (request) => client.webCrawl(request as any),
+    fetch: (request) => client.webFetch(request as any),
   })
 
   // Tool schemas for the model
@@ -38,7 +38,7 @@ async function main() {
   const browserOpenTool = {
     type: 'function',
     function: {
-      name: 'browser.open',
+      name: 'browser_open',
       description: 'Open a search result or URL, or scroll the current page.',
       parameters: {
         type: 'object',
@@ -58,7 +58,7 @@ async function main() {
   const browserFindTool = {
     type: 'function',
     function: {
-      name: 'browser.find',
+      name: 'browser_find',
       description: 'Find a pattern within the currently open page.',
       parameters: {
         type: 'object',
@@ -77,7 +77,7 @@ async function main() {
       const result = await browser.search(args)
       return result.pageText
     },
-    'browser.open': async (args: {
+    browser_open: async (args: {
       id?: string | number
       cursor?: number
       loc?: number
@@ -86,7 +86,7 @@ async function main() {
       const result = await browser.open(args)
       return result.pageText
     },
-    'browser.find': async (args: { pattern: string; cursor?: number }) => {
+    browser_find: async (args: { pattern: string; cursor?: number }) => {
       const result = await browser.find(args)
       return result.pageText
     },
@@ -95,7 +95,7 @@ async function main() {
   const messages: Message[] = [
     {
       role: 'user',
-      content: 'Who is Nicole Pardal?',
+      content: 'What does Ollama do?',
     },
   ]
 
@@ -146,6 +146,7 @@ async function main() {
             availableTools[toolCall.function.name as keyof typeof availableTools]
           if (functionToCall) {
             const args = toolCall.function.arguments as any
+            console.log('\nCalling function:', toolCall.function.name, 'with arguments:', args)
             const output = await functionToCall(args)
 
             // message history
