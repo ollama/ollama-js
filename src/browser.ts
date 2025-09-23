@@ -51,29 +51,42 @@ export class Ollama {
 
 
   /**
-   * Only forward the Authorization header to Ollama cloud endpoints, and only when running in Node. 
-   * In browsers, do not forward custom headers to
+   * Chooses which headers to send based on the target URL. If the hostname is
+   * ollama.com (or a subdomain), forward only the Authorization header (and only when running in Node);
+   * otherwise, pass through the configured headers. In browsers, do not forward custom headers to
    * remote domains to avoid leaking credentials.
    */
-  protected filterHeadersForOllama(headers?: HeadersInit): HeadersInit | undefined {
-    if (!headers) return undefined
-    if (!utils.isNodeRuntime()) return undefined
+  protected computeHeadersForUrl(url: string, headers?: HeadersInit): HeadersInit | undefined {
+    try {
+      const hostname = new URL(url).hostname
+      const isOllamaCloud = hostname === 'ollama.com' || hostname.endsWith('.ollama.com')
+      
+      if (isOllamaCloud) {
+        const headersToFilter = headers ?? this.config.headers
+        if (!headersToFilter) return undefined
+        if (!utils.isNodeRuntime()) return undefined
 
-    let obj: Record<string, string> = {}
-    if (headers instanceof Headers) {
-      headers.forEach((v, k) => { obj[k] = v })
-    } else if (Array.isArray(headers)) {
-      obj = Object.fromEntries(headers as Array<[string, string]>)
-    } else {
-      obj = headers as Record<string, string>
-    }
+        let obj: Record<string, string> = {}
+        if (headersToFilter instanceof Headers) {
+          headersToFilter.forEach((v, k) => { obj[k] = v })
+        } else if (Array.isArray(headersToFilter)) {
+          obj = Object.fromEntries(headersToFilter as Array<[string, string]>)
+        } else {
+          obj = headersToFilter as Record<string, string>
+        }
 
-    for (const [k, v] of Object.entries(obj)) {
-      if (k.toLowerCase() === 'authorization') {
-        return { authorization: v }
+        for (const [k, v] of Object.entries(obj)) {
+          if (k.toLowerCase() === 'authorization') {
+            return { authorization: v }
+          }
+        }
+        return undefined
       }
+      
+      return headers ?? this.config.headers
+    } catch {
+      return headers ?? this.config.headers
     }
-    return undefined
   }
 
   // Abort any ongoing streamed requests to Ollama
@@ -105,7 +118,7 @@ export class Ollama {
       const abortController = new AbortController()
       const response = await utils.post(this.fetch, host, request, {
         signal: abortController.signal,
-        headers: this.config.headers
+        headers: this.computeHeadersForUrl(host, this.config.headers)
       })
 
       if (!response.body) {
@@ -127,7 +140,7 @@ export class Ollama {
       return abortableAsyncIterator
     }
     const response = await utils.post(this.fetch, host, request, {
-      headers: this.config.headers
+      headers: this.computeHeadersForUrl(host, this.config.headers)
     })
     return await response.json()
   }
@@ -268,7 +281,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
       this.fetch,
       `${this.config.host}/api/delete`,
       { name: request.model },
-      { headers: this.config.headers }
+      { headers: this.computeHeadersForUrl(`${this.config.host}/api/delete`, this.config.headers) }
     )
     return { status: 'success' }
   }
@@ -281,7 +294,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    */
   async copy(request: CopyRequest): Promise<StatusResponse> {
     await utils.post(this.fetch, `${this.config.host}/api/copy`, { ...request }, {
-      headers: this.config.headers
+      headers: this.computeHeadersForUrl(`${this.config.host}/api/copy`, this.config.headers)
     })
     return { status: 'success' }
   }
@@ -293,7 +306,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    */
   async list(): Promise<ListResponse> {
     const response = await utils.get(this.fetch, `${this.config.host}/api/tags`, {
-      headers: this.config.headers
+      headers: this.computeHeadersForUrl(`${this.config.host}/api/tags`, this.config.headers)
     })
     return (await response.json()) as ListResponse
   }
@@ -307,7 +320,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
     const response = await utils.post(this.fetch, `${this.config.host}/api/show`, {
       ...request,
     }, {
-      headers: this.config.headers
+      headers: this.computeHeadersForUrl(`${this.config.host}/api/show`, this.config.headers)
     })
     return (await response.json()) as ShowResponse
   }
@@ -321,7 +334,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
       const response = await utils.post(this.fetch, `${this.config.host}/api/embed`, {
         ...request,
       }, {
-        headers: this.config.headers
+        headers: this.computeHeadersForUrl(`${this.config.host}/api/embed`, this.config.headers)
       })
       return (await response.json()) as EmbedResponse
     }
@@ -335,7 +348,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
     const response = await utils.post(this.fetch, `${this.config.host}/api/embeddings`, {
       ...request,
     }, {
-      headers: this.config.headers
+      headers: this.computeHeadersForUrl(`${this.config.host}/api/embeddings`, this.config.headers)
     })
     return (await response.json()) as EmbeddingsResponse
   }
@@ -347,7 +360,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    */
   async ps(): Promise<ListResponse> {
     const response = await utils.get(this.fetch, `${this.config.host}/api/ps`, {
-      headers: this.config.headers
+      headers: this.computeHeadersForUrl(`${this.config.host}/api/ps`, this.config.headers)
     })
     return (await response.json()) as ListResponse
   }
@@ -363,7 +376,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
       throw new Error('Query is required')
     }
     const response = await utils.post(this.fetch, `https://ollama.com/api/web_search`, { ...request }, {
-      headers: this.filterHeadersForOllama(this.config.headers)
+      headers: this.computeHeadersForUrl(`https://ollama.com/api/web_search`, this.config.headers)
     })
     return (await response.json()) as WebSearchResponse
   }
