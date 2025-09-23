@@ -270,26 +270,25 @@ export interface StatusResponse {
   status: string
 }
 
-// Web Search types
-export interface SearchRequest {
+export interface WebSearchRequest {
   query: string
   max_results?: number
 }
 
-export interface SearchResult {
+export interface WebSearchResult {
   content: string
 }
 
-export interface SearchResponse {
-  results: SearchResult[]
+export interface WebSearchResponse {
+  results: WebSearchResult[]
 }
 
 // Fetch types
-export interface FetchRequest {
+export interface WebFetchRequest {
   url: string
 }
 
-export interface FetchResponse {
+export interface WebFetchResponse {
   title: string
   url: string
   content: string
