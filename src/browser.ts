@@ -63,8 +63,8 @@ export class Ollama {
       
       if (isOllamaCloud) {
         const headersToFilter = headers ?? this.config.headers
-        if (!headersToFilter) return undefined
-        if (!utils.isNodeRuntime()) return undefined
+        if (!headersToFilter) {return undefined}
+        if (!utils.isNodeRuntime()) {return undefined}
 
         let obj: Record<string, string> = {}
         if (headersToFilter instanceof Headers) {
