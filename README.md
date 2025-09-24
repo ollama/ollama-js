@@ -195,32 +195,26 @@ ollama.embed(request)
   - `options` `<Options>`: (Optional) Options to configure the runtime.
 - Returns: `<EmbedResponse>`
 
-### Web Search
-
-Requires an API key from `https://ollama.com/settings/keys` (set `OLLAMA_API_KEY` or pass `Authorization` header).
-
-`web_search({ query, max_results? })` → returns `{ results: [{ title, url, content }] }`
-
+### web search
 
 ```javascript
-import { Ollama } from 'ollama'
-
-const client = new Ollama({ headers: { Authorization: 'Bearer $OLLAMA_API_KEY"' } })
-await client.webSearch({ query: 'What is Ollama?' })
+ollama.webSearch(request)
 ```
 
-See `examples/websearch/websearch-tools.ts` for a tools example.
+- `request` `<Object>`: The search request parameters.
+  - `query` `<string>`: The search query string.
+  - `max_results` `<number>`: (Optional) Maximum results to return (default 5, max 10).
+- Returns: `<SearchResponse>`
 
-### Web Fetch
-
-`web_fetch({ url })` → returns `{ title, content, links }`
+### web fetch
 
 ```javascript
-import { Ollama } from 'ollama'
+ollama.webFetch(request)
+```
 
-const client = new Ollama({ headers: { Authorization: 'Bearer $OLLAMA_API_KEY"' } })
-await client.webFetch({ url: 'https://ollama.com' })
-````
+- `request` `<Object>`: The fetch request parameters.
+  - `url` `<string>`: The URL to fetch.
+- Returns: `<FetchResponse>`
 
 ### ps
 
