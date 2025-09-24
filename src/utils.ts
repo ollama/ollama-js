@@ -28,7 +28,11 @@ export class AbortableAsyncIterator<T extends object> {
   private readonly itr: AsyncGenerator<T | ErrorResponse>
   private readonly doneCallback: () => void
 
-  constructor(abortController: AbortController, itr: AsyncGenerator<T | ErrorResponse>, doneCallback: () => void) {
+  constructor(
+    abortController: AbortController,
+    itr: AsyncGenerator<T | ErrorResponse>,
+    doneCallback: () => void,
+  ) {
     this.abortController = abortController
     this.itr = itr
     this.doneCallback = doneCallback
@@ -119,29 +123,22 @@ function getPlatform(): string {
  *   - An array of key-value pairs representing headers.
  * @returns {Record<string,string>} - A plain object representing the normalized headers.
  */
-function normalizeHeaders(headers?: HeadersInit | undefined): Record<string,string> {
+function normalizeHeaders(headers?: HeadersInit | undefined): Record<string, string> {
   if (headers instanceof Headers) {
-      // If headers are an instance of Headers, convert it to an object
-      const obj: Record<string, string> = {};
-        headers.forEach((value, key) => {
-          obj[key] = value;
-        });
-        return obj;
+    // If headers are an instance of Headers, convert it to an object
+    const obj: Record<string, string> = {}
+    headers.forEach((value, key) => {
+      obj[key] = value
+    })
+    return obj
   } else if (Array.isArray(headers)) {
-      // If headers are in array format, convert them to an object
-      return Object.fromEntries(headers);
+    // If headers are in array format, convert them to an object
+    return Object.fromEntries(headers)
   } else {
-      // Otherwise assume it's already a plain object
-      return headers || {};
+    // Otherwise assume it's already a plain object
+    return headers || {}
   }
 }
-  /**
-   * Returns true when running in a Node.js environment.
-   */
-  export function isNodeRuntime(): boolean {
-    // window is undefined in Node; process.versions.node exists in Node
-    return typeof window === 'undefined' && typeof process !== 'undefined' && !!(process as any).versions?.node
-  }
 
 /**
  * A wrapper around fetch that adds default headers.
@@ -164,31 +161,37 @@ const fetchWithHeaders = async (
   // Normalizes headers into a plain object format.
   options.headers = normalizeHeaders(options.headers)
 
-  // Filter custom headers for ollama.com and inject Authorization from environment 
-  const hostname = new URL(url).hostname
-  if (hostname === 'ollama.com') {
-    // For ollama.com, only keep Authorization header
-    const authEntry = Object.entries(options.headers).find(([k]) => k.toLowerCase() === 'authorization')
-    options.headers = authEntry ? { [authEntry[0]]: authEntry[1] } : {}
-
-    // Inject Authorization from environment if not already provided 
-    const hasAuth = authEntry !== undefined
-    const apiKey = typeof process !== 'undefined' && process.env?.OLLAMA_API_KEY
-    if (!hasAuth && apiKey) {
-      options.headers['authorization'] = `Bearer ${apiKey}`
+  // Automatically add the API key to the headers if the URL is https://ollama.com
+  if (URL.canParse(url)) {
+    const parsed = new URL(url)
+    if (parsed.protocol === 'https:' && parsed.hostname === 'ollama.com') {
+      const apiKey =
+        typeof process === 'object' &&
+        process !== null &&
+        typeof process.env === 'object' &&
+        process.env !== null
+          ? process.env?.OLLAMA_API_KEY
+          : undefined
+      const authorization =
+        options.headers['authorization'] || options.headers['Authorization']
+      if (!authorization && apiKey) {
+        options.headers['Authorization'] = `Bearer ${apiKey}`
+      }
     }
   }
 
-  // Filter out default headers from custom headers
   const customHeaders = Object.fromEntries(
-    Object.entries(options.headers)
-      .filter(([key]) => !Object.keys(defaultHeaders).some(defaultKey => defaultKey.toLowerCase() === key.toLowerCase()))
-      .filter(([_, value]) => value !== null && value !== undefined)
+    Object.entries(options.headers).filter(
+      ([key]) =>
+        !Object.keys(defaultHeaders).some(
+          (defaultKey) => defaultKey.toLowerCase() === key.toLowerCase(),
+        ),
+    ),
   )
 
   options.headers = {
     ...defaultHeaders,
-    ...customHeaders
+    ...customHeaders,
   }
 
   return fetch(url, options)
@@ -200,9 +203,13 @@ const fetchWithHeaders = async (
  * @param host {string} - The host to fetch
  * @returns {Promise<Response>} - The fetch response
  */
-export const get = async (fetch: Fetch, host: string, options?: { headers?: HeadersInit }): Promise<Response> => {
+export const get = async (
+  fetch: Fetch,
+  host: string,
+  options?: { headers?: HeadersInit },
+): Promise<Response> => {
   const response = await fetchWithHeaders(fetch, host, {
-    headers: options?.headers
+    headers: options?.headers,
   })
 
   await checkOk(response)
@@ -236,7 +243,7 @@ export const post = async (
   fetch: Fetch,
   host: string,
   data?: Record<string, unknown> | BodyInit,
-  options?: { signal?: AbortSignal, headers?: HeadersInit },
+  options?: { signal?: AbortSignal; headers?: HeadersInit },
 ): Promise<Response> => {
   const isRecord = (input: any): input is Record<string, unknown> => {
     return input !== null && typeof input === 'object' && !Array.isArray(input)
@@ -248,7 +255,7 @@ export const post = async (
     method: 'POST',
     body: formattedData,
     signal: options?.signal,
-    headers: options?.headers
+    headers: options?.headers,
   })
 
   await checkOk(response)
@@ -271,7 +278,7 @@ export const del = async (
   const response = await fetchWithHeaders(fetch, host, {
     method: 'DELETE',
     body: JSON.stringify(data),
-    headers: options?.headers
+    headers: options?.headers,
   })
 
   await checkOk(response)
@@ -356,16 +363,16 @@ export const formatHost = (host: string): string => {
   }
 
   // Build basic auth part if present
-  let auth = '';
+  let auth = ''
   if (url.username) {
-    auth = url.username;
+    auth = url.username
     if (url.password) {
-      auth += `:${url.password}`;
+      auth += `:${url.password}`
     }
-    auth += '@';
+    auth += '@'
   }
 
-  let formattedHost = `${url.protocol}//${auth}${url.hostname}:${port}${url.pathname}`;
+  let formattedHost = `${url.protocol}//${auth}${url.hostname}:${port}${url.pathname}`
   // remove trailing slashes
   if (formattedHost.endsWith('/')) {
     formattedHost = formattedHost.slice(0, -1)
