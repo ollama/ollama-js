@@ -272,7 +272,7 @@ export interface StatusResponse {
 
 export interface WebSearchRequest {
   query: string
-  max_results?: number
+  maxResults?: number
 }
 
 export interface WebSearchResult {

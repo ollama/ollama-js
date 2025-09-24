@@ -164,9 +164,8 @@ const fetchWithHeaders = async (
   // Normalizes headers into a plain object format.
   options.headers = normalizeHeaders(options.headers);
   
-  // Inject Authorization from environment if not already provided (Node only) and only for ollama.com
+  // Filter custom headers for ollama.com and inject Authorization from environment (Node only)
   try {
-    const hasAuth = Object.keys(options.headers).some((k) => k.toLowerCase() === 'authorization')
     const isNode = isNodeRuntime()
 
     let isOllamaCloud = false
@@ -177,11 +176,23 @@ const fetchWithHeaders = async (
       isOllamaCloud = false
     }
 
+    if (isOllamaCloud) {
+      // For ollama.com endpoints, do not forward custom headers in browsers.
+      // In Node, only forward the Authorization header if provided.
+      if (!isNode) {
+        options.headers = {}
+      } else {
+        const authEntry = Object.entries(options.headers).find(([k]) => k.toLowerCase() === 'authorization')
+        options.headers = authEntry ? { [authEntry[0]]: authEntry[1] } : {}
+      }
+    }
+
+    // Inject Authorization from environment if not already provided (Node only) and only for ollama.com
+    const hasAuth = Object.keys(options.headers).some((k) => k.toLowerCase() === 'authorization')
     let apiKey: string | undefined
     if (isNode && typeof process.env === 'object') {
       apiKey = (process.env as any)['OLLAMA_API_KEY']
     }
-
     if (!hasAuth && apiKey && isOllamaCloud) {
       options.headers['authorization'] = `Bearer ${apiKey}`
     }
