@@ -140,6 +140,10 @@ function normalizeHeaders(headers?: HeadersInit | undefined): Record<string, str
   }
 }
 
+const readEnvVar = (obj: object, key: string): string | undefined => {
+  return obj[key]
+}
+
 /**
  * A wrapper around fetch that adds default headers.
  * @param fetch {Fetch} - The fetch function to use
@@ -170,7 +174,7 @@ const fetchWithHeaders = async (
         process !== null &&
         typeof process.env === 'object' &&
         process.env !== null
-          ? process.env?.OLLAMA_API_KEY
+          ? readEnvVar(process.env, 'OLLAMA_API_KEY')
           : undefined
       const authorization =
         options.headers['authorization'] || options.headers['Authorization']
