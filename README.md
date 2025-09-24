@@ -195,6 +195,28 @@ ollama.embed(request)
   - `options` `<Options>`: (Optional) Options to configure the runtime.
 - Returns: `<EmbedResponse>`
 
+### web search
+- Web search capability requires an Ollama account. [Sign up on ollama.com](https://ollama.com/signup) 
+- Create an API key by visiting https://ollama.com/settings/keys
+```javascript
+ollama.webSearch(request)
+```
+
+- `request` `<Object>`: The search request parameters.
+  - `query` `<string>`: The search query string.
+  - `max_results` `<number>`: (Optional) Maximum results to return (default 5, max 10).
+- Returns: `<SearchResponse>`
+
+### web fetch
+
+```javascript
+ollama.webFetch(request)
+```
+
+- `request` `<Object>`: The fetch request parameters.
+  - `url` `<string>`: The URL to fetch.
+- Returns: `<FetchResponse>`
+
 ### ps
 
 ```javascript
