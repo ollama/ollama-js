@@ -195,30 +195,82 @@ ollama.embed(request)
   - `options` `<Options>`: (Optional) Options to configure the runtime.
 - Returns: `<EmbedResponse>`
 
-### web search
+### Web Search
+
+Requires an API key from `https://ollama.com/settings/keys` (set `OLLAMA_API_KEY` or pass `Authorization` header).
+
+`web_search({ query, max_results? })` → returns `{ results: [{ title, url, content }] }`
+
+```shell
+curl https://api.ollama.com/api/web_search \
+  -H "Authorization: Bearer $OLLAMA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "what does Ollama do?"
+  }'
+```
+
+#### Response
+
+```json
+{
+  "results": [
+    {
+      "title": "Complete Ollama Guide: Installation, Usage & Code Examples",
+      "url": "https://collabnix.com/complete-ollama-guide-installation-usage-code-examples",
+      "content": "Ollama is a lightweight framework for running LLMs locally..."
+    },
+    {
+      "title": "What is Ollama: Running Large Language Models Locally | by Tahir",
+      "url": "https://medium.com/@tahirbalarabe2/what-is-ollama-running-large-language-models-locally-e917ca40defe",
+      "content": "Ollama lets you download and run LLMs on your machine without the cloud..."
+    }
+  ]
+}
+```
 
 ```javascript
 import { Ollama } from 'ollama'
 
-const ollama = new Ollama({
-  headers: { Authorization: 'Bearer <api key>' },
-})
+const client = new Ollama({ headers: { Authorization: 'Bearer <api key>' } })
+await client.webSearch({ query: 'What is Ollama?' })
+```
+
+See `examples/websearch/websearch-tools.ts` for a tools example.
+
+### Web Fetch
+
+`web_fetch({ url })` → returns `{ title, content, links }`
+
+```shell
+curl https://api.ollama.com/api/web_fetch \
+  -H "Authorization: Bearer $OLLAMA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "ollama.com"
+  }'
+```
+
+#### Response
+
+```json
+{
+  "title": "Ollama",
+  "content": "[Cloud models](https://ollama.com/blog/cloud-models) are now available in Ollama\n\n**Chat & build with open models**\n\n[Download](https://ollama.com/download) [Explore models](https://ollama.com/models)\n\nAvailable for macOS, Windows, and Linux",
+  "links": [
+    "http://ollama.com/",
+    "http://ollama.com/models",
+    "https://github.com/ollama/ollama"
+  ]
+}
 ```
 
 ```javascript
-ollama.webSearch(request)
+import { Ollama } from 'ollama'
+
+const client = new Ollama({ headers: { Authorization: 'Bearer <api key>' } })
+await client.webFetch({ url: 'https://ollama.com' })
 ```
-
-- `request` `<Object>`: The search request parameters.
-  - `queries` `<string[]>`: One or more search queries.
-  - `max_results` `<number>`: (Optional) Maximum results per query
-- Returns: `<SearchResponse>`
-
-- Download Ollama's [JavaScript library](https://github.com/ollama/ollama-js)
-- [Sign up](https://ollama.com/signup) for an Ollama account
-- Create an API key by visiting https://ollama.com/settings/keys
-
-See [examples/websearch/websearch-tools.ts](examples/websearch/websearch-tools.ts) for a usage example with tools.
 
 ### web crawl
 
@@ -229,10 +281,6 @@ ollama.webCrawl(request)
 - `request` `<Object>`: The crawl request parameters.
   - `urls` `<string[]>`: One or more URLs to crawl.
 - Returns: `<CrawlResponse>`
-
-- Download Ollama's [JavaScript library](https://github.com/ollama/ollama-js)
-- [Sign up](https://ollama.com/signup) for an Ollama account
-- Create an API key by visiting https://ollama.com/settings/keys
 
 ### ps
 
