@@ -201,12 +201,11 @@ Requires an API key from `https://ollama.com/settings/keys` (set `OLLAMA_API_KEY
 
 `web_search({ query, max_results? })` → returns `{ results: [{ title, url, content }] }`
 
- 
 
 ```javascript
 import { Ollama } from 'ollama'
 
-const client = new Ollama({ headers: { Authorization: 'Bearer <api key>' } })
+const client = new Ollama({ headers: { Authorization: 'Bearer $OLLAMA_API_KEY"' } })
 await client.webSearch({ query: 'What is Ollama?' })
 ```
 
@@ -216,24 +215,12 @@ See `examples/websearch/websearch-tools.ts` for a tools example.
 
 `web_fetch({ url })` → returns `{ title, content, links }`
 
- 
-
 ```javascript
 import { Ollama } from 'ollama'
 
-const client = new Ollama({ headers: { Authorization: 'Bearer <api key>' } })
+const client = new Ollama({ headers: { Authorization: 'Bearer $OLLAMA_API_KEY"' } })
 await client.webFetch({ url: 'https://ollama.com' })
-```
-
-### web crawl
-
-```javascript
-ollama.webCrawl(request)
-```
-
-- `request` `<Object>`: The crawl request parameters.
-  - `urls` `<string[]>`: One or more URLs to crawl.
-- Returns: `<CrawlResponse>`
+````
 
 ### ps
 
