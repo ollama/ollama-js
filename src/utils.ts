@@ -162,42 +162,21 @@ const fetchWithHeaders = async (
   } as HeadersInit
 
   // Normalizes headers into a plain object format.
-  options.headers = normalizeHeaders(options.headers);
-  
-  // Filter custom headers for ollama.com and inject Authorization from environment (Node only)
-  try {
-    const isNode = isNodeRuntime()
+  options.headers = normalizeHeaders(options.headers)
 
-    let isOllamaCloud = false
-    try {
-      const hostname = new URL(url).hostname
-      isOllamaCloud = hostname === 'ollama.com' || hostname.endsWith('.ollama.com')
-    } catch {
-      isOllamaCloud = false
-    }
+  // Filter custom headers for ollama.com and inject Authorization from environment 
+  const hostname = new URL(url).hostname
+  if (hostname === 'ollama.com') {
+    // For ollama.com, only keep Authorization header
+    const authEntry = Object.entries(options.headers).find(([k]) => k.toLowerCase() === 'authorization')
+    options.headers = authEntry ? { [authEntry[0]]: authEntry[1] } : {}
 
-    if (isOllamaCloud) {
-      // For ollama.com endpoints, do not forward custom headers in browsers.
-      // In Node, only forward the Authorization header if provided.
-      if (!isNode) {
-        options.headers = {}
-      } else {
-        const authEntry = Object.entries(options.headers).find(([k]) => k.toLowerCase() === 'authorization')
-        options.headers = authEntry ? { [authEntry[0]]: authEntry[1] } : {}
-      }
-    }
-
-    // Inject Authorization from environment if not already provided (Node only) and only for ollama.com
-    const hasAuth = Object.keys(options.headers).some((k) => k.toLowerCase() === 'authorization')
-    let apiKey: string | undefined
-    if (isNode && typeof process.env === 'object') {
-      apiKey = (process.env as any)['OLLAMA_API_KEY']
-    }
-    if (!hasAuth && apiKey && isOllamaCloud) {
+    // Inject Authorization from environment if not already provided 
+    const hasAuth = authEntry !== undefined
+    const apiKey = typeof process !== 'undefined' && process.env?.OLLAMA_API_KEY
+    if (!hasAuth && apiKey) {
       options.headers['authorization'] = `Bearer ${apiKey}`
     }
-  } catch {
-    // ignore if environment access is not available (e.g., browser)
   }
 
   // Filter out default headers from custom headers
