@@ -352,27 +352,8 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
     if (!request.url || request.url.length === 0) {
       throw new Error('URL is required')
     }
-    // error handling for malformed inputs with URL parsing
     const endpoint = `https://ollama.com/api/web_fetch`
-    let url = request.url.trim()
-    if (!/^https?:\/\//i.test(url)) {
-      url = `https://${url}`
-    }
-    let parsed: URL | null = null
-    try {
-      parsed = new URL(url)
-    } catch (e) {
-      parsed = null
-    }
-    if (parsed) {
-      parsed.hash = ''
-      const hostSeg = `/${parsed.host}`
-      if (parsed.pathname.startsWith(hostSeg)) {
-        parsed.pathname = parsed.pathname.slice(hostSeg.length) || '/'
-      }
-      url = parsed.toString()
-    }
-    const response = await utils.post(this.fetch, endpoint, { ...request, url }, { headers: this.config.headers })
+    const response = await utils.post(this.fetch, endpoint, { ...request }, { headers: this.config.headers })
     return (await response.json()) as FetchResponse
   }
 }

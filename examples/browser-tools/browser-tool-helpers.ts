@@ -630,17 +630,6 @@ export class Browser {
     let page: Page | undefined
     const state = this.getState()
 
-    if (cursor >= 0) {
-      if (cursor >= state.pageStack.length) {
-        cursor = Math.max(0, state.pageStack.length - 1)
-      }
-      page = this.getPageFromStack(state.pageStack[cursor])
-    } else {
-      if (state.pageStack.length !== 0) {
-        const pageURL = state.pageStack[state.pageStack.length - 1]
-        page = this.getPageFromStack(pageURL)
-      }
-    }
 
     if (typeof args.id === 'string') {
       const url = args.id
@@ -652,7 +641,6 @@ export class Browser {
         return { state: this.getState(), pageText: capToolContent(pageText) }
       }
 
-      console.log('[browser_open] fetching URL:', url)
       const fetchResponse = await this.fetchClient.fetch({ url })
       const newPage = this.buildPageFromFetchResult(url, fetchResponse)
 
@@ -662,6 +650,18 @@ export class Browser {
       return { state: this.getState(), pageText: capToolContent(pageText) }
     }
 
+    if (cursor >= 0) {
+      if (cursor >= state.pageStack.length) {
+        cursor = Math.max(0, state.pageStack.length - 1)
+      }
+      page = this.getPageFromStack(state.pageStack[cursor])
+    } else {
+      if (state.pageStack.length !== 0) {
+        const pageURL = state.pageStack[state.pageStack.length - 1]
+        page = this.getPageFromStack(pageURL)
+      }
+    }
+    
     if (typeof args.id === 'number') {
       if (!page) {
         throw new Error('No current page to resolve link from')
@@ -704,7 +704,25 @@ export class Browser {
       let newPage = state.urlToPage[pageURL]
       if (!newPage) {
         console.log('[browser_open] fetching URL from link id:', pageURL)
-        const fetchResponse = await this.fetchClient.fetch({ url: pageURL })
+        let fetchResponse: FetchResponse
+        try {
+          fetchResponse = await this.fetchClient.fetch({ url: pageURL })
+        } catch (error) {
+          // Create an error page when fetch fails
+          const errorPage: Page = {
+            url: pageURL,
+            title: `Failed to fetch: ${pageURL}`,
+            text: `This tool result wasn't accessible. Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            lines: [`This tool result wasn't accessible. Error: ${error instanceof Error ? error.message : 'Unknown error'}`],
+            links: {},
+            fetchedAt: new Date(),
+          }
+          
+          this.savePage(errorPage)
+          cursor = this.getState().pageStack.length - 1
+          const pageText = this.displayPage(errorPage, cursor, 0, -1)
+          return { state: this.getState(), pageText: capToolContent(pageText) }
+        }
         newPage = this.buildPageFromFetchResult(pageURL, fetchResponse)
       }
 
