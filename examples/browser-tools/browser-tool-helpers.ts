@@ -79,9 +79,6 @@ export class BrowserState {
   }
 }
 
-/**
- * Base Browser class with shared functionality
- */
 export class Browser {
   public state: BrowserState
   private searchClient?: {
@@ -174,9 +171,7 @@ export class Browser {
     return Math.min(loc + numLines, totalLines)
   }
 
-  /**
-   * Creates a string with line numbers, matching Python's join_lines
-   */
+
   protected joinLinesWithNumbers(lines: string[]): string {
     let result = ''
     let hadZeroLine = false
@@ -469,7 +464,6 @@ export class Browser {
     requestedURL: string,
     fetchResponse: FetchResponse,
   ): Page {
-    // Initialize page with defaults
     const page: Page = {
       url: requestedURL,
       title: requestedURL,
@@ -717,7 +711,6 @@ export class Browser {
             links: {},
             fetchedAt: new Date(),
           }
-          
           this.savePage(errorPage)
           cursor = this.getState().pageStack.length - 1
           const pageText = this.displayPage(errorPage, cursor, 0, -1)

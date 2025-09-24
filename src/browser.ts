@@ -335,8 +335,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
     if (!request.query || request.query.length === 0) {
       throw new Error('Query is required')
     }
-    const endpoint = `https://ollama.com/api/web_search`
-    const response = await utils.post(this.fetch, endpoint, { ...request }, {
+    const response = await utils.post(this.fetch, `https://ollama.com/api/web_search`, { ...request }, {
       headers: this.config.headers
     })
     return (await response.json()) as SearchResponse
@@ -352,8 +351,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
     if (!request.url || request.url.length === 0) {
       throw new Error('URL is required')
     }
-    const endpoint = `https://ollama.com/api/web_fetch`
-    const response = await utils.post(this.fetch, endpoint, { ...request }, { headers: this.config.headers })
+    const response = await utils.post(this.fetch, `https://ollama.com/api/web_fetch`, { ...request }, { headers: this.config.headers })
     return (await response.json()) as FetchResponse
   }
 }

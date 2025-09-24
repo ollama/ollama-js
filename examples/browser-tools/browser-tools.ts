@@ -71,7 +71,6 @@ async function main() {
     },
   }
 
-  // Available tool functions
   const availableTools = {
     websearch: async (args: { query: string; topn?: number }) => {
       const result = await browser.search(args)
@@ -95,11 +94,11 @@ async function main() {
   const messages: Message[] = [
     {
       role: 'user',
-      content: 'What does Ollama do?',
+      content: 'what is ollama new engine?',
     },
   ]
 
-  console.log('----- Prompt:', messages.find((m) => m.role === 'user')?.content, '\n')
+  console.log('Prompt:', messages.find((m) => m.role === 'user')?.content, '\n')
 
   while (true) {
     const response = await client.chat({
@@ -143,15 +142,17 @@ async function main() {
         hadToolCalls = true
         for (const toolCall of chunk.message.tool_calls) {
           const functionToCall =
-            availableTools[toolCall.function.name as keyof typeof availableTools]
+            availableTools[toolCall.function.name]
           if (functionToCall) {
             const args = toolCall.function.arguments as any
             console.log('\nCalling function:', toolCall.function.name, 'with arguments:', args)
-            const output = await functionToCall(args)
-
-            // message history
+            let output
+            try {
+              output = await functionToCall(args)
+            } catch (error) {
+              output = { error: error instanceof Error ? error.message : 'Unknown error' }
+            }
             messages.push(chunk.message)
-            // tool result
             messages.push({
               role: 'tool',
               content: JSON.stringify(output),
