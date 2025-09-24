@@ -196,7 +196,8 @@ ollama.embed(request)
 - Returns: `<EmbedResponse>`
 
 ### web search
-
+- Web search capability requires an Ollama account. [Sign up on ollama.com](https://ollama.com/signup) 
+- Create an API key by visiting https://ollama.com/settings/keys
 ```javascript
 ollama.webSearch(request)
 ```
