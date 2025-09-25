@@ -1,6 +1,6 @@
 import ollama, { Ollama } from 'ollama'
 import type { Message } from 'ollama'
-import { Browser } from './browser-tool-helpers'
+import { Browser } from './gpt-oss-browser-tools-helpers'
 
 async function main() {
   if (!process.env.OLLAMA_API_KEY) {
