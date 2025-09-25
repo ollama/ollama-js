@@ -24,10 +24,10 @@ import type {
   ShowRequest,
   ShowResponse,
   StatusResponse,
-  SearchRequest,
-  SearchResponse,
-  FetchRequest,
-  FetchResponse,
+  WebSearchRequest,
+  WebSearchResponse,
+  WebFetchRequest,
+  WebFetchResponse,
 } from './interfaces.js'
 import { defaultHost } from './constant.js'
 
@@ -48,6 +48,8 @@ export class Ollama {
 
     this.fetch = config?.fetch ?? fetch
   }
+
+
 
   // Abort any ongoing streamed requests to Ollama
   public abort() {
@@ -327,32 +329,32 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
 
   /**
    * Performs web search using the Ollama web search API
-   * @param request {SearchRequest} - The search request containing query and options
-   * @returns {Promise<SearchResponse>} - The search results
+   * @param request {WebSearchRequest} - The search request containing query and options
+   * @returns {Promise<WebSearchResponse>} - The search results
    * @throws {Error} - If the request is invalid or the server returns an error
    */
-  async webSearch(request: SearchRequest): Promise<SearchResponse> {
+  async webSearch(request: WebSearchRequest): Promise<WebSearchResponse> {
     if (!request.query || request.query.length === 0) {
       throw new Error('Query is required')
     }
     const response = await utils.post(this.fetch, `https://ollama.com/api/web_search`, { ...request }, {
       headers: this.config.headers
     })
-    return (await response.json()) as SearchResponse
+    return (await response.json()) as WebSearchResponse
   }
 
   /**
    * Fetches a single page using the Ollama web fetch API
-   * @param request {FetchRequest} - The fetch request containing a URL
-   * @returns {Promise<FetchResponse>} - The fetch result
+   * @param request {WebFetchRequest} - The fetch request containing a URL
+   * @returns {Promise<WebFetchResponse>} - The fetch result
    * @throws {Error} - If the request is invalid or the server returns an error
    */
-  async webFetch(request: FetchRequest): Promise<FetchResponse> {
+  async webFetch(request: WebFetchRequest): Promise<WebFetchResponse> {
     if (!request.url || request.url.length === 0) {
       throw new Error('URL is required')
     }
     const response = await utils.post(this.fetch, `https://ollama.com/api/web_fetch`, { ...request }, { headers: this.config.headers })
-    return (await response.json()) as FetchResponse
+    return (await response.json()) as WebFetchResponse
   }
 }
 
