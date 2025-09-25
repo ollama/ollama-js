@@ -166,7 +166,7 @@ const fetchWithHeaders = async (
   options.headers = normalizeHeaders(options.headers)
 
   // Automatically add the API key to the headers if the URL is https://ollama.com
-  if (URL.canParse(url)) {
+  try {
     const parsed = new URL(url)
     if (parsed.protocol === 'https:' && parsed.hostname === 'ollama.com') {
       const apiKey =
@@ -182,6 +182,8 @@ const fetchWithHeaders = async (
         options.headers['Authorization'] = `Bearer ${apiKey}`
       }
     }
+  } catch (error) {
+    console.error('error parsing url', error)
   }
 
   const customHeaders = Object.fromEntries(
