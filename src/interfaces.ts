@@ -253,9 +253,9 @@ export interface ShowResponse {
   details: ModelDetails
   messages: Message[]
   modified_at: Date
-  model_info: Map<string, any>,
+  model_info: Record<string, any>,
   capabilities: string[],
-  projector_info?: Map<string, any>
+  projector_info?: Record<string, any>
 }
 
 export interface ListResponse {
