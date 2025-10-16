@@ -46,6 +46,73 @@ for await (const part of response) {
 }
 ```
 
+## Cloud Models
+
+Run larger models by offloading to Ollama’s cloud while keeping your local workflow.
+
+[You can see models currently available on Ollama's cloud here.](https://ollama.com/search?c=cloud)
+
+### Run via local Ollama
+
+1) Sign in (one-time):
+
+```
+ollama signin
+```
+
+2) Pull a cloud model:
+
+```
+ollama pull gpt-oss:120b-cloud
+```
+
+3) Use as usual (offloads automatically):
+
+```javascript
+import { Ollama } from 'ollama'
+
+const ollama = new Ollama()
+const response = await ollama.chat({
+  model: 'gpt-oss:120b-cloud',
+  messages: [{ role: 'user', content: 'Explain quantum computing' }],
+  stream: true,
+})
+for await (const part of response) {
+  process.stdout.write(part.message.content)
+}
+```
+
+### Cloud API (ollama.com)
+
+Access cloud models directly by pointing the client at `https://ollama.com`.
+
+1) Create an [API key](https://ollama.com/settings/keys), then set the `OLLAMA_API_KEY` environment variable:
+
+```
+export OLLAMA_API_KEY=your_api_key
+```
+
+2) Generate a response via the cloud API:
+
+```javascript
+import { Ollama } from 'ollama'
+
+const ollama = new Ollama({
+  host: 'https://ollama.com',
+  headers: { Authorization: 'Bearer ' + process.env.OLLAMA_API_KEY },
+})
+
+const response = await ollama.chat({
+  model: 'gpt-oss:120b',
+  messages: [{ role: 'user', content: 'Explain quantum computing' }],
+  stream: true,
+})
+
+for await (const part of response) {
+  process.stdout.write(part.message.content)
+}
+```
+
 ## API
 
 The Ollama JavaScript library's API is designed around the [Ollama REST API](https://github.com/jmorganca/ollama/blob/main/docs/api.md)
