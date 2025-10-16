@@ -92,13 +92,7 @@ Access cloud models directly by pointing the client at `https://ollama.com`.
 export OLLAMA_API_KEY=your_api_key
 ```
 
-2) (Optional) List models available via the API:
-
-```
-curl https://ollama.com/api/tags
-```
-
-3) Generate a response via the cloud API:
+2) Generate a response via the cloud API:
 
 ```javascript
 import { Ollama } from 'ollama'
