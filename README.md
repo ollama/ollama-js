@@ -86,7 +86,7 @@ for await (const part of response) {
 
 Access cloud models directly by pointing the client at `https://ollama.com`.
 
-1) Create an API key, then set:
+1) Create an [API key](https://ollama.com/settings/keys), then set the `OLLAMA_API_KEY` environment variable:
 
 ```
 export OLLAMA_API_KEY=your_api_key
