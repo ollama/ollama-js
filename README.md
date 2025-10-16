@@ -50,7 +50,7 @@ for await (const part of response) {
 
 Run larger models by offloading to Ollama’s cloud while keeping your local workflow.
 
-- Supported models: `deepseek-v3.1:671b-cloud`, `gpt-oss:20b-cloud`, `gpt-oss:120b-cloud`, `kimi-k2:1t-cloud`, `qwen3-coder:480b-cloud`
+[You can see models currently available on Ollama's cloud here.](https://ollama.com/search?c=cloud)
 
 ### Run via local Ollama
 
