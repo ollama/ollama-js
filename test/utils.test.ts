@@ -83,9 +83,6 @@ describe('get Function Header Tests', () => {
 
 describe('parseJSON UTF-8 multibyte character handling', () => {
   it('should correctly decode multibyte UTF-8 characters split across chunk boundaries', async () => {
-    // This test reproduces the bug where multibyte UTF-8 characters
-    // are corrupted when split across stream chunk boundaries.
-
     const encoder = new TextEncoder()
 
     // Create chunks where the 'ь' character (UTF-8: 0xD1 0x8C) is split
