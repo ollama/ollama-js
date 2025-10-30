@@ -311,7 +311,7 @@ export const parseJSON = async function* <T = unknown>(
       break
     }
 
-    buffer += decoder.decode(chunk)
+    buffer += decoder.decode(chunk, { stream: true })
 
     const parts = buffer.split('\n')
 
@@ -325,6 +325,9 @@ export const parseJSON = async function* <T = unknown>(
       }
     }
   }
+
+  // Flush any remaining bytes from incomplete multibyte sequences
+  buffer += decoder.decode()
 
   for (const part of buffer.split('\n').filter((p) => p !== '')) {
     try {

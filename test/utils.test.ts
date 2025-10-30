@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { get } from '../src/utils'
+import { get, parseJSON } from '../src/utils'
 
 describe('get Function Header Tests', () => {
   const mockFetch = vi.fn();
@@ -79,4 +79,32 @@ describe('get Function Header Tests', () => {
       headers: expect.objectContaining(defaultHeaders)
     });
   });
+});
+
+describe('parseJSON UTF-8 multibyte character handling', () => {
+  it('should correctly decode multibyte UTF-8 characters split across chunk boundaries', async () => {
+    // This test reproduces the bug where multibyte UTF-8 characters
+    // are corrupted when split across stream chunk boundaries.
+
+    const encoder = new TextEncoder()
+
+    // Create chunks where the 'ь' character (UTF-8: 0xD1 0x8C) is split
+    const chunks = [
+      new Uint8Array([...encoder.encode('{"text":"использоват'), 0xd1]),
+      new Uint8Array([0x8c, ...encoder.encode('"}\n')]),
+    ]
+
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        for (const chunk of chunks) {
+          controller.enqueue(chunk)
+        }
+        controller.close()
+      },
+    })
+
+    const itr = parseJSON<{ text: string }>(stream)
+    const { value } = await itr.next()
+    expect(value?.text).toBe('использовать')
+  })
 });
