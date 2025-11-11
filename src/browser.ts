@@ -328,6 +328,17 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
   }
 
   /**
+   * Returns the Ollama server version.
+   * @returns {Promise<{version: string}>} - The server version object.
+   */
+  async version(): Promise<{ version: string }> {
+    const response = await utils.get(this.fetch, `${this.config.host}/api/version`, {
+      headers: this.config.headers,
+    })
+    return (await response.json()) as { version: string }
+  }
+
+  /**
    * Performs web search using the Ollama web search API
    * @param request {WebSearchRequest} - The search request containing query and options
    * @returns {Promise<WebSearchResponse>} - The search results
