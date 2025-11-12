@@ -1,6 +1,6 @@
-import { Ollama } from 'ollama';
+import { Ollama, Logprob } from 'ollama';
 
-function printLogprobs(entries: Array<{ token: string; logprob: number; top_logprobs?: typeof entries }>, label: string) {
+function printLogprobs(entries: Logprob[], label: string) {
   console.log(`\n${label}:`)
   for (const entry of entries) {
     console.log(`  token=${entry.token.padEnd(12)} logprob=${entry.logprob.toFixed(3)}`)

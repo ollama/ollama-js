@@ -134,6 +134,8 @@ ollama.chat(request)
   - `format` `<string>`: (Optional) Set the expected format of the response (`json`).
   - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
   - `think` `<boolean | "high" | "medium" | "low">`: (Optional) Enable model thinking. Use `true`/`false` or specify a level. Requires model support.
+  - `logprobs` `<boolean>`: (Optional) Return log probabilities for tokens. Requires model support.
+  - `top_logprobs` `<number>`: (Optional) Number of top log probabilities to return per token when `logprobs` is enabled.
   - `keep_alive` `<string | number>`: (Optional) How long to keep the model loaded. A number (seconds) or a string with a duration unit suffix ("300ms", "1.5h", "2h45m", etc.)
   - `tools` `<Tool[]>`: (Optional) A list of tool calls the model may make.
   - `options` `<Options>`: (Optional) Options to configure the runtime.
@@ -157,6 +159,8 @@ ollama.generate(request)
   - `format` `<string>`: (Optional) Set the expected format of the response (`json`).
   - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
   - `think` `<boolean | "high" | "medium" | "low">`: (Optional) Enable model thinking. Use `true`/`false` or specify a level. Requires model support.
+  - `logprobs` `<boolean>`: (Optional) Return log probabilities for tokens. Requires model support.
+  - `top_logprobs` `<number>`: (Optional) Number of top log probabilities to return per token when `logprobs` is enabled.
   - `keep_alive` `<string | number>`: (Optional) How long to keep the model loaded. A number (seconds) or a string with a duration unit suffix ("300ms", "1.5h", "2h45m", etc.)
   - `options` `<Options>`: (Optional) Options to configure the runtime.
 - Returns: `<GenerateResponse>`
