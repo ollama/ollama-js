@@ -1,4 +1,4 @@
-import { Ollama } from '../../src/index'
+import { Ollama } from 'ollama';
 
 function printLogprobs(entries: Array<{ token: string; logprob: number; top_logprobs?: typeof entries }>, label: string) {
   console.log(`\n${label}:`)
