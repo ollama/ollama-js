@@ -57,6 +57,8 @@ export interface GenerateRequest {
   images?: Uint8Array[] | string[]
   keep_alive?: string | number // a number (seconds) or a string with a duration unit suffix ("300ms", "1.5h", "2h45m", etc)
   think?: boolean | 'high' | 'medium' | 'low'
+  logprobs?: boolean
+  top_logprobs?: number
 
   options?: Partial<Options>
 }
@@ -110,6 +112,8 @@ export interface ChatRequest {
   keep_alive?: string | number // a number (seconds) or a string with a duration unit suffix ("300ms", "1.5h", "2h45m", etc)
   tools?: Tool[]
   think?: boolean | 'high' | 'medium' | 'low'
+  logprobs?: boolean
+  top_logprobs?: number
 
   options?: Partial<Options>
 }
@@ -174,6 +178,14 @@ export interface EmbeddingsRequest {
 }
 
 // response types
+export interface TokenLogprob {
+  token: string
+  logprob: number
+}
+
+export interface Logprob extends TokenLogprob {
+  top_logprobs?: TokenLogprob[]
+}
 
 export interface GenerateResponse {
   model: string
@@ -189,6 +201,7 @@ export interface GenerateResponse {
   prompt_eval_duration: number
   eval_count: number
   eval_duration: number
+  logprobs?: Logprob[]
 }
 
 export interface ChatResponse {
@@ -203,6 +216,7 @@ export interface ChatResponse {
   prompt_eval_duration: number
   eval_count: number
   eval_duration: number
+  logprobs?: Logprob[]
 }
 
 export interface EmbedResponse {
