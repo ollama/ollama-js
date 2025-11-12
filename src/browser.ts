@@ -28,6 +28,7 @@ import type {
   WebSearchResponse,
   WebFetchRequest,
   WebFetchResponse,
+  VersionResponse,
 } from './interfaces.js'
 import { defaultHost } from './constant.js'
 
@@ -329,13 +330,13 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
 
   /**
    * Returns the Ollama server version.
-   * @returns {Promise<{version: string}>} - The server version object.
+   * @returns {Promise<VersionResponse>} - The server version object.
    */
-  async version(): Promise<{ version: string }> {
+  async version(): Promise<VersionResponse> {
     const response = await utils.get(this.fetch, `${this.config.host}/api/version`, {
       headers: this.config.headers,
     })
-    return (await response.json()) as { version: string }
+    return (await response.json()) as VersionResponse
   }
 
   /**
