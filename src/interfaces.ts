@@ -272,6 +272,10 @@ export interface ShowResponse {
   projector_info?: Map<string, any>
 }
 
+export interface VersionResponse {
+  version: string
+}
+
 export interface ListResponse {
   models: ModelResponse[]
 }

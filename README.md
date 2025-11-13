@@ -296,6 +296,14 @@ ollama.ps()
 
 - Returns: `<ListResponse>`
 
+### version
+
+```javascript
+ollama.version()
+```
+
+- Returns: `<VersionResponse>`
+
 ### abort
 
 ```javascript
