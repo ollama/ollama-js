@@ -30,6 +30,7 @@ export interface Options {
   num_predict: number
   top_k: number
   top_p: number
+  min_p: number
   tfs_z: number
   typical_p: number
   repeat_last_n: number
