@@ -128,29 +128,23 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
   return image;
 }
 
-  generate(
-    request: GenerateRequest & { stream: true },
-  ): Promise<AbortableAsyncIterator<GenerateResponse>>
-  generate(request: GenerateRequest & { stream?: false }): Promise<GenerateResponse>
   /**
    * Generates a response from a text prompt.
    * @param request {GenerateRequest} - The request object.
    * @returns {Promise<GenerateResponse | AbortableAsyncIterator<GenerateResponse>>} - The response object or
    * an AbortableAsyncIterator that yields response messages.
    */
-  async generate(
-    request: GenerateRequest,
-  ): Promise<GenerateResponse | AbortableAsyncIterator<GenerateResponse>> {
+  async generate<S extends boolean = false>(
+    request: GenerateRequest & { stream?: S },
+  ): Promise<S extends true ? AbortableAsyncIterator<GenerateResponse> : GenerateResponse> {
     if (request.images) {
       request.images = await Promise.all(request.images.map(this.encodeImage.bind(this)))
     }
-    return this.processStreamableRequest<GenerateResponse>('generate', request)
+    return this.processStreamableRequest<GenerateResponse>('generate', request) as Promise<
+      S extends true ? AbortableAsyncIterator<GenerateResponse> : GenerateResponse
+    >
   }
 
-  chat(
-    request: ChatRequest & { stream: true },
-  ): Promise<AbortableAsyncIterator<ChatResponse>>
-  chat(request: ChatRequest & { stream?: false }): Promise<ChatResponse>
   /**
    * Chats with the model. The request object can contain messages with images that are either
    * Uint8Arrays or base64 encoded strings. The images will be base64 encoded before sending the
@@ -159,9 +153,9 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @returns {Promise<ChatResponse | AbortableAsyncIterator<ChatResponse>>} - The response object or an
    * AbortableAsyncIterator that yields response messages.
    */
-  async chat(
-    request: ChatRequest,
-  ): Promise<ChatResponse | AbortableAsyncIterator<ChatResponse>> {
+  async chat<S extends boolean = false>(
+    request: ChatRequest & { stream?: S },
+  ): Promise<S extends true ? AbortableAsyncIterator<ChatResponse> : ChatResponse> {
     if (request.messages) {
       for (const message of request.messages) {
         if (message.images) {
@@ -171,30 +165,24 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
         }
       }
     }
-    return this.processStreamableRequest<ChatResponse>('chat', request)
+    return this.processStreamableRequest<ChatResponse>('chat', request) as Promise<
+      S extends true ? AbortableAsyncIterator<ChatResponse> : ChatResponse
+    >
   }
 
-  create(
-    request: CreateRequest & { stream: true },
-  ): Promise<AbortableAsyncIterator<ProgressResponse>>
-  create(request: CreateRequest & { stream?: false }): Promise<ProgressResponse>
   /**
    * Creates a new model from a stream of data.
    * @param request {CreateRequest} - The request object.
    * @returns {Promise<ProgressResponse | AbortableAsyncIterator<ProgressResponse>>} - The response object or a stream of progress responses.
    */
-  async create(
-    request: CreateRequest
-  ): Promise<ProgressResponse | AbortableAsyncIterator<ProgressResponse>> {
+  async create<S extends boolean = false>(
+    request: CreateRequest & { stream?: S },
+  ): Promise<S extends true ? AbortableAsyncIterator<ProgressResponse> : ProgressResponse> {
     return this.processStreamableRequest<ProgressResponse>('create', {
-      ...request
-    })
+      ...request,
+    }) as Promise<S extends true ? AbortableAsyncIterator<ProgressResponse> : ProgressResponse>
   }
 
-  pull(
-    request: PullRequest & { stream: true },
-  ): Promise<AbortableAsyncIterator<ProgressResponse>>
-  pull(request: PullRequest & { stream?: false }): Promise<ProgressResponse>
   /**
    * Pulls a model from the Ollama registry. The request object can contain a stream flag to indicate if the
    * response should be streamed.
@@ -202,20 +190,16 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @returns {Promise<ProgressResponse | AbortableAsyncIterator<ProgressResponse>>} - The response object or
    * an AbortableAsyncIterator that yields response messages.
    */
-  async pull(
-    request: PullRequest,
-  ): Promise<ProgressResponse | AbortableAsyncIterator<ProgressResponse>> {
+  async pull<S extends boolean = false>(
+    request: PullRequest & { stream?: S },
+  ): Promise<S extends true ? AbortableAsyncIterator<ProgressResponse> : ProgressResponse> {
     return this.processStreamableRequest<ProgressResponse>('pull', {
       name: request.model,
       stream: request.stream,
       insecure: request.insecure,
-    })
+    }) as Promise<S extends true ? AbortableAsyncIterator<ProgressResponse> : ProgressResponse>
   }
 
-  push(
-    request: PushRequest & { stream: true },
-  ): Promise<AbortableAsyncIterator<ProgressResponse>>
-  push(request: PushRequest & { stream?: false }): Promise<ProgressResponse>
   /**
    * Pushes a model to the Ollama registry. The request object can contain a stream flag to indicate if the
    * response should be streamed.
@@ -223,14 +207,14 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @returns {Promise<ProgressResponse | AbortableAsyncIterator<ProgressResponse>>} - The response object or
    * an AbortableAsyncIterator that yields response messages.
    */
-  async push(
-    request: PushRequest,
-  ): Promise<ProgressResponse | AbortableAsyncIterator<ProgressResponse>> {
+  async push<S extends boolean = false>(
+    request: PushRequest & { stream?: S },
+  ): Promise<S extends true ? AbortableAsyncIterator<ProgressResponse> : ProgressResponse> {
     return this.processStreamableRequest<ProgressResponse>('push', {
       name: request.model,
       stream: request.stream,
       insecure: request.insecure,
-    })
+    }) as Promise<S extends true ? AbortableAsyncIterator<ProgressResponse> : ProgressResponse>
   }
 
   /**

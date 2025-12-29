@@ -40,25 +40,16 @@ export class Ollama extends OllamaBrowser {
     }
   }
 
-  create(
-    request: CreateRequest & { stream: true },
-  ): Promise<AbortableAsyncIterator<ProgressResponse>>
-  create(request: CreateRequest & { stream?: false }): Promise<ProgressResponse>
-
-  async create(
-    request: CreateRequest,
-  ): Promise<ProgressResponse | AbortableAsyncIterator<ProgressResponse>> {
+  async create<S extends boolean = false>(
+    request: CreateRequest & { stream?: S },
+  ): Promise<S extends true ? AbortableAsyncIterator<ProgressResponse> : ProgressResponse> {
     // fail if request.from is a local path
     // TODO: https://github.com/ollama/ollama-js/issues/191
     if (request.from && await this.fileExists(resolve(request.from))) {
       throw Error('Creating with a local path is not currently supported from ollama-js')
     }
 
-    if (request.stream) {
-      return super.create(request as CreateRequest & { stream: true })
-    } else {
-      return super.create(request as CreateRequest & { stream: false })
-    }
+    return super.create(request)
   }
 }
 
