@@ -1,6 +1,15 @@
 import { describe, it, expect, vi } from 'vitest'
 import { Ollama } from '../src/browser'
 import type { ChatResponse, GenerateResponse } from '../src/interfaces'
+import type { AbortableAsyncIterator } from '../src/browser'
+
+describe('AbortableAsyncIterator type export', () => {
+  it('should be importable from browser module', () => {
+    const typeCheck = (_: AbortableAsyncIterator<ChatResponse> | null) => {}
+    typeCheck(null)
+    expect(true).toBe(true)
+  })
+})
 
 describe('Ollama logprob request fields', () => {
   it('forwards logprob settings in generate requests', async () => {
