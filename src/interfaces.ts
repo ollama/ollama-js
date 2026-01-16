@@ -142,6 +142,14 @@ export interface CreateRequest {
   parameters?: Record<string, unknown>
   messages?: Message[]
   adapters?: Record<string, string>
+  // `modelfile` and `files` are used for creating models from local files https://github.com/ollama/ollama-js/issues/191
+  modelfile?: string
+  files?: CreateRequestFile[]
+}
+
+export interface CreateRequestFile {
+  filepath: string
+  sha256?: string
 }
 
 export interface DeleteRequest {
