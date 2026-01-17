@@ -60,7 +60,10 @@ export class Ollama extends OllamaBrowser {
     // Handle local file uploads
     // API compatibility: ollama version 0.14.1
     // todo: need to test compatibility for other ollama versions as well
-    if (request.files && request.files.length > 0) {
+    if (request.files !== undefined) {
+      if (request.files.length < 1) {
+        throw new Error('At least one file must be specified when using file upload')
+      }
       return this.createFromFiles(request)
     }
 
