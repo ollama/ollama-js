@@ -61,6 +61,11 @@ export interface GenerateRequest {
   logprobs?: boolean
   top_logprobs?: number
 
+  // Experimental image generation parameters
+  width?: number
+  height?: number
+  steps?: number
+
   options?: Partial<Options>
 }
 
@@ -191,7 +196,7 @@ export interface Logprob extends TokenLogprob {
 export interface GenerateResponse {
   model: string
   created_at: Date
-  response: string
+  response?: string
   thinking?: string
   done: boolean
   done_reason: string
@@ -203,6 +208,11 @@ export interface GenerateResponse {
   eval_count: number
   eval_duration: number
   logprobs?: Logprob[]
+
+  // Image generation response fields
+  image?: string // Base64-encoded generated image data
+  completed?: number // Number of completed steps (for streaming progress)
+  total?: number // Total number of steps (for streaming progress)
 }
 
 export interface ChatResponse {
