@@ -56,3 +56,89 @@ describe('Ollama logprob request fields', () => {
     )
   })
 })
+
+describe('Ollama image generation request fields', () => {
+  it('forwards image generation parameters in generate requests', async () => {
+    const client = new Ollama()
+    const spy = vi
+      .spyOn(client as any, 'processStreamableRequest')
+      .mockResolvedValue({} as GenerateResponse)
+
+    await client.generate({
+      model: 'dummy-image',
+      prompt: 'a sunset over mountains',
+      width: 1024,
+      height: 768,
+      steps: 20,
+    })
+
+    expect(spy).toHaveBeenCalledWith(
+      'generate',
+      expect.objectContaining({
+        model: 'dummy-image',
+        prompt: 'a sunset over mountains',
+        width: 1024,
+        height: 768,
+        steps: 20,
+      }),
+    )
+  })
+
+  it('handles image generation response with image field', async () => {
+    const mockResponse: GenerateResponse = {
+      model: 'dummy-image',
+      created_at: new Date(),
+      done: true,
+      done_reason: 'stop',
+      context: [],
+      total_duration: 1000,
+      load_duration: 100,
+      prompt_eval_count: 10,
+      prompt_eval_duration: 50,
+      eval_count: 0,
+      eval_duration: 0,
+      image: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+    }
+
+    const client = new Ollama()
+    vi.spyOn(client as any, 'processStreamableRequest').mockResolvedValue(mockResponse)
+
+    const response = await client.generate({
+      model: 'dummy-image',
+      prompt: 'a sunset',
+    })
+
+    expect(response.image).toBeDefined()
+    expect(response.done).toBe(true)
+  })
+
+  it('handles streaming progress fields for image generation', async () => {
+    const mockResponse: GenerateResponse = {
+      model: 'dummy-image',
+      created_at: new Date(),
+      done: false,
+      done_reason: '',
+      context: [],
+      total_duration: 0,
+      load_duration: 0,
+      prompt_eval_count: 0,
+      prompt_eval_duration: 0,
+      eval_count: 0,
+      eval_duration: 0,
+      completed: 5,
+      total: 20,
+    }
+
+    const client = new Ollama()
+    vi.spyOn(client as any, 'processStreamableRequest').mockResolvedValue(mockResponse)
+
+    const response = await client.generate({
+      model: 'dummy-image',
+      prompt: 'a sunset',
+    })
+
+    expect(response.completed).toBe(5)
+    expect(response.total).toBe(20)
+    expect(response.done).toBe(false)
+  })
+})

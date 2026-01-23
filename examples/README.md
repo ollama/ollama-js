@@ -8,3 +8,10 @@ To run the examples run:
 ```sh
 npx tsx <folder-name>/<file-name>.ts
 ```
+
+### Image Generation (Experimental)
+
+> **Note:** Image generation is experimental and currently only available on macOS.
+
+- [image-generation/image-generation.ts](image-generation/image-generation.ts)
+- [image-generation/image-generation-stream.ts](image-generation/image-generation-stream.ts) - Streamed progress
