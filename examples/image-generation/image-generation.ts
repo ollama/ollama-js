@@ -10,15 +10,20 @@ async function main() {
   const response = await ollama.generate({
     model: 'x/z-image-turbo',
     prompt,
-    width: 1024,
-    height: 768,
+    stream: true,
   })
 
-  // Save the generated image
-  const imageBuffer = Buffer.from(response.image!, 'base64')
-  writeFileSync('output.png', imageBuffer)
-
-  console.log('Image saved to output.png')
+  for await (const part of response) {
+    if (part.image) {
+      // Final response contains the image
+      const imageBuffer = Buffer.from(part.image, 'base64')
+      writeFileSync('output.png', imageBuffer)
+      console.log('\nImage saved to output.png')
+    } else if (part.total) {
+      // Progress update
+      process.stdout.write(`\rProgress: ${part.completed}/${part.total}`)
+    }
+  }
 }
 
 main().catch(console.error)
