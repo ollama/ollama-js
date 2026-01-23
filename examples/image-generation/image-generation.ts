@@ -21,7 +21,7 @@ async function main() {
       console.log('\nImage saved to output.png')
     } else if (part.total) {
       // Progress update
-      process.stdout.write(`\rProgress: ${part.completed}/${part.total}`)
+      process.stdout.write(`\rProgress: ${part.completed ?? 0}/${part.total}`)
     }
   }
 }
