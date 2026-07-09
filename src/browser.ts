@@ -9,6 +9,7 @@ import type {
   CopyRequest,
   CreateRequest,
   DeleteRequest,
+  StopRequest,
   EmbedRequest,
   EmbedResponse,
   EmbeddingsRequest,
@@ -326,6 +327,23 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
       headers: this.config.headers
     })
     return (await response.json()) as ListResponse
+  }
+
+  /**
+   * Stops a running model, unloading it from memory. Mirrors the `ollama stop`
+   * CLI command, which unloads a model by making a generate request with
+   * keep_alive set to 0.
+   * @param request {StopRequest} - The request object containing the model name.
+   * @returns {Promise<StatusResponse>} - The response object.
+   */
+  async stop(request: StopRequest): Promise<StatusResponse> {
+    await utils.post(this.fetch, `${this.config.host}/api/generate`, {
+      model: request.model,
+      keep_alive: 0,
+    }, {
+      headers: this.config.headers
+    })
+    return { status: 'success' }
   }
 
   /**
