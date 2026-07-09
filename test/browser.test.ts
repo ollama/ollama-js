@@ -142,3 +142,25 @@ describe('Ollama image generation request fields', () => {
     expect(response.done).toBe(false)
   })
 })
+
+describe('Ollama stop', () => {
+  it('unloads a model via /api/generate with keep_alive 0', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ model: 'llama3', done: true, done_reason: 'unload' }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
+    const client = new Ollama({ fetch: fetchMock as any })
+
+    const response = await client.stop({ model: 'llama3' })
+
+    expect(response).toEqual({ status: 'success' })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+
+    const [url, init] = fetchMock.mock.calls[0]
+    expect(url).toContain('/api/generate')
+    expect(init?.method).toBe('POST')
+    expect(JSON.parse(init?.body as string)).toEqual({ model: 'llama3', keep_alive: 0 })
+  })
+})
