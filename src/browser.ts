@@ -66,6 +66,8 @@ export class Ollama {
    * object.
    * @param endpoint {string} - The endpoint to send the request to.
    * @param request {object} - The request object to send to the endpoint.
+   * @param signal {AbortSignal} - An optional external signal that aborts the request immediately,
+   * without waiting for the ongoing request cleanup that `this.abort()` goes through.
    * @protected {T | AbortableAsyncIterator<T>} - The response object or a AbortableAsyncIterator that yields
    * response messages.
    * @throws {Error} - If the response body is missing or if the response is an error.
@@ -74,11 +76,19 @@ export class Ollama {
   protected async processStreamableRequest<T extends object>(
     endpoint: string,
     request: { stream?: boolean } & Record<string, any>,
+    signal?: AbortSignal,
   ): Promise<T | AbortableAsyncIterator<T>> {
     request.stream = request.stream ?? false
     const host = `${this.config.host}/api/${endpoint}`
     if (request.stream) {
       const abortController = new AbortController()
+      if (signal) {
+        if (signal.aborted) {
+          abortController.abort()
+        } else {
+          signal.addEventListener('abort', () => abortController.abort(), { once: true })
+        }
+      }
       const response = await utils.post(this.fetch, host, request, {
         signal: abortController.signal,
         headers: this.config.headers
@@ -103,6 +113,7 @@ export class Ollama {
       return abortableAsyncIterator
     }
     const response = await utils.post(this.fetch, host, request, {
+      signal,
       headers: this.config.headers
     })
     return await response.json()
@@ -130,37 +141,53 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
 
   generate(
     request: GenerateRequest & { stream: true },
+    options?: { signal?: AbortSignal },
   ): Promise<AbortableAsyncIterator<GenerateResponse>>
-  generate(request: GenerateRequest & { stream?: false }): Promise<GenerateResponse>
+  generate(
+    request: GenerateRequest & { stream?: false },
+    options?: { signal?: AbortSignal },
+  ): Promise<GenerateResponse>
   /**
    * Generates a response from a text prompt.
    * @param request {GenerateRequest} - The request object.
+   * @param options {object} - Optional. An object with an `AbortSignal` that, when aborted, cancels
+   * this specific request immediately, independently of any other ongoing requests.
    * @returns {Promise<GenerateResponse | AbortableAsyncIterator<GenerateResponse>>} - The response object or
    * an AbortableAsyncIterator that yields response messages.
    */
   async generate(
     request: GenerateRequest,
+    options?: { signal?: AbortSignal },
   ): Promise<GenerateResponse | AbortableAsyncIterator<GenerateResponse>> {
     if (request.images) {
       request.images = await Promise.all(request.images.map(this.encodeImage.bind(this)))
     }
-    return this.processStreamableRequest<GenerateResponse>('generate', request)
+    return options?.signal
+      ? this.processStreamableRequest<GenerateResponse>('generate', request, options.signal)
+      : this.processStreamableRequest<GenerateResponse>('generate', request)
   }
 
   chat(
     request: ChatRequest & { stream: true },
+    options?: { signal?: AbortSignal },
   ): Promise<AbortableAsyncIterator<ChatResponse>>
-  chat(request: ChatRequest & { stream?: false }): Promise<ChatResponse>
+  chat(
+    request: ChatRequest & { stream?: false },
+    options?: { signal?: AbortSignal },
+  ): Promise<ChatResponse>
   /**
    * Chats with the model. The request object can contain messages with images that are either
    * Uint8Arrays or base64 encoded strings. The images will be base64 encoded before sending the
    * request.
    * @param request {ChatRequest} - The request object.
+   * @param options {object} - Optional. An object with an `AbortSignal` that, when aborted, cancels
+   * this specific request immediately, independently of any other ongoing requests.
    * @returns {Promise<ChatResponse | AbortableAsyncIterator<ChatResponse>>} - The response object or an
    * AbortableAsyncIterator that yields response messages.
    */
   async chat(
     request: ChatRequest,
+    options?: { signal?: AbortSignal },
   ): Promise<ChatResponse | AbortableAsyncIterator<ChatResponse>> {
     if (request.messages) {
       for (const message of request.messages) {
@@ -171,7 +198,9 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
         }
       }
     }
-    return this.processStreamableRequest<ChatResponse>('chat', request)
+    return options?.signal
+      ? this.processStreamableRequest<ChatResponse>('chat', request, options.signal)
+      : this.processStreamableRequest<ChatResponse>('chat', request)
   }
 
   create(
