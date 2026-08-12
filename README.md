@@ -336,7 +336,7 @@ const response = await ollama.chat({
 })
 ```
 
-> **Tip:** Apps that use the OpenAI JS client can point `baseURL` at any OpenAI-compatible multi-model gateway when you are not self-hosting Ollama — for example [DaoXE](https://daoxe.com/?utm_source=github&utm_medium=organic&utm_campaign=ollama-js&utm_content=custom_client) at `https://api.daoxe.com/v1`.
+> **Tip:** Apps that use the OpenAI JS client can point `baseURL` at any OpenAI-compatible multi-model gateway when you are not self-hosting Ollama — for example [DaoXE](https://daoxe.com/) at `https://api.daoxe.com/v1`.
 
 ## Custom Headers
 
