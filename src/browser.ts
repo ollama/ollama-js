@@ -134,6 +134,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
   generate(request: GenerateRequest & { stream?: false }): Promise<GenerateResponse>
   /**
    * Generates a response from a text prompt.
+   * Omit `prompt` (or pass an empty string) to load the model into memory without generating.
    * @param request {GenerateRequest} - The request object.
    * @returns {Promise<GenerateResponse | AbortableAsyncIterator<GenerateResponse>>} - The response object or
    * an AbortableAsyncIterator that yields response messages.
