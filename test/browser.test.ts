@@ -142,3 +142,29 @@ describe('Ollama image generation request fields', () => {
     expect(response.done).toBe(false)
   })
 })
+
+describe('Ollama draft_num_predict option', () => {
+  it('forwards draft_num_predict in generate options', async () => {
+    const client = new Ollama()
+    const spy = vi
+      .spyOn(client as any, 'processStreamableRequest')
+      .mockResolvedValue({} as GenerateResponse)
+
+    await client.generate({
+      model: 'dummy',
+      prompt: 'Hello',
+      options: {
+        draft_num_predict: 10,
+      },
+    })
+
+    expect(spy).toHaveBeenCalledWith(
+      'generate',
+      expect.objectContaining({
+        options: {
+          draft_num_predict: 10,
+        },
+      }),
+    )
+  })
+})
