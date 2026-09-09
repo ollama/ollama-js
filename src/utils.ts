@@ -304,38 +304,41 @@ export const parseJSON = async function* <T = unknown>(
 
   const reader = itr.getReader()
 
-  while (true) {
-    const { done, value: chunk } = await reader.read()
+  try {
+    while (true) {
+      const { done, value: chunk } = await reader.read()
 
-    if (done) {
-      reader.releaseLock()
-      break
+      if (done) {
+        break
+      }
+
+      buffer += decoder.decode(chunk, { stream: true })
+
+      const parts = buffer.split('\n')
+
+      buffer = parts.pop() ?? ''
+
+      for (const part of parts) {
+        try {
+          yield JSON.parse(part)
+        } catch (error) {
+          console.warn('invalid json: ', part)
+        }
+      }
     }
 
-    buffer += decoder.decode(chunk, { stream: true })
+    // Flush any remaining bytes from incomplete multibyte sequences
+    buffer += decoder.decode()
 
-    const parts = buffer.split('\n')
-
-    buffer = parts.pop() ?? ''
-
-    for (const part of parts) {
+    for (const part of buffer.split('\n').filter((p) => p !== '')) {
       try {
         yield JSON.parse(part)
       } catch (error) {
         console.warn('invalid json: ', part)
       }
     }
-  }
-
-  // Flush any remaining bytes from incomplete multibyte sequences
-  buffer += decoder.decode()
-
-  for (const part of buffer.split('\n').filter((p) => p !== '')) {
-    try {
-      yield JSON.parse(part)
-    } catch (error) {
-      console.warn('invalid json: ', part)
-    }
+  } finally {
+    reader.releaseLock()
   }
 }
 /**

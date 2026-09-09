@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { get, parseJSON } from '../src/utils'
+import { AbortableAsyncIterator, get, parseJSON } from '../src/utils'
 
 describe('get Function Header Tests', () => {
   const mockFetch = vi.fn();
@@ -105,3 +105,71 @@ describe('parseJSON UTF-8 multibyte character handling', () => {
     expect(value?.text).toBe('использовать')
   })
 });
+
+describe('parseJSON reader cleanup', () => {
+  function createStream(messages: object[]) {
+    return new ReadableStream<Uint8Array>({
+      start(controller) {
+        for (const message of messages) {
+          controller.enqueue(new TextEncoder().encode(JSON.stringify(message) + '\n'))
+        }
+        controller.close()
+      },
+    })
+  }
+
+  it('releases the reader after reaching EOF', async () => {
+    const body = createStream([{ text: 'hello' }])
+    const messages = []
+    for await (const message of parseJSON(body)) {
+      messages.push(message)
+    }
+    expect(messages).toEqual([{ text: 'hello' }])
+    expect(body.locked).toBe(false)
+  })
+
+  it('releases the reader when the consumer breaks early', async () => {
+    const body = createStream([{ text: 'hello' }, { text: 'world' }])
+    for await (const message of parseJSON(body)) {
+      expect(message).toEqual({ text: 'hello' })
+      break
+    }
+    expect(body.locked).toBe(false)
+  })
+
+  it('releases the reader and preserves a read error', async () => {
+    const error = new Error('stream failed')
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.error(error)
+      },
+    })
+    await expect(parseJSON(body).next()).rejects.toBe(error)
+    expect(body.locked).toBe(false)
+  })
+
+  it.each([{ done: true }, { status: 'success' }])(
+    'releases the reader when the response iterator receives %j',
+    async (message) => {
+      const body = createStream([message])
+      const response = new AbortableAsyncIterator(
+        new AbortController(), parseJSON<object>(body), vi.fn(),
+      )
+      const messages = []
+      for await (const part of response) {
+        messages.push(part)
+      }
+      expect(messages).toEqual([message])
+      expect(body.locked).toBe(false)
+    },
+  )
+
+  it('releases the reader when the response iterator throws a server error', async () => {
+    const body = createStream([{ error: 'model failed' }])
+    const response = new AbortableAsyncIterator(
+      new AbortController(), parseJSON<object>(body), vi.fn(),
+    )
+    await expect(response[Symbol.asyncIterator]().next()).rejects.toThrow('model failed')
+    expect(body.locked).toBe(false)
+  })
+})
