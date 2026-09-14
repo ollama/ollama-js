@@ -142,3 +142,121 @@ describe('Ollama image generation request fields', () => {
     expect(response.done).toBe(false)
   })
 })
+
+function streamResponse(
+  lines: string[],
+  { neverClose = false }: { neverClose?: boolean } = {},
+) {
+  const encoder = new TextEncoder()
+  return (_url: string, options?: RequestInit) => {
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        for (const line of lines) {
+          controller.enqueue(encoder.encode(line + '\n'))
+        }
+        if (!neverClose) {
+          controller.close()
+        }
+        // behave like fetch: an aborted request signal errors the body
+        options?.signal?.addEventListener('abort', () =>
+          controller.error(
+            new DOMException('The operation was aborted.', 'AbortError'),
+          ),
+        )
+      },
+    })
+    return Promise.resolve(new Response(body, { status: 200 }))
+  }
+}
+
+const streamingChatChunk =
+  '{"model":"m","created_at":"t","message":{"role":"assistant","content":"hi"},"done":false}'
+
+describe('Ollama ongoing streamed request tracking', () => {
+  it('removes the stream from ongoingStreamedRequests after abort', async () => {
+    const mockFetch = vi
+      .fn()
+      .mockImplementation(
+        streamResponse([streamingChatChunk], { neverClose: true }),
+      )
+    const client = new Ollama({ fetch: mockFetch as any })
+
+    const itr = await client.chat({ model: 'm', messages: [], stream: true })
+    const iterator = itr[Symbol.asyncIterator]()
+    await iterator.next()
+
+    itr.abort()
+    await expect(iterator.next()).rejects.toThrow()
+
+    expect((client as any).ongoingStreamedRequests).toHaveLength(0)
+  })
+
+  it('removes the stream when the server sends an error chunk', async () => {
+    const mockFetch = vi
+      .fn()
+      .mockImplementation(streamResponse(['{"error":"boom"}']))
+    const client = new Ollama({ fetch: mockFetch as any })
+
+    const itr = await client.chat({ model: 'm', messages: [], stream: true })
+    await expect(async () => {
+      for await (const _ of itr) {
+        // consume
+      }
+    }).rejects.toThrow('boom')
+
+    expect((client as any).ongoingStreamedRequests).toHaveLength(0)
+  })
+
+  it('removes the stream when it ends without a done message', async () => {
+    const mockFetch = vi
+      .fn()
+      .mockImplementation(streamResponse([streamingChatChunk]))
+    const client = new Ollama({ fetch: mockFetch as any })
+
+    const itr = await client.chat({ model: 'm', messages: [], stream: true })
+    await expect(async () => {
+      for await (const _ of itr) {
+        // consume
+      }
+    }).rejects.toThrow('Did not receive done or success response in stream.')
+
+    expect((client as any).ongoingStreamedRequests).toHaveLength(0)
+  })
+
+  it('removes the stream after a successful done response', async () => {
+    const mockFetch = vi.fn().mockImplementation(
+      streamResponse([
+        streamingChatChunk,
+        '{"model":"m","created_at":"t","message":{"role":"assistant","content":"bye"},"done":true}',
+      ]),
+    )
+    const client = new Ollama({ fetch: mockFetch as any })
+
+    const itr = await client.chat({ model: 'm', messages: [], stream: true })
+    for await (const _ of itr) {
+      // consume
+    }
+
+    expect((client as any).ongoingStreamedRequests).toHaveLength(0)
+  })
+
+  it('keeps tracking a stream the consumer stopped iterating so abort() can still cancel it', async () => {
+    const mockFetch = vi
+      .fn()
+      .mockImplementation(
+        streamResponse([streamingChatChunk], { neverClose: true }),
+      )
+    const client = new Ollama({ fetch: mockFetch as any })
+
+    const itr = await client.chat({ model: 'm', messages: [], stream: true })
+    for await (const _ of itr) {
+      break
+    }
+
+    // the request is still in-flight; it must stay registered so that
+    // Ollama#abort() can still cancel it
+    expect((client as any).ongoingStreamedRequests).toHaveLength(1)
+    client.abort()
+    expect((client as any).ongoingStreamedRequests).toHaveLength(0)
+  })
+})
