@@ -43,19 +43,28 @@ export class AbortableAsyncIterator<T extends object> {
   }
 
   async *[Symbol.asyncIterator]() {
-    for await (const message of this.itr) {
-      if ('error' in message) {
-        throw new Error(message.error)
+    try {
+      for await (const message of this.itr) {
+        if ('error' in message) {
+          throw new Error(message.error)
+        }
+        yield message
+        // message will be done in the case of chat and generate
+        // message will be success in the case of a progress response (pull, push, create)
+        if ((message as any).done || (message as any).status === 'success') {
+          this.doneCallback()
+          return
+        }
       }
-      yield message
-      // message will be done in the case of chat and generate
-      // message will be success in the case of a progress response (pull, push, create)
-      if ((message as any).done || (message as any).status === 'success') {
-        this.doneCallback()
-        return
-      }
+      throw new Error('Did not receive done or success response in stream.')
+    } catch (error) {
+      // the stream terminated in a failed state (aborted, server error chunk,
+      // or ended without a done/success message): cancel the in-flight request
+      // and deregister it so dead streams are not tracked as ongoing requests
+      this.abortController.abort()
+      this.doneCallback()
+      throw error
     }
-    throw new Error('Did not receive done or success response in stream.')
   }
 }
 
