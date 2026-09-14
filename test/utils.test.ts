@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { get, parseJSON } from '../src/utils'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { get, post, parseJSON } from '../src/utils'
 
 describe('get Function Header Tests', () => {
   const mockFetch = vi.fn();
@@ -105,3 +105,54 @@ describe('parseJSON UTF-8 multibyte character handling', () => {
     expect(value?.text).toBe('использовать')
   })
 });
+
+describe('ollama.com API key injection', () => {
+  const apiUrl = 'https://ollama.com/api/web_search'
+
+  beforeEach(() => {
+    vi.stubEnv('OLLAMA_API_KEY', 'env-key')
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  it('adds the OLLAMA_API_KEY bearer token when no authorization header is set', async () => {
+    const mockFetch = vi.fn().mockResolvedValue(new Response('{}', { status: 200 }))
+
+    await post(mockFetch, apiUrl, { query: 'x' })
+
+    const headers = mockFetch.mock.calls[0][1].headers as Record<string, string>
+    expect(headers['Authorization']).toBe('Bearer env-key')
+  })
+
+  it('does not add a second authorization header when one is provided with different casing', async () => {
+    const mockFetch = vi.fn().mockResolvedValue(new Response('{}', { status: 200 }))
+
+    await post(mockFetch, apiUrl, { query: 'x' }, {
+      headers: { AUTHORIZATION: 'Bearer custom-token' },
+    })
+
+    const headers = mockFetch.mock.calls[0][1].headers as Record<string, string>
+    const authKeys = Object.keys(headers).filter(
+      key => key.toLowerCase() === 'authorization',
+    )
+    expect(authKeys).toHaveLength(1)
+    expect(headers[authKeys[0]]).toBe('Bearer custom-token')
+  })
+
+  it('respects a user provided authorization header', async () => {
+    const mockFetch = vi.fn().mockResolvedValue(new Response('{}', { status: 200 }))
+
+    await post(mockFetch, apiUrl, { query: 'x' }, {
+      headers: { Authorization: 'Bearer custom-token' },
+    })
+
+    const headers = mockFetch.mock.calls[0][1].headers as Record<string, string>
+    const authKeys = Object.keys(headers).filter(
+      key => key.toLowerCase() === 'authorization',
+    )
+    expect(authKeys).toHaveLength(1)
+    expect(headers[authKeys[0]]).toBe('Bearer custom-token')
+  })
+})
