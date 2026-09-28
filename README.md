@@ -318,6 +318,48 @@ If there is a need to manage streams with timeouts, it is recommended to have on
 
 All asynchronous threads listening to streams (typically the `for await (const part of response)`) will throw an `AbortError` exception. See [examples/abort/abort-all-requests.ts](examples/abort/abort-all-requests.ts) for an example.
 
+### systemone
+
+```typescript
+import ollama from 'ollama'
+
+const response = await ollama.systemone({
+  model: 'nimble',
+  state: 'Our checkout has returned 500 errors since 9am.',
+  questions: {
+    team: {
+      type: 'choice',
+      instructions: 'Which team should handle this ticket?',
+      criteria: { billing: 'Payments and refunds', technical: 'Software errors' },
+    },
+  },
+})
+console.log(response.answers.team)
+```
+
+System One requires an Ollama server build that implements `POST /v1/systemone`
+and a compatible local model such as `nimble`. It returns one JSON response;
+streaming and cloud models are not supported.
+
+`state` and question `instructions` accept text, JSON objects, or arrays. Questions
+are evaluated in their supplied order:
+
+- `choice`: 2–26 option keys mapped to descriptions; `null` uses the key as its description.
+- `noul`: probability of true, with optional `{"false": "No", "true": "Yes"}` descriptions.
+- `score`: 2–26 descriptions ordered lowest to highest; returns a potentially fractional, zero-based score.
+
+Responses contain `model`, `answers`, and `usage.input_tokens` / `usage.output_tokens`.
+Confidence measures probability concentration, not calibrated correctness.
+Token usage comes from the server; output tokens are not necessarily zero.
+Optional `keep_alive` accepts seconds or a duration string. Requests use the client's
+existing host, headers, and HTTP error handling. The server validates its body and
+model context limits without truncating input.
+
+Available on the default client and `new Ollama()` from both `ollama` and
+`ollama/browser`. Both entry points export `SystemOneRequest`, `SystemOneResponse`,
+and the question/answer types. Browser requests follow the server's normal CORS rules.
+See [the combined question example](examples/systemone.mjs).
+
 ## Custom client
 
 A custom client can be created with the following fields:
