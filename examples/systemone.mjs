@@ -2,7 +2,7 @@ import { Ollama } from 'ollama'
 
 const ollama = new Ollama({ host: process.env.OLLAMA_HOST })
 
-// Requires a System One-enabled server and the local nimble model.
+// Requires Ollama v0.35.0 or later and the local nimble model.
 const response = await ollama.systemone({
   "model": "nimble",
   "state": {
