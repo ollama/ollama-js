@@ -24,6 +24,8 @@ import type {
   ShowRequest,
   ShowResponse,
   StatusResponse,
+  SystemOneRequest,
+  SystemOneResponse,
   WebSearchRequest,
   WebSearchResponse,
   WebFetchRequest,
@@ -301,6 +303,16 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
       })
       return (await response.json()) as EmbedResponse
     }
+
+  /** Score choice, noul, and score questions. Returns JSON without streaming. */
+  async systemone(request: SystemOneRequest): Promise<SystemOneResponse> {
+    const response = await utils.post(this.fetch, `${this.config.host}/v1/systemone`, {
+      ...request,
+    }, {
+      headers: this.config.headers
+    })
+    return (await response.json()) as SystemOneResponse
+  }
 
   /**
    * Embeds a text prompt into a vector.

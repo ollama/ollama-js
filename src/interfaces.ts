@@ -323,3 +323,70 @@ export interface WebFetchResponse {
   content: string
   links: string[]
 }
+
+/** Text or structured JSON rendered as text by System One. */
+export type SystemOneContent = string | Record<string, unknown> | unknown[]
+
+export interface SystemOneChoiceQuestion {
+  type: 'choice'
+  instructions: SystemOneContent
+  /** Ordered choices; null uses the choice key as its description. */
+  criteria: Record<string, string | null>
+}
+
+export interface SystemOneNoulQuestion {
+  type: 'noul'
+  instructions: SystemOneContent
+  criteria?: { false?: string; true?: string }
+}
+
+export interface SystemOneScoreQuestion {
+  type: 'score'
+  instructions: SystemOneContent
+  /** Descriptions ordered from lowest to highest score. */
+  criteria: string[]
+}
+
+export type SystemOneQuestion = SystemOneChoiceQuestion | SystemOneNoulQuestion | SystemOneScoreQuestion
+
+export interface SystemOneRequest {
+  model: string
+  state: SystemOneContent
+  questions: Record<string, SystemOneQuestion>
+  keep_alive?: string | number
+}
+
+export interface SystemOneNoulAnswer {
+  type: 'noul'
+  /** Probability of true. */
+  noul: number
+}
+
+export interface SystemOneChoiceAnswer {
+  type: 'choice'
+  choice: string
+  probabilities: Record<string, number>
+  confidence: number
+}
+
+export interface SystemOneScoreAnswer {
+  type: 'score'
+  /** Expected zero-based score, which may be fractional. */
+  score: number
+  legend: Record<string, string>
+  probabilities: Record<string, number>
+  confidence: number
+}
+
+export type SystemOneAnswer = SystemOneNoulAnswer | SystemOneChoiceAnswer | SystemOneScoreAnswer
+
+export interface SystemOneUsage {
+  input_tokens: number
+  output_tokens: number
+}
+
+export interface SystemOneResponse {
+  model: string
+  answers: Record<string, SystemOneAnswer>
+  usage: SystemOneUsage
+}
