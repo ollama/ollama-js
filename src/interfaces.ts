@@ -10,19 +10,27 @@ export interface Config {
 // request types
 
 export interface Options {
+  /** @deprecated No longer supported; removed from requests with a warning. */
   numa: boolean
   num_ctx: number
   num_batch: number
   num_gpu: number
   main_gpu: number
+  /** @deprecated No longer supported; removed from requests with a warning. */
   low_vram: boolean
+  /** @deprecated No longer supported; removed from requests with a warning. */
   f16_kv: boolean
+  /** @deprecated No longer supported; removed from requests with a warning. */
   logits_all: boolean
+  /** @deprecated No longer supported; removed from requests with a warning. */
   vocab_only: boolean
   use_mmap: boolean
+  /** @deprecated No longer supported; removed from requests with a warning. */
   use_mlock: boolean
+  /** @deprecated No longer supported; removed from requests with a warning. */
   embedding_only: boolean
   num_thread: number
+  draft_num_predict: number
 
   // Runtime options
   num_keep: number
@@ -31,16 +39,22 @@ export interface Options {
   top_k: number
   top_p: number
   min_p: number
+  /** @deprecated No longer supported; removed from requests with a warning. */
   tfs_z: number
+  /** @deprecated No longer supported; removed from requests with a warning. */
   typical_p: number
   repeat_last_n: number
   temperature: number
   repeat_penalty: number
   presence_penalty: number
   frequency_penalty: number
+  /** @deprecated No longer supported; removed from requests with a warning. */
   mirostat: number
+  /** @deprecated No longer supported; removed from requests with a warning. */
   mirostat_tau: number
+  /** @deprecated No longer supported; removed from requests with a warning. */
   mirostat_eta: number
+  /** @deprecated No longer supported; removed from requests with a warning. */
   penalize_newline: boolean
   stop: string[]
 }

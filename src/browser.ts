@@ -34,6 +34,48 @@ import type {
 } from './interfaces.js'
 import { defaultHost } from './constant.js'
 
+// Warn on no longer supported options
+const UNSUPPORTED_OPTIONS = new Set([
+  'embedding_only',
+  'f16_kv',
+  'logits_all',
+  'low_vram',
+  'mirostat',
+  'mirostat_eta',
+  'mirostat_tau',
+  'numa',
+  'penalize_newline',
+  'tfs_z',
+  'typical_p',
+  'use_mlock',
+  'vocab_only',
+])
+
+function withoutUnsupportedOptions(
+  options: Record<string, unknown>,
+): Record<string, unknown> {
+  const kept: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(options)) {
+    if (UNSUPPORTED_OPTIONS.has(key)) {
+      console.warn(`option '${key}' is no longer supported and was ignored`)
+    } else {
+      kept[key] = value
+    }
+  }
+  return kept
+}
+
+function stripUnsupportedOptions<T extends Record<string, unknown>>(request: T): T {
+  const target = request as Record<string, unknown>
+  for (const field of ['options', 'parameters']) {
+    const values = target[field]
+    if (values && typeof values === 'object' && !Array.isArray(values)) {
+      target[field] = withoutUnsupportedOptions(values as Record<string, unknown>)
+    }
+  }
+  return request
+}
+
 export class Ollama {
   protected readonly config: Config
   protected readonly fetch: Fetch
@@ -78,6 +120,7 @@ export class Ollama {
     request: { stream?: boolean } & Record<string, any>,
   ): Promise<T | AbortableAsyncIterator<T>> {
     request.stream = request.stream ?? false
+    stripUnsupportedOptions(request)
     const host = `${this.config.host}/api/${endpoint}`
     if (request.stream) {
       const abortController = new AbortController()
@@ -296,9 +339,9 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @returns {Promise<EmbedResponse>} - The response object.
    */
     async embed(request: EmbedRequest): Promise<EmbedResponse> {
-      const response = await utils.post(this.fetch, `${this.config.host}/api/embed`, {
+      const response = await utils.post(this.fetch, `${this.config.host}/api/embed`, stripUnsupportedOptions({
         ...request,
-      }, {
+      }), {
         headers: this.config.headers
       })
       return (await response.json()) as EmbedResponse
@@ -320,9 +363,9 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
    * @returns {Promise<EmbeddingsResponse>} - The response object.
    */
   async embeddings(request: EmbeddingsRequest): Promise<EmbeddingsResponse> {
-    const response = await utils.post(this.fetch, `${this.config.host}/api/embeddings`, {
+    const response = await utils.post(this.fetch, `${this.config.host}/api/embeddings`, stripUnsupportedOptions({
       ...request,
-    }, {
+    }), {
       headers: this.config.headers
     })
     return (await response.json()) as EmbeddingsResponse
