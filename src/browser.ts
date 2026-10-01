@@ -361,7 +361,16 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
     if (!request.query || request.query.length === 0) {
       throw new Error('Query is required')
     }
-    const response = await utils.post(this.fetch, `https://ollama.com/api/web_search`, { ...request }, {
+
+    // Transform maxResults (camelCase) to max_results (snake_case) for API compatibility
+    const apiRequest: Record<string, unknown> = {
+      query: request.query,
+    }
+    if (request.maxResults !== undefined) {
+      apiRequest.max_results = request.maxResults
+    }
+
+    const response = await utils.post(this.fetch, `https://ollama.com/api/web_search`, apiRequest, {
       headers: this.config.headers
     })
     return (await response.json()) as WebSearchResponse
