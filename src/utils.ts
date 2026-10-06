@@ -356,7 +356,12 @@ export const formatHost = (host: string): string => {
     isExplicitProtocol = true
   }
 
+  let hasExplicitPort = false
   if (!isExplicitProtocol) {
+    // `URL.port` is empty for a protocol's default port (e.g. 80 for http), so it can't tell
+    // "no port given" apart from "host:80". Check the original input for an explicit port.
+    const authority = host.split(/[/?#]/, 1)[0]
+    hasExplicitPort = /:\d+$/.test(authority.slice(authority.lastIndexOf('@') + 1))
     host = `http://${host}`
   }
 
@@ -364,7 +369,7 @@ export const formatHost = (host: string): string => {
 
   let port = url.port
   if (!port) {
-    if (!isExplicitProtocol) {
+    if (!isExplicitProtocol && !hasExplicitPort) {
       port = defaultPort
     } else {
       // Assign default ports based on the protocol
