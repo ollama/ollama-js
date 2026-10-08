@@ -56,7 +56,8 @@ export class Ollama {
 
   // Abort any ongoing streamed requests to Ollama
   public abort() {
-    for (const request of this.ongoingStreamedRequests) {
+    // Aborting a request removes it from the list, so iterate over a snapshot.
+    for (const request of this.ongoingStreamedRequests.slice()) {
       request.abort()
     }
     this.ongoingStreamedRequests.length = 0
