@@ -390,10 +390,12 @@ const ollama = new Ollama({
   headers: {
     Authorization: 'Bearer <api key>',
     'X-Custom-Header': 'custom-value',
-    'User-Agent': 'MyApp/1.0',
   },
 })
 ```
+
+`Content-Type`, `Accept`, and `User-Agent` are set by the library and cannot be
+overridden through `headers`, regardless of header name casing.
 
 ## Building
 
