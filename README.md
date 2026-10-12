@@ -299,6 +299,16 @@ ollama.ps()
 
 - Returns: `<ListResponse>`
 
+### stop
+
+```javascript
+ollama.stop(request)
+```
+
+- `request` `<Object>`: The request object containing stop parameters.
+  - `model` `<string>` The name of the running model to stop and unload from memory.
+- Returns: `<StatusResponse>`
+
 ### version
 
 ```javascript
