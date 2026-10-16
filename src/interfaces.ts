@@ -352,6 +352,8 @@ export type SystemOneQuestion = SystemOneChoiceQuestion | SystemOneNoulQuestion 
 export interface SystemOneRequest {
   model: string
   state: SystemOneContent
+  /** Images shared by all questions; PNG, JPEG, or WebP. */
+  images?: Uint8Array[] | string[]
   questions: Record<string, SystemOneQuestion>
   keep_alive?: string | number
 }

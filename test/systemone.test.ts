@@ -41,6 +41,17 @@ describe.each([['node', NodeOllama], ['browser', BrowserOllama]] as const)('%s s
     expect(request).not.toHaveProperty('stream')
   })
 
+  it('base64 encodes images without changing the request', async () => {
+    const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify(result)))
+    const client = new Client({ fetch })
+    const withImages = { ...request, images: [new Uint8Array([137, 80, 78, 71]), 'aGVsbG8='] }
+    await client.systemone(withImages)
+    const body = JSON.parse(fetch.mock.calls[0][1].body)
+    expect(body.images).toEqual(['iVBORw==', 'aGVsbG8='])
+    expect(body.questions).toEqual(request.questions)
+    expect(withImages.images[0]).toBeInstanceOf(Uint8Array)
+  })
+
   it.each([400, 404, 413, 503])('preserves HTTP %s errors', async (status) => {
     const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({ error: 'synthetic server error' }), { status, headers: { 'Content-Type': 'application/json' } }))
     const client = new Client({ fetch })
