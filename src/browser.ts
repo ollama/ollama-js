@@ -304,10 +304,18 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
       return (await response.json()) as EmbedResponse
     }
 
-  /** Score choice, noul, and score questions. Returns JSON without streaming. */
+  /**
+   * Score choice, noul, and score questions. Images, shared by all questions, are base64 encoded
+   * before sending; only models that accept images (such as Clef) support them. Returns JSON
+   * without streaming.
+   */
   async systemone(request: SystemOneRequest): Promise<SystemOneResponse> {
+    const images = request.images?.length
+      ? await Promise.all(request.images.map(this.encodeImage.bind(this)))
+      : undefined
     const response = await utils.post(this.fetch, `${this.config.host}/v1/systemone`, {
       ...request,
+      images,
     }, {
       headers: this.config.headers
     })
