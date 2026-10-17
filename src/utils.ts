@@ -27,6 +27,7 @@ export class AbortableAsyncIterator<T extends object> {
   private readonly abortController: AbortController
   private readonly itr: AsyncGenerator<T | ErrorResponse>
   private readonly doneCallback: () => void
+  private finished = false
 
   constructor(
     abortController: AbortController,
@@ -40,22 +41,36 @@ export class AbortableAsyncIterator<T extends object> {
 
   abort() {
     this.abortController.abort()
+    this.finish()
+  }
+
+  private finish() {
+    if (!this.finished) {
+      this.finished = true
+      this.doneCallback()
+    }
   }
 
   async *[Symbol.asyncIterator]() {
-    for await (const message of this.itr) {
-      if ('error' in message) {
-        throw new Error(message.error)
+    try {
+      for await (const message of this.itr) {
+        if ('error' in message) {
+          throw new Error(message.error)
+        }
+        yield message
+        // message will be done in the case of chat and generate
+        // message will be success in the case of a progress response (pull, push, create)
+        if ((message as any).done || (message as any).status === 'success') {
+          this.finish()
+          return
+        }
       }
-      yield message
-      // message will be done in the case of chat and generate
-      // message will be success in the case of a progress response (pull, push, create)
-      if ((message as any).done || (message as any).status === 'success') {
-        this.doneCallback()
-        return
-      }
+      throw new Error('Did not receive done or success response in stream.')
+    } catch (error) {
+      // Keep early consumer breaks registered so client.abort() can still cancel them.
+      this.abort()
+      throw error
     }
-    throw new Error('Did not receive done or success response in stream.')
   }
 }
 
