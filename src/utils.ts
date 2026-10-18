@@ -165,25 +165,23 @@ const fetchWithHeaders = async (
   // Normalizes headers into a plain object format.
   options.headers = normalizeHeaders(options.headers)
 
-  // Automatically add the API key to the headers if the URL is https://ollama.com
-  try {
-    const parsed = new URL(url)
-    if (parsed.protocol === 'https:' && parsed.hostname === 'ollama.com') {
-      const apiKey =
-        typeof process === 'object' &&
-        process !== null &&
-        typeof process.env === 'object' &&
-        process.env !== null
-          ? readEnvVar(process.env, 'OLLAMA_API_KEY')
-          : undefined
-      const authorization =
-        options.headers['authorization'] || options.headers['Authorization']
-      if (!authorization && apiKey) {
-        options.headers['Authorization'] = `Bearer ${apiKey}`
-      }
+  // Automatically add the API key to the headers if the URL is https://ollama.com.
+  // Relative URLs (browser proxy mode) are resolved against a placeholder, so they
+  // parse without a host of their own and never match ollama.com.
+  const parsed = new URL(url, 'http://localhost')
+  if (parsed.protocol === 'https:' && parsed.hostname === 'ollama.com') {
+    const apiKey =
+      typeof process === 'object' &&
+      process !== null &&
+      typeof process.env === 'object' &&
+      process.env !== null
+        ? readEnvVar(process.env, 'OLLAMA_API_KEY')
+        : undefined
+    const authorization =
+      options.headers['authorization'] || options.headers['Authorization']
+    if (!authorization && apiKey) {
+      options.headers['Authorization'] = `Bearer ${apiKey}`
     }
-  } catch (error) {
-    console.error('error parsing url', error)
   }
 
   const customHeaders = Object.fromEntries(
