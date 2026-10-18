@@ -374,8 +374,13 @@ See [the combined question example](examples/systemone.mjs).
 A custom client can be created with the following fields:
 
 - `host` `<string>`: (Optional) The Ollama host address. Default: `"http://127.0.0.1:11434"`.
+- `proxy` `<boolean>`: (Optional) Use relative request URLs, such as `/api/chat`, for a browser app's same-origin reverse proxy. Default: `false`. When `true`, `host` is ignored.
 - `fetch` `<Object>`: (Optional) The fetch library used to make requests to the Ollama host.
 - `headers` `<Object>`: (Optional) Custom headers to include with every request.
+
+The `proxy` flag does not configure an HTTP forward proxy or proxy agent. For
+that, supply a compatible custom `fetch` implementation. `webSearch` and
+`webFetch` still use `https://ollama.com`, regardless of `host` or `proxy`.
 
 ```javascript
 import { Ollama } from 'ollama'
