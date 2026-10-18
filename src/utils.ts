@@ -176,9 +176,12 @@ const fetchWithHeaders = async (
         process.env !== null
           ? readEnvVar(process.env, 'OLLAMA_API_KEY')
           : undefined
-      const authorization =
-        options.headers['authorization'] || options.headers['Authorization']
-      if (!authorization && apiKey) {
+      // HTTP header names are case-insensitive: only inject the env key when the
+      // caller did not already provide an Authorization header in any casing.
+      const hasAuthorization = Object.keys(options.headers).some(
+        (key) => key.toLowerCase() === 'authorization',
+      )
+      if (!hasAuthorization && apiKey) {
         options.headers['Authorization'] = `Bearer ${apiKey}`
       }
     }

@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { get, parseJSON } from '../src/utils'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { get, post, parseJSON } from '../src/utils'
 
 describe('get Function Header Tests', () => {
   const mockFetch = vi.fn();
@@ -105,3 +105,64 @@ describe('parseJSON UTF-8 multibyte character handling', () => {
     expect(value?.text).toBe('использовать')
   })
 });
+
+describe('ollama.com API key injection (issue #296)', () => {
+  const apiUrl = 'https://ollama.com/api/web_search'
+
+  beforeEach(() => {
+    vi.stubEnv('OLLAMA_API_KEY', 'env-key')
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  it('injects the OLLAMA_API_KEY bearer token when no authorization header is set', async () => {
+    const mockFetch = vi.fn().mockResolvedValue(new Response('{}', { status: 200 }))
+
+    await post(mockFetch, apiUrl, { query: 'x' })
+
+    const headers = mockFetch.mock.calls[0][1].headers as Record<string, string>
+    expect(headers['Authorization']).toBe('Bearer env-key')
+  })
+
+  it('does not inject when the caller provided an authorization header with non-standard casing', async () => {
+    for (const casing of ['AUTHORIZATION', 'aUtHoRiZaTiOn', 'AuThOrIzAtIoN']) {
+      const mockFetch = vi.fn().mockResolvedValue(new Response('{}', { status: 200 }))
+
+      await post(mockFetch, apiUrl, { query: 'x' }, {
+        headers: { [casing]: 'Bearer user-key' },
+      })
+
+      const headers = mockFetch.mock.calls[0][1].headers as Record<string, string>
+      const authKeys = Object.keys(headers).filter((key) => key.toLowerCase() === 'authorization')
+      expect(authKeys).toHaveLength(1)
+      expect(headers[authKeys[0]]).toBe('Bearer user-key')
+    }
+  })
+
+  it('respects a caller provided authorization header with standard or lowercase casing', async () => {
+    for (const casing of ['Authorization', 'authorization']) {
+      const mockFetch = vi.fn().mockResolvedValue(new Response('{}', { status: 200 }))
+
+      await post(mockFetch, apiUrl, { query: 'x' }, {
+        headers: { [casing]: 'Bearer user-key' },
+      })
+
+      const headers = mockFetch.mock.calls[0][1].headers as Record<string, string>
+      const authKeys = Object.keys(headers).filter((key) => key.toLowerCase() === 'authorization')
+      expect(authKeys).toHaveLength(1)
+      expect(headers[authKeys[0]]).toBe('Bearer user-key')
+    }
+  })
+
+  it('does not inject the env key for non-ollama.com hosts', async () => {
+    const mockFetch = vi.fn().mockResolvedValue(new Response('{}', { status: 200 }))
+
+    await post(mockFetch, 'http://localhost:11434/api/generate', { model: 'x' })
+
+    const headers = mockFetch.mock.calls[0][1].headers as Record<string, string>
+    const authKeys = Object.keys(headers).filter((key) => key.toLowerCase() === 'authorization')
+    expect(authKeys).toHaveLength(0)
+  })
+})
