@@ -23,6 +23,7 @@ export interface Options {
   use_mlock: boolean
   embedding_only: boolean
   num_thread: number
+  draft_num_predict: number
 
   // Runtime options
   num_keep: number
