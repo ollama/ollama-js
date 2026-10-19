@@ -153,6 +153,10 @@ export interface DeleteRequest {
   model: string
 }
 
+export interface StopRequest {
+  model: string
+}
+
 export interface CopyRequest {
   source: string
   destination: string
