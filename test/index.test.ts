@@ -91,4 +91,39 @@ describe('formatHost Function Tests', () => {
   it('should preserve basic auth and remove trailing slash', () => {
     expect(formatHost('http://john:doe@site.com:3000/')).toBe('http://john:doe@site.com:3000')
   })
+
+  // Explicit port 80 (the default port for http, which `new URL` reports as an empty port)
+  it('should preserve an explicit port 80 without a protocol', () => {
+    expect(formatHost('myhost:80')).toBe('http://myhost:80')
+  })
+
+  it('should preserve an explicit port 80 on localhost without a protocol', () => {
+    expect(formatHost('localhost:80')).toBe('http://localhost:80')
+  })
+
+  it('should preserve an explicit port 80 on an IPv6 host without a protocol', () => {
+    expect(formatHost('[::1]:80')).toBe('http://[::1]:80')
+  })
+
+  it('should preserve an explicit port 80 with basic auth and no protocol', () => {
+    expect(formatHost('user:pw@h:80')).toBe('http://user:pw@h:80')
+  })
+
+  it('should preserve an explicit port 80 with a trailing slash and no protocol', () => {
+    expect(formatHost('myhost:80/')).toBe('http://myhost:80')
+  })
+
+  it('should still apply the default port when no port is given', () => {
+    expect(formatHost('myhost')).toBe('http://myhost:11434')
+    expect(formatHost('[::1]')).toBe('http://[::1]:11434')
+    expect(formatHost('user:pw@h')).toBe('http://user:pw@h:11434')
+  })
+
+  it('should keep an explicit port 443 without a protocol', () => {
+    expect(formatHost('myhost:443')).toBe('http://myhost:443')
+  })
+
+  it('should keep an explicit port 80 with an http protocol', () => {
+    expect(formatHost('http://myhost:80')).toBe('http://myhost:80')
+  })
 })
