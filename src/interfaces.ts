@@ -47,7 +47,8 @@ export interface Options {
 
 export interface GenerateRequest {
   model: string
-  prompt: string
+  // Optional: omit or pass an empty string to load the model into memory without generating
+  prompt?: string
   suffix?: string
   system?: string
   template?: string
