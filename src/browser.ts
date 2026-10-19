@@ -18,6 +18,7 @@ import type {
   GenerateRequest,
   GenerateResponse,
   ListResponse,
+  Message,
   ProgressResponse,
   PullRequest,
   PushRequest,
@@ -143,8 +144,12 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
   async generate(
     request: GenerateRequest,
   ): Promise<GenerateResponse | AbortableAsyncIterator<GenerateResponse>> {
-    if (request.images) {
-      request.images = await Promise.all(request.images.map(this.encodeImage.bind(this)))
+    // copy so the caller's request is not modified; images and stream are read from
+    // the original so inherited values are still sent as before
+    const images = request.images
+    request = { ...request, stream: request.stream }
+    if (images) {
+      request.images = await Promise.all(images.map(this.encodeImage.bind(this)))
     }
     return this.processStreamableRequest<GenerateResponse>('generate', request)
   }
@@ -164,14 +169,24 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
   async chat(
     request: ChatRequest,
   ): Promise<ChatResponse | AbortableAsyncIterator<ChatResponse>> {
+    // copy so the caller's request and messages are not modified; stream is read from
+    // the original so an inherited value is still sent as before
+    request = { ...request, stream: request.stream }
     if (request.messages) {
+      const messages: Message[] = []
       for (const message of request.messages) {
         if (message.images) {
-          message.images = await Promise.all(
-            message.images.map(this.encodeImage.bind(this)),
-          )
+          messages.push({
+            ...message,
+            images: await Promise.all(
+              message.images.map(this.encodeImage.bind(this)),
+            ),
+          })
+        } else {
+          messages.push(message)
         }
       }
+      request.messages = messages
     }
     return this.processStreamableRequest<ChatResponse>('chat', request)
   }
