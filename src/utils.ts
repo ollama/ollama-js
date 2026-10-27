@@ -128,12 +128,28 @@ function normalizeHeaders(headers?: HeadersInit | undefined): Record<string, str
     // If headers are an instance of Headers, convert it to an object
     const obj: Record<string, string> = {}
     headers.forEach((value, key) => {
-      obj[key] = value
+      obj[key] = headers.get(key) ?? value
     })
     return obj
   } else if (Array.isArray(headers)) {
     // If headers are in array format, convert them to an object
-    return Object.fromEntries(headers)
+    const groups = new Map<string, [string, string][]>()
+    for (const entry of headers) {
+      const name = entry[0].toLowerCase()
+      const group = groups.get(name)
+      if (group) {
+        group.push(entry)
+      } else {
+        groups.set(name, [entry])
+      }
+    }
+    return Object.fromEntries(
+      Array.from(groups, ([name, entries]) =>
+        entries.length === 1
+          ? entries[0]
+          : [name, new Headers(entries).get(name) ?? ''],
+      ),
+    )
   } else {
     // Otherwise assume it's already a plain object
     return headers || {}
