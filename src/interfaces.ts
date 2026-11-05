@@ -187,6 +187,7 @@ export interface EmbeddingsRequest {
 export interface TokenLogprob {
   token: string
   logprob: number
+  bytes?: number[]
 }
 
 export interface Logprob extends TokenLogprob {
