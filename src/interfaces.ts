@@ -260,6 +260,11 @@ export interface ModelResponse {
   size_vram: number
 }
 
+export interface ProcessorUsage {
+  cpu: number
+  gpu: number
+}
+
 export interface ModelDetails {
   parent_model: string
   format: string

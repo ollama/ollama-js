@@ -68,3 +68,5 @@ export default new Ollama()
 export * from './interfaces.js'
 
 export type { AbortableAsyncIterator }
+
+export { getProcessorUsage } from './utils.js'

@@ -1,5 +1,5 @@
 import { defaultHost, defaultPort } from './constant.js'
-import type { ErrorResponse, Fetch } from './interfaces.js'
+import type { ErrorResponse, Fetch, ModelResponse, ProcessorUsage } from './interfaces.js'
 import { version } from './version.js'
 
 /**
@@ -389,4 +389,31 @@ export const formatHost = (host: string): string => {
   }
 
   return formattedHost
+}
+
+/**
+ * Computes how a running model is split between CPU and GPU memory, the same way
+ * the `PROCESSOR` column of `ollama ps` does.
+ * @param model {Pick<ModelResponse, 'size' | 'size_vram'>} - A model from `ollama.ps()`
+ * @returns {ProcessorUsage | undefined} - Whole percentages of the model held in CPU and GPU
+ * memory (they add up to 100), or undefined when the split can't be determined
+ */
+export const getProcessorUsage = (
+  model: Pick<ModelResponse, 'size' | 'size_vram'>,
+): ProcessorUsage | undefined => {
+  const { size, size_vram } = model
+  if (typeof size !== 'number' || typeof size_vram !== 'number') {
+    return undefined
+  }
+  if (size_vram === 0) {
+    return { cpu: 100, gpu: 0 }
+  }
+  if (size_vram === size) {
+    return { cpu: 0, gpu: 100 }
+  }
+  if (size_vram > size || size <= 0) {
+    return undefined
+  }
+  const cpu = Math.round(((size - size_vram) / size) * 100)
+  return { cpu, gpu: 100 - cpu }
 }
