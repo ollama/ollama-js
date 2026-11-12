@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { get, parseJSON } from '../src/utils'
+import { get, getProcessorUsage, parseJSON } from '../src/utils'
+import { getProcessorUsage as browserGetProcessorUsage } from '../src/browser'
+import { getProcessorUsage as nodeGetProcessorUsage } from '../src/index'
 
 describe('get Function Header Tests', () => {
   const mockFetch = vi.fn();
@@ -105,3 +107,40 @@ describe('parseJSON UTF-8 multibyte character handling', () => {
     expect(value?.text).toBe('использовать')
   })
 });
+
+describe('getProcessorUsage', () => {
+  it('reports 100% CPU when nothing is in VRAM', () => {
+    expect(getProcessorUsage({ size: 1000, size_vram: 0 })).toEqual({ cpu: 100, gpu: 0 })
+  })
+
+  it('reports 100% GPU when the whole model is in VRAM', () => {
+    expect(getProcessorUsage({ size: 1000, size_vram: 1000 })).toEqual({ cpu: 0, gpu: 100 })
+  })
+
+  it('splits a partially offloaded model like ollama ps', () => {
+    expect(getProcessorUsage({ size: 1000, size_vram: 520 })).toEqual({ cpu: 48, gpu: 52 })
+  })
+
+  it('rounds the CPU share and keeps the total at 100', () => {
+    expect(getProcessorUsage({ size: 3, size_vram: 1 })).toEqual({ cpu: 67, gpu: 33 })
+    expect(getProcessorUsage({ size: 200, size_vram: 101 })).toEqual({ cpu: 50, gpu: 50 })
+  })
+
+  it('returns undefined when VRAM exceeds the model size', () => {
+    expect(getProcessorUsage({ size: 1000, size_vram: 1001 })).toBeUndefined()
+  })
+
+  it('returns undefined when the model size is zero but VRAM is not', () => {
+    expect(getProcessorUsage({ size: 0, size_vram: 10 })).toBeUndefined()
+  })
+
+  it('returns undefined when size_vram is missing, as in list() results', () => {
+    const model = { size: 1000 } as { size: number; size_vram: number }
+    expect(getProcessorUsage(model)).toBeUndefined()
+  })
+
+  it('is exported from the node and browser entry points', () => {
+    expect(nodeGetProcessorUsage).toBe(getProcessorUsage)
+    expect(browserGetProcessorUsage).toBe(getProcessorUsage)
+  })
+})

@@ -299,6 +299,19 @@ ollama.ps()
 
 - Returns: `<ListResponse>`
 
+To see how much of each running model is on the CPU and the GPU, as in the `PROCESSOR` column of `ollama ps`, pass it to `getProcessorUsage`:
+
+```javascript
+import ollama, { getProcessorUsage } from 'ollama'
+
+const { models } = await ollama.ps()
+for (const model of models) {
+  console.log(model.name, getProcessorUsage(model)) // e.g. { cpu: 48, gpu: 52 }
+}
+```
+
+- Returns: `<ProcessorUsage | undefined>` with whole percentages `cpu` and `gpu` that add up to 100, or `undefined` when the split can't be determined.
+
 ### version
 
 ```javascript
