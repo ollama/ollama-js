@@ -212,7 +212,7 @@ ollama.create(request)
   - `model` `<string>` The name of the model to create.
   - `from` `<string>`: The base model to derive from.
   - `stream` `<boolean>`: (Optional) Enable streaming. Defaults to `false`.
-  - `quantize` `<string>`: Quanization precision level (`q8_0`, `q4_K_M`, etc.).
+  - `quantize` `<string>`: Quantization precision level (`q8_0`, `q4_K_M`, etc.).
   - `template` `<string>`: (Optional) The prompt template to use with the model.
   - `license` `<string|string[]>`: (Optional) The license(s) associated with the model.
   - `system` `<string>`: (Optional) The system prompt for the model.
