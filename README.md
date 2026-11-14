@@ -30,7 +30,9 @@ import ollama from 'ollama/browser'
 
 ## Streaming responses
 
-Response streaming can be enabled by setting `stream: true`, modifying function calls to return an `AsyncGenerator` where each part is an object in the stream.
+Response streaming can be enabled by setting `stream: true`. Await the function call to get an
+`AbortableAsyncIterator`, then use `for await...of` to read each response object. When `stream` is
+`false` or omitted, the promise resolves to a single response object instead.
 
 ```javascript
 import ollama from 'ollama'
@@ -132,7 +134,7 @@ ollama.chat(request)
     - `images` `<Uint8Array[] | string[]>`: (Optional) Images to be included in the message, either as Uint8Array or base64 encoded strings.
     - `tool_name` `<string>`: (Optional) Add the name of the tool that was executed to inform the model of the result 
   - `format` `<string>`: (Optional) Set the expected format of the response (`json`).
-  - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
+  - `stream` `<boolean>`: (Optional) Enable streaming. Defaults to `false`.
   - `think` `<boolean | "high" | "medium" | "low">`: (Optional) Enable model thinking. Use `true`/`false` or specify a level. Requires model support.
   - `logprobs` `<boolean>`: (Optional) Return log probabilities for tokens. Requires model support.
   - `top_logprobs` `<number>`: (Optional) Number of top log probabilities to return per token when `logprobs` is enabled.
@@ -140,7 +142,9 @@ ollama.chat(request)
   - `tools` `<Tool[]>`: (Optional) A list of tool calls the model may make.
   - `options` `<Options>`: (Optional) Options to configure the runtime.
 
-- Returns: `<ChatResponse>`
+- Returns:
+  - With `stream: true`: `<Promise<AbortableAsyncIterator<ChatResponse>>>`
+  - With `stream: false` or omitted: `<Promise<ChatResponse>>`
 
 ### generate
 
@@ -157,7 +161,7 @@ ollama.generate(request)
   - `raw` `<boolean>`: (Optional) Bypass the prompt template and pass the prompt directly to the model.
   - `images` `<Uint8Array[] | string[]>`: (Optional) Images to be included, either as Uint8Array or base64 encoded strings.
   - `format` `<string>`: (Optional) Set the expected format of the response (`json`).
-  - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
+  - `stream` `<boolean>`: (Optional) Enable streaming. Defaults to `false`.
   - `think` `<boolean | "high" | "medium" | "low">`: (Optional) Enable model thinking. Use `true`/`false` or specify a level. Requires model support.
   - `logprobs` `<boolean>`: (Optional) Return log probabilities for tokens. Requires model support.
   - `top_logprobs` `<number>`: (Optional) Number of top log probabilities to return per token when `logprobs` is enabled.
@@ -166,7 +170,9 @@ ollama.generate(request)
   - `height` `<number>`: (Optional, Experimental) Height of the generated image in pixels. For image generation models only.
   - `steps` `<number>`: (Optional, Experimental) Number of diffusion steps. For image generation models only.
   - `options` `<Options>`: (Optional) Options to configure the runtime.
-- Returns: `<GenerateResponse>`
+- Returns:
+  - With `stream: true`: `<Promise<AbortableAsyncIterator<GenerateResponse>>>`
+  - With `stream: false` or omitted: `<Promise<GenerateResponse>>`
 
 ### pull
 
@@ -177,8 +183,10 @@ ollama.pull(request)
 - `request` `<Object>`: The request object containing pull parameters.
   - `model` `<string>` The name of the model to pull.
   - `insecure` `<boolean>`: (Optional) Pull from servers whose identity cannot be verified.
-  - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
-- Returns: `<ProgressResponse>`
+  - `stream` `<boolean>`: (Optional) Enable streaming. Defaults to `false`.
+- Returns:
+  - With `stream: true`: `<Promise<AbortableAsyncIterator<ProgressResponse>>>`
+  - With `stream: false` or omitted: `<Promise<ProgressResponse>>`
 
 ### push
 
@@ -189,8 +197,10 @@ ollama.push(request)
 - `request` `<Object>`: The request object containing push parameters.
   - `model` `<string>` The name of the model to push.
   - `insecure` `<boolean>`: (Optional) Push to servers whose identity cannot be verified.
-  - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
-- Returns: `<ProgressResponse>`
+  - `stream` `<boolean>`: (Optional) Enable streaming. Defaults to `false`.
+- Returns:
+  - With `stream: true`: `<Promise<AbortableAsyncIterator<ProgressResponse>>>`
+  - With `stream: false` or omitted: `<Promise<ProgressResponse>>`
 
 ### create
 
@@ -201,15 +211,17 @@ ollama.create(request)
 - `request` `<Object>`: The request object containing create parameters.
   - `model` `<string>` The name of the model to create.
   - `from` `<string>`: The base model to derive from.
-  - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
-  - `quantize` `<string>`: Quanization precision level (`q8_0`, `q4_K_M`, etc.).
+  - `stream` `<boolean>`: (Optional) Enable streaming. Defaults to `false`.
+  - `quantize` `<string>`: Quantization precision level (`q8_0`, `q4_K_M`, etc.).
   - `template` `<string>`: (Optional) The prompt template to use with the model.
   - `license` `<string|string[]>`: (Optional) The license(s) associated with the model.
   - `system` `<string>`: (Optional) The system prompt for the model.
   - `parameters` `<Record<string, unknown>>`: (Optional) Additional model parameters as key-value pairs.
   - `messages` `<Message[]>`: (Optional) Initial chat messages for the model.
   - `adapters` `<Record<string, string>>`: (Optional) A key-value map of LoRA adapter configurations.
-- Returns: `<ProgressResponse>`
+- Returns:
+  - With `stream: true`: `<Promise<AbortableAsyncIterator<ProgressResponse>>>`
+  - With `stream: false` or omitted: `<Promise<ProgressResponse>>`
 
 Note: The `files` parameter is not currently supported in `ollama-js`.
 
