@@ -301,7 +301,11 @@ export interface StatusResponse {
 
 export interface WebSearchRequest {
   query: string
+  /**
+   * @deprecated Use `max_results` instead.
+   */
   maxResults?: number
+  max_results?: number
 }
 
 export interface WebSearchResult {
