@@ -149,7 +149,7 @@ ollama.generate(request)
 ```
 
 - `request` `<Object>`: The request object containing generate parameters.
-  - `model` `<string>` The name of the model to use for the chat.
+  - `model` `<string>` The name of the model to use for generation.
   - `prompt` `<string>`: The prompt to send to the model.
   - `suffix` `<string>`: (Optional) Suffix is the text that comes after the inserted text.
   - `system` `<string>`: (Optional) Override the model system prompt.
@@ -200,9 +200,9 @@ ollama.create(request)
 
 - `request` `<Object>`: The request object containing create parameters.
   - `model` `<string>` The name of the model to create.
-  - `from` `<string>`: The base model to derive from.
+  - `from` `<string>`: (Optional) The base model to derive from.
   - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
-  - `quantize` `<string>`: Quanization precision level (`q8_0`, `q4_K_M`, etc.).
+  - `quantize` `<string>`: (Optional) Quantization precision level (`q8_0`, `q4_K_M`, etc.).
   - `template` `<string>`: (Optional) The prompt template to use with the model.
   - `license` `<string|string[]>`: (Optional) The license(s) associated with the model.
   - `system` `<string>`: (Optional) The system prompt for the model.
