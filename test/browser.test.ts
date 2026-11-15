@@ -142,3 +142,64 @@ describe('Ollama image generation request fields', () => {
     expect(response.done).toBe(false)
   })
 })
+
+describe('Ollama webSearch request fields', () => {
+  it('maps legacy maxResults parameter to max_results', async () => {
+    const mockFetch = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ results: [] }), { status: 200 }),
+    )
+    const client = new Ollama({ fetch: mockFetch })
+
+    await client.webSearch({
+      query: 'ollama',
+      maxResults: 5,
+    })
+
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+    const [, options] = mockFetch.mock.calls[0]
+    const body = JSON.parse(options.body as string)
+    expect(body).toEqual({
+      query: 'ollama',
+      max_results: 5,
+    })
+  })
+
+  it('forwards max_results parameter directly', async () => {
+    const mockFetch = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ results: [] }), { status: 200 }),
+    )
+    const client = new Ollama({ fetch: mockFetch })
+
+    await client.webSearch({
+      query: 'ollama',
+      max_results: 10,
+    })
+
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+    const [, options] = mockFetch.mock.calls[0]
+    const body = JSON.parse(options.body as string)
+    expect(body).toEqual({
+      query: 'ollama',
+      max_results: 10,
+    })
+  })
+
+  it('omits max_results when not provided', async () => {
+    const mockFetch = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ results: [] }), { status: 200 }),
+    )
+    const client = new Ollama({ fetch: mockFetch })
+
+    await client.webSearch({
+      query: 'ollama',
+    })
+
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+    const [, options] = mockFetch.mock.calls[0]
+    const body = JSON.parse(options.body as string)
+    expect(body).toEqual({
+      query: 'ollama',
+    })
+  })
+})
+

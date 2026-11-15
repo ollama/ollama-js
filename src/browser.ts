@@ -369,7 +369,13 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
     if (!request.query || request.query.length === 0) {
       throw new Error('Query is required')
     }
-    const response = await utils.post(this.fetch, `https://ollama.com/api/web_search`, { ...request }, {
+    const { maxResults, max_results, ...rest } = request
+    const maxResultsValue = max_results ?? maxResults
+    const data: Record<string, unknown> = {
+      ...rest,
+      ...(maxResultsValue !== undefined ? { max_results: maxResultsValue } : {}),
+    }
+    const response = await utils.post(this.fetch, `https://ollama.com/api/web_search`, data, {
       headers: this.config.headers
     })
     return (await response.json()) as WebSearchResponse
