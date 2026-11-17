@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises'
 async function main() {
   const image = await readFile(new URL('./cat.jpg', import.meta.url))
   const response = await ollama.generate({
-    model: 'llava',
+    model: 'gemma4',
     prompt: 'describe this image:',
     images: [image],
     stream: true,

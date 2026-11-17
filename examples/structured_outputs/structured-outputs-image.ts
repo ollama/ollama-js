@@ -83,7 +83,7 @@ async function run(model: string) {
   }
 }
 
-run('llama3.2-vision').catch((error) => {
+run('gemma4').catch((error) => {
   console.error(error)
   process.exitCode = 1
 })

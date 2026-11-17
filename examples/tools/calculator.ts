@@ -96,4 +96,4 @@ async function run(model: string) {
   }
 }
 
-run('llama3.1:8b').catch((error) => console.error('An error occurred:', error))
+run('gemma4').catch((error) => console.error('An error occurred:', error))

@@ -9,7 +9,7 @@ async function main() {
     await Promise.all([
       (async () => {
         const stream = await client1.generate({
-          model: 'llama3.2',
+          model: 'gemma4',
           prompt: 'Write a long story about dragons',
           stream: true,
         })
@@ -32,7 +32,7 @@ async function main() {
       })(),
       (async () => {
         const stream = await client2.generate({
-          model: 'llama3.2',
+          model: 'gemma4',
           prompt: 'Write a short story about wizards',
           stream: true,
         })

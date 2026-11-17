@@ -12,7 +12,7 @@ async function main() {
   try {
     await Promise.all(
       prompts.map(async (prompt, index) => {
-        const stream = await ollama.generate({ model: 'llama3.2', prompt, stream: true })
+        const stream = await ollama.generate({ model: 'gemma4', prompt, stream: true })
         // Pending requests cannot be aborted until their response headers arrive.
         if (cancelled) {
           stream.abort()

@@ -11,11 +11,11 @@ npx tsx examples/tools/calculator.ts
 
 The examples import `ollama` from this checkout's built `dist` directory. Rebuild after changing the SDK. `tsx` runs TypeScript; the structured-output examples use Zod 4. To use a released SDK in another project, install `ollama>=0.6.4` instead. System One is available in 0.6.4; System One image inputs currently require `main` and a rebuilt package.
 
-Pull the model named in the example before running it, for example `ollama pull llama3.1:8b`. Use `ollama list` to see installed models and `ollama show <model>` to check capabilities. Models may require several GB of memory and disk space; pulling is a separate step except in the pull-progress example.
+Pull the model named in the example before running it, for example `ollama pull gemma4`. Use `ollama list` to see installed models and `ollama show <model>` to check capabilities. Models may require several GB of memory and disk space; pulling is a separate step except in the pull-progress example.
 
 | Examples | Model / additional requirements |
 | --- | --- |
-| [Calculator](tools/calculator.ts), [structured text output](structured_outputs/structured-outputs.ts) | `llama3.1:8b` |
+| [Calculator](tools/calculator.ts), [structured text output](structured_outputs/structured-outputs.ts) | `gemma4` |
 | [Flight tracker](tools/flight-tracker.ts) | `mistral`; flight data is simulated |
 | [Multi-tool](tools/multi-tool.ts), [web search](websearch/websearch-tools.ts) | `qwen3` (thinking and tools); weather data is simulated |
 | [GPT-OSS browser tools](websearch/gpt-oss-browser-tools.ts) | `gpt-oss`; web-search API key |
@@ -23,10 +23,10 @@ Pull the model named in the example before running it, for example `ollama pull 
 | [Thinking levels](thinking/thinking-levels.ts) | `gpt-oss:20b` |
 | [Fill in the middle](fill-in-middle/fill.ts) | `deepseek-coder-v2` |
 | [Logprobs](logprobs/logprobs-chat.ts) | `gemma3` |
-| [Multimodal](multimodal/multimodal.ts) | `llava`; includes `cat.jpg` |
-| [Structured image output](structured_outputs/structured-outputs-image.ts) | `llama3.2-vision` and an image path |
-| [Abort all](abort/abort-all-requests.ts), [abort one](abort/abort-single-request.ts) | `llama3.2` |
-| [Pull progress](pull-progress/pull.ts) | Downloads `llama3.1` |
+| [Multimodal](multimodal/multimodal.ts) | `gemma4`; includes `cat.jpg` |
+| [Structured image output](structured_outputs/structured-outputs-image.ts) | `gemma4` and an image path |
+| [Abort all](abort/abort-all-requests.ts), [abort one](abort/abort-single-request.ts) | `gemma4` |
+| [Pull progress](pull-progress/pull.ts) | Downloads `gemma4` |
 | [Image generation](image-generation/image-generation.ts) | `x/z-image-turbo`; supported macOS installation; overwrites `output.png` |
 | [System One](systemone.mjs) | `nimble`; Ollama v0.35.0 or later; run with `node examples/systemone.mjs` |
 
