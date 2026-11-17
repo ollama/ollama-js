@@ -27,7 +27,8 @@ async function main() {
 
     if (chunk.message.thinking) {
       process.stdout.write(chunk.message.thinking)
-    } else if (chunk.message.content) {
+    }
+    if (chunk.message.content) {
       process.stdout.write(chunk.message.content)
     }
   }

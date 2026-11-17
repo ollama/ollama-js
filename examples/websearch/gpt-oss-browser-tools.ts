@@ -1,4 +1,4 @@
-import ollama, { Ollama } from 'ollama'
+import { Ollama } from 'ollama'
 import type { Message } from 'ollama'
 import { Browser } from './gpt-oss-browser-tools-helpers'
 
@@ -14,8 +14,8 @@ async function main() {
   })
 
   const browser = new Browser(undefined, {
-    search: (request) => client.webSearch(request as any),
-    fetch: (request) => client.webFetch(request as any),
+    search: (request) => client.webSearch(request),
+    fetch: (request) => client.webFetch(request),
   })
 
   // Tool schemas for the model
@@ -44,12 +44,19 @@ async function main() {
         type: 'object',
         properties: {
           id: {
-            description: 'Link id (number) from the results page, or a URL string to open',
+            description:
+              'Link id (number) from the results page, or a URL string to open',
             anyOf: [{ type: 'number' }, { type: 'string' }],
           },
-          cursor: { type: 'number', description: 'Page index in the stack to operate on' },
+          cursor: {
+            type: 'number',
+            description: 'Page index in the stack to operate on',
+          },
           loc: { type: 'number', description: 'Start line to view from' },
-          num_lines: { type: 'number', description: 'Number of lines to display (-1 for auto)' },
+          num_lines: {
+            type: 'number',
+            description: 'Number of lines to display (-1 for auto)',
+          },
         },
       },
     },
@@ -109,64 +116,42 @@ async function main() {
       think: true,
     })
 
-    let hadToolCalls = false
-    let startedThinking = false
-    let finishedThinking = false
-    let content = ''
-    let thinking = ''
-
+    const assistant: Message = {
+      role: 'assistant',
+      content: '',
+      thinking: '',
+      tool_calls: [],
+    }
     for await (const chunk of response) {
-      if (chunk.message.thinking && !startedThinking) {
-        startedThinking = true
-        process.stdout.write('Thinking:\n========\n\n')
-      } else if (chunk.message.content && startedThinking && !finishedThinking) {
-        finishedThinking = true
-        process.stdout.write('\n\nResponse:\n========\n\n')
-      }
-
-      if (chunk.message.thinking) {
-        thinking += chunk.message.thinking
-        process.stdout.write(chunk.message.thinking)
-      }
-      if (chunk.message.content) {
-        content += chunk.message.content
-        process.stdout.write(chunk.message.content)
-      }
-      if (chunk.message.tool_calls && chunk.message.tool_calls.length > 0) {
-        messages.push({
-          role: 'assistant',
-          content: content,
-          thinking: thinking,
-        })
-
-        hadToolCalls = true
-        for (const toolCall of chunk.message.tool_calls) {
-          const functionToCall =
-            availableTools[toolCall.function.name]
-          if (functionToCall) {
-            const args = toolCall.function.arguments as any
-            console.log('\nCalling function:', toolCall.function.name, 'with arguments:', args)
-            let output
-            try {
-              output = await functionToCall(args)
-            } catch (error) {
-              output = { error: error instanceof Error ? error.message : 'Unknown error' }
-            }
-            messages.push(chunk.message)
-            messages.push({
-              role: 'tool',
-              content: JSON.stringify(output),
-              tool_name: toolCall.function.name,
-            })
-          }
-        }
-      }
+      assistant.thinking += chunk.message.thinking ?? ''
+      assistant.content += chunk.message.content ?? ''
+      assistant.tool_calls!.push(...(chunk.message.tool_calls ?? []))
+      process.stdout.write(chunk.message.thinking ?? '')
+      process.stdout.write(chunk.message.content ?? '')
     }
 
-    if (!hadToolCalls) {
+    messages.push(assistant)
+    if (!assistant.tool_calls?.length) {
+      process.stdout.write('\n')
       break
+    }
+
+    for (const toolCall of assistant.tool_calls) {
+      const functionToCall = availableTools[toolCall.function.name]
+      let output
+      try {
+        output = functionToCall
+          ? await functionToCall(toolCall.function.arguments as any)
+          : `Unknown tool: ${toolCall.function.name}`
+      } catch (error) {
+        output = error instanceof Error ? error.message : String(error)
+      }
+      messages.push({ role: 'tool', content: output, tool_name: toolCall.function.name })
     }
   }
 }
 
-main().catch(console.error)
+main().catch((error) => {
+  console.error(error)
+  process.exitCode = 1
+})

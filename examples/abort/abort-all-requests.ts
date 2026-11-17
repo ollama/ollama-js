@@ -1,55 +1,49 @@
 import ollama from 'ollama'
 
-// Set a timeout to abort all requests after 5 seconds
-setTimeout(() => {
-  console.log('\nAborting all requests...\n')
-  ollama.abort()
-}, 5000) // 5000 milliseconds = 5 seconds
+async function main() {
+  const prompts = [
+    'Write a long story about dragons',
+    'Write a long story about wizards',
+    'Write a long story about knights',
+  ]
+  let cancelled = false
+  let timer: ReturnType<typeof setTimeout> | undefined
 
-// Start multiple concurrent streaming requests
-Promise.all([
-  ollama.generate({
-    model: 'llama3.2',
-    prompt: 'Write a long story about dragons',
-    stream: true,
-  }).then(
-    async (stream) => {
-      console.log(' Starting stream for dragons story...')
-      for await (const chunk of stream) {
-        process.stdout.write(' 1> ' + chunk.response)
-      }
-    }
-  ),
-
-  ollama.generate({
-    model: 'llama3.2', 
-    prompt: 'Write a long story about wizards',
-    stream: true,
-  }).then(
-    async (stream) => {
-      console.log(' Starting stream for wizards story...')
-      for await (const chunk of stream) {
-        process.stdout.write(' 2> ' + chunk.response)
-      }
-    }
-  ),
-
-  ollama.generate({
-    model: 'llama3.2',
-    prompt: 'Write a long story about knights',
-    stream: true,
-  }).then(
-    async (stream) => {
-      console.log(' Starting stream for knights story...')
-      for await (const chunk of stream) {
-        process.stdout.write(' 3>' + chunk.response)
-      }
-    }
-  )
-]).catch(error => {
-  if (error.name === 'AbortError') {
-    console.log('All requests have been aborted')
-  } else {
-    console.error('An error occurred:', error)
+  try {
+    await Promise.all(
+      prompts.map(async (prompt, index) => {
+        const stream = await ollama.generate({ model: 'llama3.2', prompt, stream: true })
+        // Pending requests cannot be aborted until their response headers arrive.
+        if (cancelled) {
+          stream.abort()
+          return
+        }
+        timer ??= setTimeout(() => {
+          cancelled = true
+          console.log('\nAborting all requests...\n')
+          ollama.abort()
+        }, 5000)
+        try {
+          for await (const chunk of stream) {
+            process.stdout.write(` ${index + 1}> ${chunk.response ?? ''}`)
+          }
+        } catch (error) {
+          if (error instanceof Error && error.name === 'AbortError') {
+            console.log(`\nStream ${index + 1} aborted`)
+          } else {
+            throw error
+          }
+        }
+      }),
+    )
+  } finally {
+    cancelled = true
+    clearTimeout(timer)
+    ollama.abort()
   }
+}
+
+main().catch((error) => {
+  console.error(error)
+  process.exitCode = 1
 })

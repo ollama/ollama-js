@@ -6,11 +6,12 @@ import {
 } from 'ollama'
 
 async function main() {
-  // Set enviornment variable OLLAMA_API_KEY=<YOUR>.<KEY>
-  // or set the header manually
-  //   const client = new Ollama({
-  //     headers: { Authorization: `Bearer ${process.env.OLLAMA_API_KEY}` },
-  //   })
+  const apiKey = process.env.OLLAMA_API_KEY
+  if (!apiKey) {
+    throw new Error(
+      'Set OLLAMA_API_KEY to an API key from https://ollama.com/settings/keys',
+    )
+  }
   const client = new Ollama()
 
   // Tool schemas
@@ -81,55 +82,45 @@ async function main() {
       think: true,
     })
 
-    let hadToolCalls = false
-    var content = ''
-    var thinking = ''
+    const assistant: Message = {
+      role: 'assistant',
+      content: '',
+      thinking: '',
+      tool_calls: [],
+    }
     for await (const chunk of response) {
-      if (chunk.message.thinking) {
-        thinking += chunk.message.thinking
-      }
-      if (chunk.message.content) {
-        content += chunk.message.content
-        process.stdout.write(chunk.message.content)
-      }
-      if (chunk.message.tool_calls && chunk.message.tool_calls.length > 0) {
-        hadToolCalls = true
-        messages.push({
-          role: 'assistant',
-          content: content,
-          thinking: thinking,
-          tool_calls: chunk.message.tool_calls,
-        })
-        // Execute tools and append tool results
-        for (const toolCall of chunk.message.tool_calls) {
-          const functionToCall = availableTools[toolCall.function.name]
-          if (functionToCall) {
-            const args = toolCall.function.arguments as any
-            console.log(
-              '\nCalling function:',
-              toolCall.function.name,
-              'with arguments:',
-              args,
-            )
-            const output = await functionToCall(args)
-            console.log('Function result:', JSON.stringify(output).slice(0, 200), '\n')
-
-            messages.push(chunk.message)
-            messages.push({
-              role: 'tool',
-              content: JSON.stringify(output).slice(0, 2000 * 4), // cap at ~2000 tokens
-              tool_name: toolCall.function.name,
-            })
-          }
-        }
-      }
+      assistant.thinking += chunk.message.thinking ?? ''
+      assistant.content += chunk.message.content ?? ''
+      assistant.tool_calls!.push(...(chunk.message.tool_calls ?? []))
+      process.stdout.write(chunk.message.content ?? '')
     }
 
-    if (!hadToolCalls) {
+    messages.push(assistant)
+    if (!assistant.tool_calls?.length) {
       process.stdout.write('\n')
       break
+    }
+
+    for (const toolCall of assistant.tool_calls) {
+      const functionToCall = availableTools[toolCall.function.name]
+      let output
+      try {
+        output = functionToCall
+          ? await functionToCall(toolCall.function.arguments as any)
+          : { error: `Unknown tool: ${toolCall.function.name}` }
+      } catch (error) {
+        output = { error: error instanceof Error ? error.message : String(error) }
+      }
+      messages.push({
+        role: 'tool',
+        content: JSON.stringify(output).slice(0, 2000 * 4),
+        tool_name: toolCall.function.name,
+      })
     }
   }
 }
 
-main().catch(console.error)
+main().catch((error) => {
+  console.error(error)
+  process.exitCode = 1
+})
