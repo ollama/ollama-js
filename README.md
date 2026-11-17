@@ -14,7 +14,7 @@ npm i ollama
 import ollama from 'ollama'
 
 const response = await ollama.chat({
-  model: 'llama3.1',
+  model: 'gemma4',
   messages: [{ role: 'user', content: 'Why is the sky blue?' }],
 })
 console.log(response.message.content)
@@ -37,7 +37,7 @@ import ollama from 'ollama'
 
 const message = { role: 'user', content: 'Why is the sky blue?' }
 const response = await ollama.chat({
-  model: 'llama3.1',
+  model: 'gemma4',
   messages: [message],
   stream: true,
 })
@@ -342,6 +342,9 @@ not supported. It runs locally with decision models such as `nimble` (Ollama
 v0.35.0 or later) or `clef` (v0.35.1 or later), and in the cloud with `clef:cloud`
 (through Ollama v0.40.5 or later, or [directly against ollama.com](#cloud-api-ollamacom)).
 
+System One image inputs below require the current `main` checkout; they are not
+in the 0.6.4 release.
+
 Clef also reads images (v0.40.0 or later locally): pass `images` as `Uint8Array`s,
 base64 strings, or (in Node) file paths, shared by all questions. Cloud requests
 accept up to 4 PNG, JPEG, or WebP images (each at most 4 MiB and 16 megapixels,
@@ -382,7 +385,7 @@ import { Ollama } from 'ollama'
 
 const ollama = new Ollama({ host: 'http://127.0.0.1:11434' })
 const response = await ollama.chat({
-  model: 'llama3.1',
+  model: 'gemma4',
   messages: [{ role: 'user', content: 'Why is the sky blue?' }],
 })
 ```
