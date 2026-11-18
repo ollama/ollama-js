@@ -291,7 +291,7 @@ async encodeImage(image: Uint8Array | string): Promise<string> {
   }
 
   /**
-   * Embeds text input into vectors.
+   * Generates embeddings for text, images, or audio.
    * @param request {EmbedRequest} - The request object.
    * @returns {Promise<EmbedResponse>} - The response object.
    */

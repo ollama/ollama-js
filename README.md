@@ -263,7 +263,7 @@ ollama.embed(request)
 
 - `request` `<Object>`: The request object containing embedding parameters.
   - `model` `<string>` The name of the model used to generate the embeddings.
-  - `input` `<string> | <string[]>`: The input used to generate the embeddings.
+  - `input` `<EmbedInput> | <EmbedInput[]>`: A text string or an object with one or more of `text`, `image`, and `audio`. Arrays can mix strings and objects. For models that support media, pass image and audio bytes as base64 strings.
   - `truncate` `<boolean>`: (Optional) Truncate the input to fit the maximum context length supported by the model.
   - `keep_alive` `<string | number>`: (Optional) How long to keep the model loaded. A number (seconds) or a string with a duration unit suffix ("300ms", "1.5h", "2h45m", etc.)
   - `options` `<Options>`: (Optional) Options to configure the runtime.
