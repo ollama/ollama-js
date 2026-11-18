@@ -165,9 +165,16 @@ export interface ShowRequest {
   options?: Partial<Options>
 }
 
+/** A single embedding input. Image and audio values are base64-encoded bytes. */
+export type EmbedInput =
+  | string
+  | { text: string; image?: string; audio?: string }
+  | { text?: string; image: string; audio?: string }
+  | { text?: string; image?: string; audio: string }
+
 export interface EmbedRequest {
   model: string
-  input: string | string[]
+  input: EmbedInput | EmbedInput[]
   truncate?: boolean
   keep_alive?: string | number // a number (seconds) or a string with a duration unit suffix ("300ms", "1.5h", "2h45m", etc)
   dimensions?: number
