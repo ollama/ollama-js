@@ -142,3 +142,38 @@ describe('Ollama image generation request fields', () => {
     expect(response.done).toBe(false)
   })
 })
+
+describe('client-wide stream cancellation', () => {
+  it('aborts pending chat and generate requests before headers arrive', async () => {
+    const signals: AbortSignal[] = []
+    const client = new Ollama({
+      fetch: (_url, init) => new Promise<Response>((_resolve, reject) => {
+        const signal = init!.signal!
+        signals.push(signal)
+        signal.addEventListener('abort', () => reject(signal.reason), { once: true })
+      }),
+    })
+    const chat = client.chat({ model: 'dummy', messages: [], stream: true })
+    const generate = client.generate({ model: 'dummy', prompt: 'hello', stream: true })
+
+    client.abort()
+
+    expect(signals.map(signal => signal.aborted)).toEqual([true, true])
+    await expect(chat).rejects.toMatchObject({ name: 'AbortError' })
+    await expect(generate).rejects.toMatchObject({ name: 'AbortError' })
+  })
+
+  it('releases a pending controller when its request fails', async () => {
+    let signal: AbortSignal | null = null
+    const client = new Ollama({
+      fetch: async (_url, init) => {
+        signal = init!.signal!
+        throw new Error('offline')
+      },
+    })
+    await expect(client.generate({ model: 'dummy', stream: true })).rejects.toThrow('offline')
+    client.abort()
+
+    expect(signal).toHaveProperty('aborted', false)
+  })
+})

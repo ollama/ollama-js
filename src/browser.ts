@@ -37,6 +37,7 @@ import { defaultHost } from './constant.js'
 export class Ollama {
   protected readonly config: Config
   protected readonly fetch: Fetch
+  private readonly pendingStreamRequests = new Set<AbortController>()
   protected readonly ongoingStreamedRequests: AbortableAsyncIterator<object>[] = []
 
   constructor(config?: Partial<Config>) {
@@ -56,6 +57,10 @@ export class Ollama {
 
   // Abort any ongoing streamed requests to Ollama
   public abort() {
+    for (const controller of Array.from(this.pendingStreamRequests)) {
+      this.pendingStreamRequests.delete(controller)
+      controller.abort()
+    }
     for (const request of this.ongoingStreamedRequests) {
       request.abort()
     }
@@ -81,10 +86,16 @@ export class Ollama {
     const host = `${this.config.host}/api/${endpoint}`
     if (request.stream) {
       const abortController = new AbortController()
-      const response = await utils.post(this.fetch, host, request, {
-        signal: abortController.signal,
-        headers: this.config.headers
-      })
+      this.pendingStreamRequests.add(abortController)
+      let response: Response
+      try {
+        response = await utils.post(this.fetch, host, request, {
+          signal: abortController.signal,
+          headers: this.config.headers
+        })
+      } finally {
+        this.pendingStreamRequests.delete(abortController)
+      }
 
       if (!response.body) {
         throw new Error('Missing body')
