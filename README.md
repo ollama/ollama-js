@@ -404,6 +404,29 @@ const ollama = new Ollama({
 })
 ```
 
+## Handling HTTP errors
+
+Import `ResponseError` to distinguish an unsuccessful HTTP response from a
+network failure or a local validation error. The error exposes the server's
+message as `error` and the HTTP status as `status_code`.
+
+```typescript
+import ollama, { ResponseError } from 'ollama'
+
+try {
+  await ollama.generate({ model: 'llama3.2', prompt: 'Hello' })
+} catch (error) {
+  if (error instanceof ResponseError) {
+    console.error(error.status_code, error.error)
+  } else {
+    throw error
+  }
+}
+```
+
+The same error class is available from `ollama/browser`. Stream error messages
+received after a successful HTTP response are not `ResponseError` instances.
+
 ## Building
 
 To build the project files run:

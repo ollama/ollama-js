@@ -6,7 +6,7 @@ import { version } from './version.js'
  * An error class for response errors.
  * @extends Error
  */
-class ResponseError extends Error {
+export class ResponseError extends Error {
   constructor(
     public error: string,
     public status_code: number,
