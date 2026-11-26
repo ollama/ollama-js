@@ -142,3 +142,38 @@ describe('Ollama image generation request fields', () => {
     expect(response.done).toBe(false)
   })
 })
+
+describe('Ollama context window request fields', () => {
+  it('forwards truncate and shift in generate requests', async () => {
+    const client = new Ollama()
+    const spy = vi
+      .spyOn(client as any, 'processStreamableRequest')
+      .mockResolvedValue({} as GenerateResponse)
+
+    await client.generate({ model: 'dummy', prompt: 'Hello', truncate: false, shift: false })
+
+    expect(spy).toHaveBeenCalledWith(
+      'generate',
+      expect.objectContaining({ truncate: false, shift: false }),
+    )
+  })
+
+  it('forwards truncate and shift in chat requests', async () => {
+    const client = new Ollama()
+    const spy = vi
+      .spyOn(client as any, 'processStreamableRequest')
+      .mockResolvedValue({} as ChatResponse)
+
+    await client.chat({
+      model: 'dummy',
+      messages: [{ role: 'user', content: 'hi' }],
+      truncate: true,
+      shift: false,
+    })
+
+    expect(spy).toHaveBeenCalledWith(
+      'chat',
+      expect.objectContaining({ truncate: true, shift: false }),
+    )
+  })
+})
