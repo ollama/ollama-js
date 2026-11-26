@@ -258,6 +258,8 @@ export interface ModelResponse {
   details: ModelDetails
   expires_at: Date
   size_vram: number
+  context_length?: number // ps(): context length the running model was loaded with
+  capabilities?: string[] // list(): e.g. 'completion', 'tools', 'vision', 'thinking'
 }
 
 export interface ModelDetails {

@@ -142,3 +142,39 @@ describe('Ollama image generation request fields', () => {
     expect(response.done).toBe(false)
   })
 })
+
+describe('Ollama model list response fields', () => {
+  const jsonFetch = (body: object) =>
+    vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(body), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    )
+
+  it('exposes context_length from ps()', async () => {
+    const client = new Ollama({
+      fetch: jsonFetch({
+        models: [{ name: 'dummy', model: 'dummy', context_length: 8192, size_vram: 1 }],
+      }),
+    })
+
+    const response = await client.ps()
+
+    const contextLength: number | undefined = response.models[0].context_length
+    expect(contextLength).toBe(8192)
+  })
+
+  it('exposes capabilities from list()', async () => {
+    const client = new Ollama({
+      fetch: jsonFetch({
+        models: [{ name: 'dummy', model: 'dummy', capabilities: ['completion', 'tools'] }],
+      }),
+    })
+
+    const response = await client.list()
+
+    const capabilities: string[] | undefined = response.models[0].capabilities
+    expect(capabilities).toEqual(['completion', 'tools'])
+  })
+})
