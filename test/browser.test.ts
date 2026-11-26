@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { Ollama } from '../src/browser'
-import type { ChatResponse, GenerateResponse } from '../src/interfaces'
+import type { ChatResponse, GenerateResponse, Message } from '../src/interfaces'
 import type { AbortableAsyncIterator } from '../src/browser'
 
 describe('AbortableAsyncIterator type export', () => {
@@ -140,5 +140,46 @@ describe('Ollama image generation request fields', () => {
     expect(response.completed).toBe(5)
     expect(response.total).toBe(20)
     expect(response.done).toBe(false)
+  })
+})
+
+describe('Ollama tool call ids', () => {
+  it('forwards tool call ids in chat messages', async () => {
+    const client = new Ollama()
+    const spy = vi
+      .spyOn(client as any, 'processStreamableRequest')
+      .mockResolvedValue({} as ChatResponse)
+
+    const messages: Message[] = [
+      { role: 'user', content: 'What is the weather in Paris and Tokyo?' },
+      {
+        role: 'assistant',
+        content: '',
+        tool_calls: [
+          {
+            id: 'call_1',
+            function: { name: 'get_weather', arguments: { city: 'Paris' } },
+          },
+          {
+            id: 'call_2',
+            function: { name: 'get_weather', arguments: { city: 'Tokyo' } },
+          },
+        ],
+      },
+      { role: 'tool', content: '18C', tool_name: 'get_weather', tool_call_id: 'call_1' },
+      { role: 'tool', content: '22C', tool_name: 'get_weather', tool_call_id: 'call_2' },
+    ]
+
+    await client.chat({ model: 'dummy', messages })
+
+    const request = spy.mock.calls[0][1] as { messages: Message[] }
+    expect(request.messages[1].tool_calls?.map((call) => call.id)).toEqual([
+      'call_1',
+      'call_2',
+    ])
+    expect(request.messages.slice(2).map((message) => message.tool_call_id)).toEqual([
+      'call_1',
+      'call_2',
+    ])
   })
 })

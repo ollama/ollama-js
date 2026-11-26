@@ -76,9 +76,11 @@ export interface Message {
   images?: Uint8Array[] | string[]
   tool_calls?: ToolCall[]
   tool_name?: string
+  tool_call_id?: string // the id of the tool call this tool message answers
 }
 
 export interface ToolCall {
+  id?: string;
   function: {
     name: string;
     arguments: {
