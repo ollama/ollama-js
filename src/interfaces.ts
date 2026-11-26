@@ -60,6 +60,8 @@ export interface GenerateRequest {
   think?: boolean | 'high' | 'medium' | 'low'
   logprobs?: boolean
   top_logprobs?: number
+  truncate?: boolean // truncate the chat history if the rendered prompt exceeds the context length
+  shift?: boolean // shift the context instead of erroring when it reaches the context length
 
   // Experimental image generation parameters
   width?: number
@@ -120,6 +122,8 @@ export interface ChatRequest {
   think?: boolean | 'high' | 'medium' | 'low'
   logprobs?: boolean
   top_logprobs?: number
+  truncate?: boolean // truncate the chat history if the rendered prompt exceeds the context length
+  shift?: boolean // shift the context instead of erroring when it reaches the context length
 
   options?: Partial<Options>
 }
